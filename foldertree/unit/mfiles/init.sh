@@ -13,7 +13,7 @@ if [[ $(hostname) == matlab* ]]
 then
       echo You are logged on to the matlab server! 
       echo The github connection will be done via 128.193.69.189
-      ssh   mixing@128.193.69.189 'cd ~/ganges/work/chipod_gust; sh update.sh'
+      ssh   mixing@128.193.69.189 'cd ~/ganges/work/chipod_gust; bash update.sh'
       scp -r mixing@128.193.69.189:~/ganges/work/chipod_gust ./
                   
 else

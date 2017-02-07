@@ -9,9 +9,10 @@
 echo Are you sure that you want to reset the mfile directory?
 echo this action will delete all driver routines from this directory
 echo type y/n
+
 read test
 
-if [ $test == 'y' ]
+if [[ $test == y* ]]
 then
    echo !!!!!!!!!!!! GOOOOOO !!!!!!!!!
       rm -rf ./chipod_gust

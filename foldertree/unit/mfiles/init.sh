@@ -8,7 +8,7 @@
 #           2) creating an out put directory
 #           3) copying the standard driver function in this directory 
 
-git clone https://github.com/jbecherer/chipod_gust
+git clone https://github.com/OceanMixingGroup/chipod_gust
 
 mkdir out
 

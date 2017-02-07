@@ -1,0 +1,6 @@
+
+Before starting any processing you should run 
+      sh init.sh
+
+This will initialize the unit directory by getting the latest software from github and
+putting all routines you need in the base m-file folder 

@@ -1,5 +1,5 @@
 
-Before starting any processing you should run 
+Before starting any processing you should run  in a terminal
       sh init.sh
 
 This will initialize the unit directory by getting the latest software from github and

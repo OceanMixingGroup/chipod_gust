@@ -98,14 +98,14 @@ thermistor_cutoff_frequency  = 32;
 
       % same for T structure
       iiT        = find( T.time>=tl(1) & T.time<=tl(2) ); % find all indexes that are within the time interval
-      if isempty(iiTz) % if there are no data points in the interval interp
+      if isempty(iiT) % if there are no data points in the interval interp
          chi.T(i)    = interp1( T.time, T.T, chi.time(i));
          chi.S(i)    = interp1( T.time, T.S, chi.time(i));
          chi.depth(i)= interp1( T.time, T.depth, chi.time(i));
       else % if there are datapoints in the interval average
-         chi.T(i)    = nanmean( T.T(iiTz) );
-         chi.S(i)    = nanmean( T.S(iiTz) );
-         chi.depth(i)= nanmean( T.depth(iiTz) );
+         chi.T(i)    = nanmean( T.T(iiT) );
+         chi.S(i)    = nanmean( T.S(iiT) );
+         chi.depth(i)= nanmean( T.depth(iiT) );
       end
 
    end

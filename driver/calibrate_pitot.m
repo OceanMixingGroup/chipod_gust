@@ -11,9 +11,9 @@ close all;
 %_____________________set processing flags______________________
    do_parallel = 0;     % use paralelle computing 
    do_raw_data = 0;     % do the averagring of the raw-data (1) or skip (0) if done before 
-   do_v0_self  = 1;     % detremine V0 based on a min of the averaged signal (self contained)
-   do_v0_adcp  = 1;     % detremin V0 based on a fit against reference velocity (adcp) data
-   do_plot     = 1;     % generate some figures in ../pics/ to compare the different velocity estimates
+   do_v0_self  = 0;     % detremine V0 based on a min of the averaged signal (self contained)
+   do_v0_adcp  = 0;     % detremin V0 based on a fit against reference velocity (adcp) data
+   do_plot     = 0;     % generate some figures in ../pics/ to compare the different velocity estimates
 
    % if you want to restrict the time range that should be analyzed use the following
    time_range(1)  = datenum(2000, 1, 1, 0, 0, 0); 

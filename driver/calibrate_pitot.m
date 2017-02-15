@@ -20,6 +20,8 @@ close all;
    time_range(2)  = datenum(2030, 1, 1, 0, 0, 0); 
 
 
+   % which temperature sensor to use T1 (1) or if T1 is broken T2 (2) ;  for gusTs (0)
+   use_T = 1;  
 
 
 
@@ -110,11 +112,20 @@ end
    end
    %--------------------base calibation----------------------
    P.time = Praw.time;
-   % temperature
-   P.T1   =  (Praw.T1.^2+Praw.vT1)*head.coef.T1(3)+ Praw.T1*head.coef.T1(2) + head.coef.T1(1);
-   P.T2   =  (Praw.T2.^2+Praw.vT2)*head.coef.T2(3)+ Praw.T2*head.coef.T2(2) + head.coef.T2(1);
 
-   P.T    =  P.T1;  % should be generalized in case T1 is broken
+   % temperature
+   if (use_T==0) gusTs
+      P.T   =  (Praw.T.^2+Praw.vT)*head.coef.T(3)+ Praw.T*head.coef.T(2) + head.coef.T(1);
+   else  % chipods
+      P.T1   =  (Praw.T1.^2+Praw.vT1)*head.coef.T1(3)+ Praw.T1*head.coef.T1(2) + head.coef.T1(1);
+      P.T2   =  (Praw.T2.^2+Praw.vT2)*head.coef.T2(3)+ Praw.T2*head.coef.T2(2) + head.coef.T2(1);
+      if use_T==1
+         P.T    = P.T1; 
+      else % in case T1 is broken
+         P.T    = P.T2;
+      end
+   end
+
    % pressure
    P.P    =  Praw.P*head.coef.P(2) + head.coef.P(1);
 

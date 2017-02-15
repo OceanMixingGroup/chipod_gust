@@ -131,7 +131,7 @@ end
 
    % set the average temperature as reference value for the Pitot calibration
    W.T0   =  nanmean(P.T);
-   P.P0   =  nanmean(P.P);
+   W.P0   =  nanmean(P.P);
 
    % compass
    P.cmp  = Praw.cmp + head.coef.CMP(1);

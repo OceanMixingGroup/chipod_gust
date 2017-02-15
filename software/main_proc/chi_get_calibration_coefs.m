@@ -1,5 +1,5 @@
-function [head]  = chi_get_calibration_coef(basedir)
-%% function [head]  = chi_get_calibration_coef(basedir)
+function [head]  = chi_get_calibration_coefs(basedir)
+%% function [head]  = chi_get_calibration_coefs(basedir)
 %     This function returns a coeffcient structure that could be
 %     used by chi_calibrate_rawdata()
 % 

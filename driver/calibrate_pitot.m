@@ -165,6 +165,32 @@ if do_v0_self
    disp(['based on the internal method V0 is calculated to be']);
    W
    
+   if do_plot
+      figure
+         a=1;
+         ax(a) = subplot(3,1,a);
+            plot(ax(a), P.time, P.T, 'Linewidth', 1);
+            ylabel(ax(a), 'T [deg C]');
+            datetick(ax(a), 'keeplimits');
+         a=2;
+         ax(a) = subplot(3,1,a);
+            plot(ax(a), P.time, P.P/1.47, 'Linewidth', 1);
+            ylabel(ax(a), 'depth [m]');
+            datetick(ax(a), 'keeplimits');
+         a=3;
+         ax(a) = subplot(3,1,a);
+            plot(ax(a), P.time, P.W, 'Linewidth', 1);
+            hold all;
+            plot(ax(a), P.time([1 end]), [1 1]*W.V0, 'Linewidth', 1);
+            ylabel(ax(a), '[Volt]');
+            legend(ax(a),  'Pitot signal', 'V_0');
+            datetick(ax(a), 'keeplimits');
+
+            linkaxes(ax, 'x');
+            
+   end
+
+
 end
 
 %_____________________detremine V0 based on a fit against ADCP data______________________

@@ -159,9 +159,6 @@ if do_v0_self
    % add directional information from the compass
    P.U = pitot_add_direction(P.time, P.spd, P.time, P.cmp);
 
-   % save header and calibrated data
-   save('../calib/header_p_self.mat', 'W');
-   save('../proc/P_self.mat', 'P');
 
    % output
    disp(['based on the internal method V0 is calculated to be']);
@@ -179,10 +176,10 @@ if do_v0_self
             legend(ax(a),  'T signal', 'T_0');
          a=2;
          ax(a) = subplot(3,1,a);
-            plot(ax(a), P.time, P.P/1.47, 'Linewidth', 1);
+            plot(ax(a), P.time, P.P, 'Linewidth', 1);
             hold all;
             plot(ax(a), P.time([1 end]), [1 1]*W.P0, 'Linewidth', 1);
-            ylabel(ax(a), 'depth [m]');
+            ylabel(ax(a), 'Pres [psu]');
             legend(ax(a),  'P signal', 'P_0');
             datetick(ax(a), 'keeplimits');
          a=3;
@@ -198,7 +195,15 @@ if do_v0_self
             
    end
 
+   % cut data matrix
+   ff = fields(P);
+   for fi = 1:length(ff)
+      P.(ff{fi})   = P.(ff{fi})(iiP);
+   end
 
+   % save header and calibrated data
+   save('../calib/header_p_self.mat', 'W');
+   save('../proc/P_self.mat', 'P');
 end
 
 %_____________________detremine V0 based on a fit against ADCP data______________________
@@ -221,6 +226,12 @@ if do_v0_adcp
 
    % add directional information from the compass
    P.U = pitot_add_direction(P.time, P.spd, P.time, P.cmp);
+
+   % cut data matrix
+   ff = fields(P);
+   for fi = 1:length(ff)
+      P.(ff{fi})   = P.(ff{fi})(iiP);
+   end
 
    % save header and calibrated data
    save('../calib/header_p_fit.mat', 'W');

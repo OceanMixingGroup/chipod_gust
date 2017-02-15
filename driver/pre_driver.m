@@ -65,35 +65,31 @@ if do_temp
 end
 
 
-%%%%%%%%%%%%%%%%%%% Pitot processing %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%55
+%%%%%%%%%%%%%%%%%%% generating Pitot velocity input file %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%55
 if do_vel_p
-   %_____________processing loop through all raw files__________________
 
-      % init parallel pool
-      if(do_parallel)
-         parpool;
-         % parallel for-loop
-         parfor f=1:length(fids)
-            try % take care if script crashes that the parpoo is shut down
-               disp(['calculating file ' num2str(f) ' of ' num2str(length(fids))]);
-               chi_pitot_proc(basedir, fids{f});
-            catch
-               disp(['!!!!!! ' fids{f} ' crashed while processing vel_p structure !!!!!!' ]);
-            end
-         end
-         % close parpool
-         delete(gcp);
-      else
-         for f=1:length(fids)
-            disp(['calculating file ' num2str(f) ' of ' num2str(length(fids))]);
-            chi_pitot_proc(basedir, fids{f});
-         end
-      end
+   fidf = '../proc/P_fit.mat';
+   fids = '../proc/P_self.mat';
+   
+   if exist(fidf, 'file');
+      load(fidf);
+      vel_p.text = 'vel_p.mat is generated based on the ADCP fitted Pitot signal';
+      disp(vel_p.text);
+   elseif exist(fids, 'file');
+      load(fids);
+      vel_p.text = 'vel_p.mat is generated in the self contained way';
+      disp(vel_p.text);
+   else
+      disp([fid ' does not exist. Run calibrate_pitot first !']);
+   end
 
-   %_____________________merge individual files______________________
-      chi_merge_and_avg(basedir, 'pitot', 60);
-   %______________ generate chi processing imput file__________
-      chi_generate_vel_pitot(basedir);
+   vel_p.time  = P.time;
+   vel_p.spd   = P.spd;
+   vel_p.U     = P.U;
+   vel_p.u     = real(P.U);
+   vel_p.v     = imag(P.U);
+
+   save('../input/vel_p.mat', 'vel_p');
    
 end
 

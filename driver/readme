@@ -3,8 +3,9 @@ This is the proposed order to execute the m-file routines
 1) create_header
 2) pre_driver[ do_vel_m ] (only if you have available velocity data)
 3) calibrate_pitot
-4) pre_driver[ do_temp ]   (Not really necessary, but potentially useful)
-5) pre_driver[ do_dTdz_m ]  (if you have available mooring stratification)
-6) pre_driver[ do_dTdz_i ]  (only if you have a surface pumped mooring)
+4) pre_driver[ do_vel_p ]  
+5) pre_driver[ do_temp ]   (Not really necessary, but potentially useful)
+6) pre_driver[ do_dTdz_m ]  (if you have available mooring stratification)
+7) pre_driver[ do_dTdz_i ]  (only if you have a surface pumped mooring)
 
-7) main_driver
+8) main_driver

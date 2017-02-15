@@ -129,12 +129,16 @@ end
    % pressure
    P.P    =  Praw.P*head.coef.P(2) + head.coef.P(1);
 
-   % set the average temperature as reference value for the Pitot calibration
-   W.T0   =  nanmean(P.T);
-   W.P0   =  nanmean(P.P);
-
    % compass
    P.cmp  = Praw.cmp + head.coef.CMP(1);
+
+   %---------------------pre calibration for Pitot----------------------
+      %% find all idexes in the desired time interval;
+      iiP = find( P.time>=time_range(1) & P.time<=time_range(2) );
+
+   % set the average temperature as reference value for the Pitot calibration
+   W.T0   =  nanmean(P.T(iiP));
+   W.P0   =  nanmean(P.P(iiP));
 
    % calibrate the Pitot voltage for temperature (pressure ? Tilt ?)
    P.W   =   Praw.W - (P.T-W.T0)*W.T(2);
@@ -144,8 +148,6 @@ end
 %_____________________detremine V0 based on min method (self contained)______________________
 if do_v0_self
 
-   %% find all idexes in the desired time interval;
-      iiP = find( P.time>=time_range(1) & P.time<=time_range(2) );
 
    % calculate V0 as the median of the smalles 5 % of the averaged values
       w_sort = sort(P.W(iiP));
@@ -201,8 +203,6 @@ if do_v0_adcp
    
 
    %% find all idexes in the desired time interval;
-      % pitot
-      iiP = find( P.time>=time_range(1) & P.time<=time_range(2) );
       % adcp
       iiA = find( vel_m.time>=P.time(iiP(1)) &  vel_m.time<=P.time(iiP(end)) );
 

@@ -9,5 +9,6 @@ This is the proposed order to execute the m-file routines
 6) pre_driver[ do_dTdz_m ] (if you have available mooring stratification)
 7) pre_driver[ do_dTdz_i ] (only if you have a surface pumped mooring)     [1y in  30 min on MS]
 
-8) main_driver             [1y in 2h/HFset and 30min/ICset on MS]
+8) main_driver                                              [1y in 2h/HFset and 30min/ICset on MS]
+9) combine_turbulence                                        [5 min ]
 

@@ -115,7 +115,7 @@ end
     % dummy head for integrate routine (This part should be integrated from the routine)
     dhead.sensor_index.AX = 1;
     dhead.samplerate = 50;
-    [~,vel]=integrate_acc(rdat,dhead);
+    [dis,vel]=integrate_acc(rdat,dhead);
 
 %_____________________loop through dt intervals______________________
 
@@ -130,13 +130,32 @@ for i=1:length(I)
    DR.AY(i)    = nanmean( rdat.AY(I{i}) ); 
    DR.AZ(i)    = nanmean( rdat.AZ(I{i}) ); 
 
-   % Pitot velocities
+%_____________________Pitot______________________
+   % which variable carries the Pitot signal
+
+      % find pitot data W or WP
+       if isfield(rdat, 'W')
+         dV1 = abs(nanmean(rdat.W)-2.02);
+         dV2 = abs(nanmean(rdat.WP)-2.02);
+         if dV1>dV2
+            W  = rdat.W;
+         else
+            W  = rdat.WP;
+         end
+       else  
+         dV1 = abs(nanmean(rdat.W2)-2.02);
+         dV2 = abs(nanmean(rdat.W3)-2.02);
+         if dV1>dV2
+            W  = rdat.W2;
+         else
+            W  = rdat.W3;
+         end
+      end
    wtmp        = W(I{i}) ;
-   DR.Wa(i)    = nanmean( wtmp ); 
-   DR.Wm(i)    = nanmedian( wtmp ); 
-   % more suffisticated with removing negative outlieres
+   %  removing negative outlieres
    wtmp( wtmp<(nanmean(wtmp)-2*nanstd(wtmp)) ) = nan;
-   DR.Wa2(i)   = nanmean( wtmp ); 
+
+   DR.W(i)   = nanmean( wtmp ); 
 
 
 
@@ -152,9 +171,11 @@ for i=1:length(I)
    DR.vUaz(i)  = var(vel.z(I{i}));
 
    %-----------temperature gradient---------------------
-   p = polyfit( rdat.P(I{i}), rdat.T1(I{i}), 1);
+   %p = polyfit( rdat.P(I{i}), rdat.T1(I{i}), 1); % pressure has a drift problem
+   p = polyfit( dis.z(I{i}), rdat.T1(I{i}), 1);
    DR.Tz1(i)  = p(1); 
-   p = polyfit( rdat.P(I{i}), rdat.T2(I{i}), 1);
+   %p = polyfit( rdat.P(I{i}), rdat.T2(I{i}), 1);
+   p = polyfit( dis.z(I{i}), rdat.T1(I{i}), 1);
    DR.Tz2(i)  = p(1); 
 
    %---------------------spectra----------------------

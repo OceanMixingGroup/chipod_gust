@@ -49,9 +49,16 @@ g = 9.81;
    Ctp1  = 2*DR.T1*head.coef.T1(3)+ head.coef.T1(2); 
    Ctp2  = 2*DR.T2*head.coef.T2(3)+ head.coef.T2(2); 
 
+   % depth calibration
+
+   % if pressure
+   %Cz = head.coef.P(2)*1.47;
+   % if Acc
+   Cz = -g*head.coef.AZ(2);
+
    % dTdz
-   chi.Tz1  =  -DR.Tz1.*Ctp1/head.coef.P(2)*1.47;
-   chi.Tz2  =  -DR.Tz2.*Ctp2/head.coef.P(2)*1.47;
+   chi.Tz1  =  -DR.Tz1.*Ctp1/Cz;
+   chi.Tz2  =  -DR.Tz2.*Ctp2/Cz;
 
    % N2
    alpha    = sw_alpha(35, mean(chi.T1), 30, 'temp');

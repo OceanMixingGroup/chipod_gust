@@ -9,6 +9,7 @@ close all;
 
 %_____________________processing flags______________________
 
+   do_parallel =  1;
    do_onboard  =  0;
    do_homework =  1;  
 
@@ -27,7 +28,6 @@ addpath(genpath('./chipod_gust/software/'));% include  path to preocessing routi
    [fids, fdate] = chi_find_rawfiles(basedir);
    
 
-    do_parallel = 0;
 
 
 %_____________simulate onboard data reduction__________________

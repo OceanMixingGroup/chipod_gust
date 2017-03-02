@@ -7,6 +7,9 @@
 clear all;
 close all;
 
+%_____________________check processing flags or process?______________________
+   do_dry_run = 0;
+
 %_____________________include path of processing flies______________________
 addpath(genpath('./chipod_gust/software/'));% include  path to preocessing routines
 
@@ -58,7 +61,7 @@ addpath(genpath('./chipod_gust/software/'));% include  path to preocessing routi
 
 
 %_____________processing loop through all raw files__________________
-
+if ~do_dry_run   
    % init parallel pool
    if(pflag.master.parallel)
       parpool;
@@ -98,3 +101,5 @@ disp('merge all days')
       disp('Pitot epsilon data are merged')
       chi_merge_and_avg(basedir, 'eps', 0);
    end
+
+end % ~dry run

@@ -82,7 +82,7 @@ function [] = chi_main_proc(basedir, rfid, pflag, varargin)
          fid = [basedir filesep 'input' filesep 'vel_p.mat'];
          if(exist([basedir filesep 'input' filesep 'dTdz_i.mat'], 'file') &&  exist(fid, 'file')  );
 
-            disp(['The Pitot velocity is handelt in Pumped mode!']);
+            disp(['The Pitot velocity is handed in PUMPED MODE!']);
             load(fid);
             vel_p1 = vel_p;
             clear vel_p;
@@ -90,7 +90,7 @@ function [] = chi_main_proc(basedir, rfid, pflag, varargin)
 
          else % case 2 not surface pumped mooring
 
-            disp(['The Pitot velocity is handelt in normal mode']);
+            disp(['The Pitot velocity is handed in NORMAL MODE']);
             fid = [basedir filesep 'calib' filesep 'header_p.mat'];
             if exist(fid, 'file');
                % load Pitot header

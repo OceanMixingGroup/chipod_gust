@@ -9,9 +9,9 @@ close all;
 
 
 %_____________________set processing flags______________________
-   do_parallel = 1;     % use paralelle computing 
-   do_qsum     = 1;     % generate qsum.mat 
-   do_qsum_pl  = 1;     % generate qsum.mat 
+   do_parallel = 0;     % use paralelle computing 
+   do_qsum     = 0;     % generate qsum.mat 
+   do_qsum_pl  = 0;     % generate qsum.mat 
 
 
 %_____________________include path of processing flies______________________
@@ -39,12 +39,18 @@ if do_qsum
          parpool;
          % parallel for-loop
          parfor f=1:length(fids)
-            chi_qsum_proc(basedir, fids{f});
+            disp(['processing day ' num2str(f) ' of ' num2str(length(fids))]);
+            try % take care if script crashes that the parpoo is shut down
+               chi_qsum_proc(basedir, fids{f});
+            catch
+               disp(['!!!!!! ' fids{f} ' crashed while processing  !!!!!!' ]);
+            end
          end
          % close parpool
          delete(gcp);
       else
          for f=1:length(fids)
+            disp(['processing day ' num2str(f) ' of ' num2str(length(fids))]);
             chi_qsum_proc(basedir, fids{f});
          end
       end

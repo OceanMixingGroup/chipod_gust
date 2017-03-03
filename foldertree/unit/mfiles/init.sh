@@ -19,6 +19,7 @@ then
       git clone -o ganges mixing@128.193.69.189:~/ganges/work/chipod_gust
       cd chipod_gust
       git remote add origin https://github.com/OceanMixingGroup/chipod_gust
+      cd ../
                   
 else
       echo The chipod_gust software package is loaded from github

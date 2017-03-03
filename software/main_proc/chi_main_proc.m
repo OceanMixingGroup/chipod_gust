@@ -74,32 +74,51 @@ function [] = chi_main_proc(basedir, rfid, pflag, varargin)
       end
       
     % calibrate pitot velocity
+    %    There are 2 ways in witch the Pitot velocity can be used
+    %       1) for pumped moorings (if dTdz_i) the average vel_p.mat should be loaded and than combined with acceleration
+    %       2) for all other puposes the instantenous Pitot velocity sould be used
       if(pflag.master.vel_p)
-         fid = [basedir filesep 'calib' filesep 'header_p.mat'];
-         if exist(fid, 'file');
-            % load Pitot header
-            load(fid);
-            if isfield(W, 'V0')
-               % which temperature to use to calibrate
-               if ~pflag.master.gst % if chipod
-                  if pflag.master.T1
-                     data.T = data.T1;
-                  else % if T1 is broken
-                     data.T = data.T2;
-                  end
-               end
+         % case 1 for pumped moorings
+         fid = [basedir filesep 'input' filesep 'vel_p.mat'];
+         if(exist([basedir filesep 'input' filesep 'dTdz_i.mat'], 'file') & ...
 
-               vel_p.time = data.time;
-               [vel_p.spd, ~, ~] = pitot_calibrate( data.W, data.T, data.P,...
-                        W.V0, W.T0, W.P0, 1/W.Pd(2), W.T(2), W.Ps(2) );
+            disp(['The Pitot velocity is handelt in Pumped mode!']);
+             exist(fid, 'file')  );
+            load(fid);
+            vel_p1 = vel_p;
+            clear vel_p;
+            [vel_p.time, vel_p.spd] = chi_convert_vel_m_to_sensor_spd(vel_p1, data);
+
+         else % case 2 not surface pumped mooring
+
+            disp(['The Pitot velocity is handelt in normal mode']);
+            fid = [basedir filesep 'calib' filesep 'header_p.mat'];
+            if exist(fid, 'file');
+               % load Pitot header
+               load(fid);
+               if isfield(W, 'V0')
+                  % which temperature to use to calibrate
+                  if ~pflag.master.gst % if chipod
+                     if pflag.master.T1
+                        data.T = data.T1;
+                     else % if T1 is broken
+                        data.T = data.T2;
+                     end
+                  end
+
+                  vel_p.time = data.time;
+                  [vel_p.spd, ~, ~] = pitot_calibrate( data.W, data.T, data.P,...
+                           W.V0, W.T0, W.P0, 1/W.Pd(2), W.T(2), W.Ps(2) );
+               else
+                  disp(['W.V0, W.T0 and W.P0 do not exit']);
+                  disp(['You need to calibrate the Pitot tube first!']);
+               end
             else
-               disp(['W.V0, W.T0 and W.P0 do not exit']);
-               disp(['You need to calibrate the Pitot tube first!']);
+               disp([fid ' does not exit']);
+               disp('corresponding processing flags are switched off');
+               pflag = pflag.c_vel_p(0);
             end
-         else
-            disp([fid ' does not exit']);
-            disp('corresponding processing flags are switched off');
-            pflag = pflag.c_vel_p(0);
+
          end
       end
 

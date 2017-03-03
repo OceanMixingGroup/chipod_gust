@@ -13,7 +13,7 @@ then
       echo The github connection will be done via 128.193.69.189
       ssh   mixing@128.193.69.189 'cd ~/ganges/work/chipod_gust; bash update.sh'
 
-      scp -r mixing@128.193.69.189:~/ganges/work/chipod_gust/* ./
+      git pull ganges master
 
 else
       echo The chipod_gust software package is updated from github

@@ -203,6 +203,8 @@ if do_v0_self
 
    % save header and calibrated data
    save('../calib/header_p_self.mat', 'W');
+   save('../calib/header_p.mat', 'W');
+
    save('../proc/P_self.mat', 'P');
 end
 
@@ -235,6 +237,8 @@ if do_v0_adcp
 
    % save header and calibrated data
    save('../calib/header_p_fit.mat', 'W');
+   save('../calib/header_p.mat', 'W');
+
    save('../proc/P_fit.mat', 'P');
 
    % output

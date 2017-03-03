@@ -80,10 +80,9 @@ function [] = chi_main_proc(basedir, rfid, pflag, varargin)
       if(pflag.master.vel_p)
          % case 1 for pumped moorings
          fid = [basedir filesep 'input' filesep 'vel_p.mat'];
-         if(exist([basedir filesep 'input' filesep 'dTdz_i.mat'], 'file') & ...
+         if(exist([basedir filesep 'input' filesep 'dTdz_i.mat'], 'file') &&  exist(fid, 'file')  );
 
             disp(['The Pitot velocity is handelt in Pumped mode!']);
-             exist(fid, 'file')  );
             load(fid);
             vel_p1 = vel_p;
             clear vel_p;

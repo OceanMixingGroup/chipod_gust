@@ -17,6 +17,7 @@ then
 
       echo The sofware is pulled to the matlab server
       git clone -o ganges mixing@128.193.69.189:~/ganges/work/chipod_gust
+      cd chipod_gust
       git remote add origin https://github.com/OceanMixingGroup/chipod_gust
                   
 else

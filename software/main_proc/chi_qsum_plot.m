@@ -3,11 +3,8 @@ function []  = chi_qsum_plot(basedir, vis)
 %     
 %     This function generates a summary figure
 
-   load([basedir 'proc' filesep 'qsum_r.mat']);
-   R = avg.R;
 
    load([basedir 'proc' filesep 'qsum.mat']);
-   S = avg.S;
 
    tl = S.time([1 end]);
 
@@ -19,7 +16,7 @@ function []  = chi_qsum_plot(basedir, vis)
             'Papersize',[30 20],'PaperPosition',[0 -1 30 20])
 
 
-            [ax, ~] = create_axes(fig, 4, 1, 0);
+            [ax, ~] = create_axes(fig, 3, 1, 0);
             
             a = 1;
             pj = 1; p(pj) = plot(ax(a), S.time, S.depth, 'color', [0  0 0 1], 'Linewidth', 2);
@@ -41,16 +38,8 @@ function []  = chi_qsum_plot(basedir, vis)
             end
                xlim(ax(a), tl);
                
-            a = 3;
-            pj = 1; p(pj) = plot(ax(a), R.time, R.W, 'color', [col(pj,:) 1], 'Linewidth', 2);
-            pj = 2; p(pj) = plot(ax(a), R.time, R.WP, 'color', [col(pj,:) 1], 'Linewidth', 2);
-               xlim(ax(a), tl);
-               t1 = text_corner(ax(a), ['W [volt]'], 1);
-               t1.Color = [col(1,:)];
-               t2 = text_corner(ax(a), ['W^\prime [volt]'], 3);
-               t2.Color = [col(2,:)];
             
-            a = 4;
+            a = 3;
             pj = 1; p(pj) = plot(ax(a), S.time, S.AX, 'color', [col(pj,:) 1], 'Linewidth', 2);
             pj = 2; p(pj) = plot(ax(a), S.time, S.AY, 'color', [col(pj,:) 1], 'Linewidth', 2);
             pj = 3; p(pj) = plot(ax(a), S.time, S.AZ, 'color', [col(pj,:) 1], 'Linewidth', 2);

@@ -3,10 +3,10 @@ function []  = chi_qsum_plot(basedir, vis)
 %     
 %     This function generates a summary figure
 
-   load([basedir 'proc' filesep 'qsum_r_600sec.mat']);
+   load([basedir 'proc' filesep 'qsum_r.mat']);
    R = avg.R;
 
-   load([basedir 'proc' filesep 'qsum_600sec.mat']);
+   load([basedir 'proc' filesep 'qsum.mat']);
    S = avg.S;
 
    tl = S.time([1 end]);

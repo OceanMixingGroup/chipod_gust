@@ -22,6 +22,7 @@ then
       rm run.sh
       rm kill_script.sh
       rm monitorMatlab.sh
+      rm follow.sh
 else
    echo action stoped
 fi

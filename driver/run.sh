@@ -4,13 +4,11 @@
 # exp:    
 #     sh run.sh main_driver.m
 
-sin=$1 
-
-if [[ "$1" == *.m ]]
+s=$1
+if [[ "$s" == *.m ]]
 then
-   s=${sin:0:-2}
-else
-   s=$sin
+   s=${s%?}
+   s=${s%?}
 fi
 
 nohup matlab.2014b -nodisplay -nosplash -r $s > ./out/out_$s & echo $! > ./out/pid_$s

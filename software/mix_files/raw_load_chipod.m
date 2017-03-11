@@ -102,7 +102,7 @@ if head.version==80; % Chipod2
     end
 %     rate=head.primary_sample_rate./head.modulas*2 ...
 %         +max(head.modulas)./head.modulas;
-    rate=11*head.primary_sample_rate./head.samplerate;
+    rate=int32(11*head.primary_sample_rate./head.samplerate);
     for ii=1:head.maxsensors
           data.(head.sensor_name(ii, regexpi(head.sensor_name(ii,:),'\w'))) = ...
              dta(offset(ii):rate(ii):end);
@@ -179,7 +179,7 @@ elseif head.version==96; % MPChipod2
         ind=find(head.offset>=ii & head.offset<ii+10);
         offset(ind)=offset(ind)+kk*3+1;
     end
-    rate=13*head.primary_sample_rate./head.samplerate;
+    rate=int32(13*head.primary_sample_rate./head.samplerate);
     for ii=1:head.maxsensors
         data.(head.sensor_name(ii,:))=dta(offset(ii):rate(ii):end);
     end

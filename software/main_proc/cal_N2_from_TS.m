@@ -33,7 +33,14 @@ function [N2, Sz, s_TS] = cal_N2_from_TS( TSP_time, T, S, P,  Tz_time, Tz,  dt)
    for i = 1:length(I)
       time_sl(i) = nanmean(TSP_time(I{i}));
       % slope
-      p           = polyfit( T(I{i}), S(I{i}),1);
+      if all(isnan(T(I{i})) == 1) ...
+              | all(isnan(S(I{i}))) == 1
+          p(1) = NaN;
+      else
+          % use MATLABs centering & scaling transformation to prevent warnings.
+          [p, ~, mu] = polyfit( T(I{i}), S(I{i}),1);
+          p(1) = p(1)/mu(2); % undo matlab scaling
+      end
       s_TS_tmp(i) = p(1);
    end
    % interpolate slope on commen time 

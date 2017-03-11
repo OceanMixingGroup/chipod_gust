@@ -12,10 +12,10 @@ close all;
    do_parallel = 0;     % use paralelle computing 
    do_temp     = 0;     % generate temp.mat 
    do_vel_p    = 0;     % generate vel_p.mat 
-   do_vel_m    = 0;     % generate vel_m.mat 
-   do_dTdz_m   = 0;     % generate dTdz_m.mat 
+   do_vel_m    = 0;     % generate vel_m.mat
+   do_dTdz_m   = 0;     % generate dTdz_m.mat
    do_dTdz_i   = 0;     % generate dTdz_i.mat 
-
+   use_pmel    = 0;     % use TAO/TRITON/PIRATA/RAMA mooring data?
 
 
 %_____________________include path of processing flies______________________
@@ -30,8 +30,27 @@ addpath(genpath('./chipod_gust/software/'));% include  path to preocessing routi
 
 %_____________________get list of all raw data______________________
    [fids, fdate] = chi_find_rawfiles(basedir);
-   
 
+%_____________________for automated PMEL mooring processing____________
+    if use_pmel
+        pmeldir = '~/TaoTritonPirataRama/'; % directory with pmel mooring files
+                                            % (can obtain an updated copy from ganges)
+        % which high-freq data file should I use?
+        % 2m/10m/30m/hr
+        velfreq = '30m';
+        Tfreq = '10m';
+        Sfreq = 'dy';
+
+        % find start and end of depoyment from raw files
+        rawdir = [basedir filesep 'raw' filesep];
+        data = raw_load_chipod([rawdir fids{1}]);
+        deployStart = data.datenum(1);
+        data = raw_load_chipod([rawdir fids{end}]);
+        deployEnd = data.datenum(end);
+
+        % chipod location (positive North, East & Down)
+        ChipodLon = 90; ChipodLat = 12; ChipodDepth = 15;
+    end
 
 %%%%%%%%%%%%%%%%%%% temp processing %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%55
 if do_temp
@@ -97,16 +116,31 @@ end
 %%%%%%%%%%%%%%%%%%% mooring velocity %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%55
 if do_vel_m
     sdir  = [basedir filesep 'input' filesep];
-   %_______ EXAMPLE________________
-      load('../../../mooring_data/mooring_Pirata14_524.mat') ;
 
-    chi_generate_vel_adcp(moor.time, moor.depth, moor.u, moor.v, moor.depth, sdir)
+    if use_pmel
+        moor = ExtractUVFromTaoTritonPirataRama(ChipodLon, ChipodLat, ...
+                                                ChipodDepth, deployStart, ...
+                                                deployEnd, pmeldir, ...
+                                                'RAMA', velfreq);
+    end
+
+    %_______ EXAMPLE________________
+    % load('../../../mooring_data/mooring_Pirata14_524.mat') ;
+
+    chi_generate_vel_adcp(moor.time, moor.depth, moor.u, moor.v, moor.depth, sdir);
 end
 
 
 %%%%%%%%%%%%%%%%%%% mooring dTdz %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%55
 if do_dTdz_m
       sdir  = [basedir filesep 'input' filesep];
+
+      if use_pmel
+          [T1, T2] = ExtractTSFromTaoTritonPirataRama(ChipodLon, ChipodLat, ...
+                                                      ChipodDepth, deployStart, ...
+                                                      deployEnd, pmeldir, 'RAMA', ...
+                                                      Tfreq, Sfreq);
+      end
 
  %_______ EXAMPLE________________
       %  load('../../G002/proc/temp.mat') ; % surounding instruments
@@ -120,8 +154,8 @@ if do_dTdz_m
       %     T2.T    = T.T; 
       %     T2.S    = ones(size((T.T)))*35; 
 
-   %  chi_generate_dTdz_m(T1.time, T1.z, T1.T, T1.S, ...
-   %                      T2.time, T2.z, T2.T, T2.S, sdir);
+      chi_generate_dTdz_m(T1.time, T1.z, T1.T, T1.S, ...
+                          T2.time, T2.z, T2.T, T2.S, sdir);
 
 end
 

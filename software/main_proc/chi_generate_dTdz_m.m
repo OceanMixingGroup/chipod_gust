@@ -40,7 +40,7 @@ function [Tz_m] = chi_generate_dTdz_m(t1, z1, T1, S1, t2, z2, T2, S2,  sdir);
    % find beginning
    ts = max(t1(1), t2(1));
    % find end
-   tf = max(t1(end), t2(end));
+   tf = min(t1(end), t2(end));
 
    % construct time array
    dt = 1/(24*60);      % one minute

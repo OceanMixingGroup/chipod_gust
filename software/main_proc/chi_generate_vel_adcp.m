@@ -57,6 +57,8 @@ else     % in cse it is at a differnt depth interpolate
 end
 
 vel_m.spd = hypot(vel_m.u, vel_m.v)
+vel_m.U = vel_m.u + 1i * vel_m.v;
+vel_m.comment = '(u,v) = velocities; spd = speed; U = u+iv';
 
 if ~isempty(sdir)
    save([sdir 'vel_m.mat'], 'vel_m');

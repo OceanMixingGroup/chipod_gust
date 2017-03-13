@@ -26,6 +26,7 @@ function [vel_m] = chi_generate_vel_adcp(time, z_adcp, u, v, z_chi,  sdir)
 % init variables
 vel_m.u     = nan(size(time));
 vel_m.v     = nan(size(time));
+vel_m.spd     = nan(size(time));
 vel_m.time  = time;
 vel_m.depth = z_chi;
 
@@ -54,6 +55,10 @@ else     % in cse it is at a differnt depth interpolate
 
    end
 end
+
+vel_m.spd = hypot(vel_m.u, vel_m.v)
+vel_m.U = vel_m.u + 1i * vel_m.v;
+vel_m.comment = '(u,v) = velocities; spd = speed; U = u+iv';
 
 if ~isempty(sdir)
    save([sdir 'vel_m.mat'], 'vel_m');

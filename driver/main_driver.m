@@ -53,6 +53,8 @@ addpath(genpath('./chipod_gust/software/'));% include  path to preocessing routi
 
     pflag = pflag.make_cons();   % make sub-flags consitent with master flags 
 
+    %pflag.master.pumped = 1;    % do you use a surface pumped mooring (default = 0)
+
     pflag.master.parallel = 1;
 
    %---------------------get flag status----------------------

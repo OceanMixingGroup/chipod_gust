@@ -33,20 +33,20 @@ addpath(genpath('./chipod_gust/software/'));% include  path to preocessing routi
 
 %_____________________for automated PMEL mooring processing____________
     if use_pmel
-        pmeldir = '~/TaoTritonPirataRama/'; % directory with pmel mooring files
+        pmeldir = '~/ganges/data/TaoTritonPirataRama/'; % directory with pmel mooring files
                                             % (can obtain an updated copy from ganges)
         % which high-freq data file should I use?
         % 2m/10m/30m/hr
-        velfreq = '30m';
-        Tfreq = '10m';
-        Sfreq = 'dy';
+        velfreq   = '30m';
+        Tfreq     = '10m';
+        Sfreq     = 'dy';
 
         % find start and end of depoyment from raw files
-        rawdir = [basedir filesep 'raw' filesep];
-        data = raw_load_chipod([rawdir fids{1}]);
-        deployStart = data.datenum(1);
-        data = raw_load_chipod([rawdir fids{end}]);
-        deployEnd = data.datenum(end);
+        rawdir       = [basedir filesep 'raw' filesep];
+        data         = raw_load_chipod([rawdir fids{1}]);
+        deployStart  = data.datenum(1);
+        data         = raw_load_chipod([rawdir fids{end}]);
+        deployEnd    = data.datenum(end);
 
         % chipod location (positive North, East & Down)
         ChipodLon = 90; ChipodLat = 12; ChipodDepth = 15;

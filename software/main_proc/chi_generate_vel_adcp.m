@@ -45,7 +45,11 @@ else     % in cse it is at a differnt depth interpolate
       [z_adcp, ~] = meshgrid(z_adcp, time);
    end
 
-
+   if sz(2) == length(time) % fix dimension order  
+       z_adcp = z_adcp';
+       u = u';
+       v = v';
+   end
 
    % loop through every time step
    for t = 1:length(time)

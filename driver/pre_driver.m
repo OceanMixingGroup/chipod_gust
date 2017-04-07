@@ -11,14 +11,21 @@ close all;
 %_____________________set processing flags______________________
    do_parallel = 0;     % use paralelle computing 
    do_temp     = 0;     % generate temp.mat 
-   do_vel_p    = 0;     % generate vel_p.mat 
+   do_vel_p    = 0;     % generate vel_p.mat
    do_vel_m    = 0;     % generate vel_m.mat
-   do_dTdz_m   = 0;     % generate dTdz_m.mat
+   do_dTdz_m   = 1;     % generate dTdz_m.mat
    do_dTdz_i   = 0;     % generate dTdz_i.mat 
    use_pmel    = 0;     % use TAO/TRITON/PIRATA/RAMA mooring data?
+   use_TS_relation = 0; % fit TS relation to estimate N2 from
+                        % mooring data?
    use_mooring_sal = 1; % use mooring salinity along with dTdz_i
                         % to estimate N^2 in dTdz_i.
                         % otherwise code assumes fixed salinity=35.
+
+   use_rama    = 1;     % use prelim processed RAMA data
+   RamaPrelimSalCutoff = 1/(1*60*60); % filter cutoff (Hz) for
+                                      % filtering prelim RAMA
+                                      % salinity data (set NaN to disable)
 
 %_____________________include path of processing flies______________________
 addpath(genpath('./chipod_gust/software/'));% include  path to preocessing routines
@@ -34,25 +41,30 @@ addpath(genpath('./chipod_gust/software/'));% include  path to preocessing routi
    [fids, fdate] = chi_find_rawfiles(basedir);
 
 %_____________________for automated PMEL mooring processing____________
-    if use_pmel
-        pmeldir = '~/ganges/data/TaoTritonPirataRama/'; % directory with pmel mooring files
+   % chipod location (positive North, East & Down)
+   ChipodLon = 90; ChipodLat = 12; ChipodDepth = 15;
+
+   if use_pmel
+       pmeldir = '~/TaoTritonPirataRama/'; % directory with pmel mooring files
                                             % (can obtain an updated copy from ganges)
-        % which high-freq data file should I use?
-        % 2m/10m/30m/hr
-        velfreq   = '30m';
-        Tfreq     = '10m';
-        Sfreq     = 'dy';
+       % which high-freq data file should I use?
+       % 2m/10m/30m/hr
+       velfreq = '30m';
+       Tfreq = '10m';
+       Sfreq = 'dy';
 
-        % find start and end of depoyment from raw files
-        rawdir       = [basedir filesep 'raw' filesep];
-        data         = raw_load_chipod([rawdir fids{1}]);
-        deployStart  = data.datenum(1);
-        data         = raw_load_chipod([rawdir fids{end}]);
-        deployEnd    = data.datenum(end);
+       % find start and end of depoyment from raw files
+       rawdir = [basedir filesep 'raw' filesep];
+       data = raw_load_chipod([rawdir fids{1}]);
+       deployStart = data.datenum(1);
+       data = raw_load_chipod([rawdir fids{end}]);
+       deployEnd = data.datenum(end);
+   end
 
-        % chipod location (positive North, East & Down)
-        ChipodLon = 90; ChipodLat = 12; ChipodDepth = 15;
-    end
+   % use RAMA preliminary data
+   if use_rama
+       ramaname = '~/rama/RamaPrelimProcessed/RAMA13.mat';
+   end
 
 %%%%%%%%%%%%%%%%%%% temp processing %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%55
 if do_temp
@@ -142,9 +154,30 @@ if do_dTdz_m
                                                       ChipodDepth, deployStart, ...
                                                       deployEnd, pmeldir, 'RAMA', ...
                                                       Tfreq, Sfreq);
+          save([basedir filesep 'proc' filesep 'T_m.mat'], ...
+                'T1', 'T2')
       end
 
- %_______ EXAMPLE________________
+      if use_rama
+          % Using RAMA prelminary data (10 min T,S)
+          [T1, T2] = ExtractTSFromRamaPrelim(ramaname, ChipodDepth);
+
+          if ~isnan(RamaPrelimSalCutoff)
+              disp('Low pass filtering RAMA salinity')
+              Sfilt = gappy_filt(1./diff(T1.time(1:2)*86400), ...
+                                 {['l' num2str(RamaPrelimSalCutoff)]}, ...
+                                 4, T1.S);
+              T1.S = Sfilt;
+              % figure; plot(T1.time, T1.S); hold on; plot(T1.time, Sfilt);
+
+              Sfilt = gappy_filt(1./diff(T2.time(1:2)*86400), ...
+                                 {['l' num2str(RamaPrelimSalCutoff)]}, ...
+                                 4, T2.S);
+              T2.S = Sfilt;
+          end
+      end
+
+      %_______ EXAMPLE________________
       %  load('../../G002/proc/temp.mat') ; % surounding instruments
       %     T1.time = T.time; 
       %     T1.z    = nanmedian(T.depth); 

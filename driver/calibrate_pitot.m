@@ -20,7 +20,8 @@ close all;
    time_range(2)  = datenum(2030, 1, 1, 0, 0, 0); 
 
 
-   % which temperature sensor to use T1 (1) or if T1 is broken T2 (2) ;  for gusTs (0)
+   % which temperature sensor to use T1 (1) or if T1 is broken T2 (2) ;  
+   % for gusTs (0)
    use_T = 1;  
 
 
@@ -85,7 +86,12 @@ if do_raw_data
          parfor f=1:length(fids)
            try % take care if script crashes that the parpoo is shut down
                disp(['calculating file ' num2str(f) ' of ' num2str(length(fids))]);
-               [~] = pitot_avg_raw_data(basedir, fids{f});
+
+               if use_T == 0 % gusT
+                  [~] = pitot_avg_raw_data(basedir, fids{f}, 0);
+               else        %chipod
+                  [~] = pitot_avg_raw_data(basedir, fids{f});
+               end
            catch
                disp(['!!!!!! ' fids{f} ' crashed while processing vel_p structure !!!!!!' ]);
             end
@@ -95,7 +101,11 @@ if do_raw_data
       else
          for f=1:length(fids)
             disp(['calculating file ' num2str(f) ' of ' num2str(length(fids))]);
-            [Praw] = pitot_avg_raw_data(basedir, fids{f});
+               if use_T == 0 % gusT
+                  [Praw] = pitot_avg_raw_data(basedir, fids{f}, 0);
+               else        %chipod
+                  [Praw] = pitot_avg_raw_data(basedir, fids{f});
+               end
          end
       end
    %_____________________merge individual files______________________
@@ -114,7 +124,7 @@ end
    P.time = Praw.time;
 
    % temperature
-   if (use_T==0) gusTs
+   if (use_T==0) %gusTs
       P.T   =  (Praw.T.^2+Praw.vT)*head.coef.T(3)+ Praw.T*head.coef.T(2) + head.coef.T(1);
    else  % chipods
       P.T1   =  (Praw.T1.^2+Praw.vT1)*head.coef.T1(3)+ Praw.T1*head.coef.T1(2) + head.coef.T1(1);
@@ -130,7 +140,12 @@ end
    P.P    =  Praw.P*head.coef.P(2) + head.coef.P(1);
 
    % compass
-   P.cmp  = Praw.cmp + head.coef.CMP(1);
+      if isfield(head.coef, 'CMP')
+         P.cmp  = Praw.cmp + head.coef.CMP(1);
+      else
+         P.cmp  = Praw.cmp;
+         disp(['CMP' ' does not exit in header']);
+      end
 
    %---------------------pre calibration for Pitot----------------------
       %% find all idexes in the desired time interval;

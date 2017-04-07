@@ -112,6 +112,7 @@ if do_plot
          [ax, ~] = create_axes(fig, 4, 1, 0);
       
          col = get(groot,'DefaultAxesColorOrder');
+         col = cat(1, col, col./2); % colorscale extension
          
          a=1;
          for f = 1:length(ff)

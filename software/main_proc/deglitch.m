@@ -1,4 +1,4 @@
-function [xd]=deglitch(x,npts,nstd,side)
+    function [xd]=deglitch(x,npts,nstd,side)
 % function [xd]=deglitch(x,npts,nstd,side)
 % x is the series to be deglitched
 % npts - number of points to deglitch at a time 

@@ -42,6 +42,7 @@ classdef chi_processing_flags
     % master.Tzm    = 0;  % use mooring stratification 
     % master.ic     = 0;  % do inertial sub-range fit of temperature (1)
     % master.vc     = 0;  % do viscous convective sub-range fit of temperature (1)
+    % master.pumped = 0;  % do we have a surface pumped mooring
    
 
     % % normal processing
@@ -157,6 +158,7 @@ classdef chi_processing_flags
          obj.master.ic     = 0;  % do inertial sub-range fit of temperature (1)
          obj.master.vc     = 0;  % do vicous convective sub-range fit of temperature (1) (this is the standart proceedure)
          obj.master.epsp   = 0;  % intertial sub-range fit on pitot_velocities (1)
+         obj.master.pumped = 0;  % do we have a surface pumped mooring
 
 
          %_____________ processing flags_________________________________
@@ -644,6 +646,8 @@ classdef chi_processing_flags
             obj.proc.pi22_ic   = 1;  
             obj.proc.mi212_ic  = 1;  
             obj.proc.pi212_ic  = 1;  
+            
+            obj.master.pumped  = 1;
          else
             obj.proc.mig       = 0;  
             obj.proc.pig       = 0;  

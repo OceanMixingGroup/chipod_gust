@@ -1,10 +1,11 @@
 function [T1, T2] = ExtractTSFromRamaPrelim(ramaname, ChipodDepth)
 
     rama = load(ramaname);
-    keyboard;
 
-    [z1,z2] = ChooseDepthLevels(rama.depth, ChipodDepth)
+    [z1,z2] = ChooseDepthLevels(rama.depth, ChipodDepth);
 
+    disp(['RamaPrelim: Choosing depths at ' ...
+          num2str(rama.depth([z1, z2]), '%d m ')])
     T1.time = rama.time;
     T1.S = rama.sal(z1,:);
     T1.T = rama.temp(z1,:);

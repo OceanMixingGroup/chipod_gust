@@ -1,4 +1,5 @@
-function [Tz_m] = chi_generate_dTdz_m(t1, z1, T1, S1, t2, z2, T2, S2,  sdir);
+function [Tz_m] = chi_generate_dTdz_m(t1, z1, T1, S1, t2, z2, T2, ...
+                                      S2,  sdir, use_TS_relation);
 % [Tz_m] = chi_generate_dTdz_m(t1, z1, T1, S1, t2, z2, T2, S2,  sdir);
 %
 %        This function generates an input file for chi-processing dTdz_m.m at
@@ -15,6 +16,7 @@ function [Tz_m] = chi_generate_dTdz_m(t1, z1, T1, S1, t2, z2, T2, S2,  sdir);
 %           T2          : temperature vector of 2nd CTD time series
 %           S2          : salinity vector of 2nd CTD time series (could also be constant scalar)
 %           sdir        : directory to save dTdz_m.met to
+%       use_TS_relation : if 1, fit TS relation; else do naive differencing
 % 
 %        Output
 %           Tz_m.time   : time vector  (1min averages)
@@ -34,7 +36,9 @@ function [Tz_m] = chi_generate_dTdz_m(t1, z1, T1, S1, t2, z2, T2, S2,  sdir);
       S2 = ones(size(T2))*S2;
    end
 
-
+   if ~exist('use_TS_relation', 'var')
+       use_TS_relation = 0;
+   end
 
 %---------------------create time vector----------------------
    % find beginning
@@ -74,15 +78,18 @@ function [Tz_m] = chi_generate_dTdz_m(t1, z1, T1, S1, t2, z2, T2, S2,  sdir);
    % cal temperature gradient
    Tz_m.Tz = (T1_int-T2_int)/dz;
 
-   % cal density
-   %D1 = sw_dens(S1_int,T1_int,abs(z1));
-   %D2 = sw_dens(S2_int,T2_int,abs(z2));
-   
-   % N2
-   %g        = 9.81;
-   %rho_0    = 1025;
-   %Tz_m.N2  = -g/rho_0*(D1-D2)/dz;
-   [Tz_m.N2,~,~]  = cal_N2_from_TS(t1, T1,  S1, ones(size(S1))*abs(.5*(z1+z2)), time, Tz_m.Tz, 600);
+   if ~use_TS_relation
+       % cal density
+       D1 = sw_pden(S1_int,T1_int,abs(z1), 0.5*abs(z1+z2));
+       D2 = sw_pden(S2_int,T2_int,abs(z2), 0.5*abs(z1+z2));
+
+       % N2
+       g        = 9.81;
+       rho_0    = 1025;
+       Tz_m.N2  = -g/rho_0*(D1-D2)/dz;
+   else
+       [Tz_m.N2,~,~]  = cal_N2_from_TS(t1, T1,  S1, ones(size(S1))*abs(.5*(z1+z2)), time, Tz_m.Tz, 600);
+   end
 
    Tz_m.time  = time;
 

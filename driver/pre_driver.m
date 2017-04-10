@@ -16,7 +16,9 @@ close all;
    do_dTdz_m   = 0;     % generate dTdz_m.mat
    do_dTdz_i   = 0;     % generate dTdz_i.mat 
    use_pmel    = 0;     % use TAO/TRITON/PIRATA/RAMA mooring data?
-
+   use_mooring_sal = 1; % use mooring salinity along with dTdz_i
+                        % to estimate N^2 in dTdz_i.
+                        % otherwise code assumes fixed salinity=35.
 
 %_____________________include path of processing flies______________________
 addpath(genpath('./chipod_gust/software/'));% include  path to preocessing routines
@@ -157,6 +159,37 @@ if do_dTdz_m
       chi_generate_dTdz_m(T1.time, T1.z, T1.T, T1.S, ...
                           T2.time, T2.z, T2.T, T2.S, sdir);
 
+      %__________________recalculate N^2 using processed mooring salinity____________________
+
+      if use_mooring_sal
+          if ~exist('../input/dTdz_i.mat', 'file')
+              error(['Create dTdz_i.mat first. Run pre_driver with ' ...
+                     'do_dTdz_i=1']);
+          end
+
+          load ../input/dTdz_i.mat
+          load ../input/dTdz_m.mat
+
+          % interpolate to Tz_i.time
+          dSdz = interp1(T1.time, (T1.S-T2.S)/abs(T1.z-T2.z), Tz_i.time);
+          Smean = interp1(T1.time, (T1.S + T2.S)/2, Tz_i.time);
+
+          Tnames = {'T1', 'T2', 'T12'};
+          Tznames = {'Tz1', 'Tz2', 'Tz12'};
+          Nnames = {'N2_1', 'N2_2', 'N2_12'};
+          for ii=1:length(Tnames)
+              Tii = Tz_i.(Tnames{ii});
+              dTdz = Tz_i.(Tznames{ii});
+
+              alpha = sw_alpha(Smean, Tii, ChipodDepth);
+              beta = sw_beta(Smean, Tii, ChipodDepth);
+
+              Tz_i.(Nnames{ii}) = -9.81 * (-alpha.*dTdz + beta.*dSdz);
+          end
+
+          Tz_i.S = Smean;
+          save('../input/dTdz_i.mat', 'Tz_i');
+      end
 end
 
 %%%%%%%%%%%%%%%%%%% internal dTdz %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%55

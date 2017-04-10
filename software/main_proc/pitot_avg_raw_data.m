@@ -62,7 +62,7 @@ end
          rdat.time_cmp = rdat.datenum(1:di_cmp:end);
       else  % gusT
          di_cmp        = round(length(rdat.time)/length(rdat.compass)); 
-         rdat.time_cmp = rdat.datenum(1:di_cmp:end);
+         rdat.time_cmp = rdat.time(1:di_cmp:end);
       end
 
    % sample rate in Hz
@@ -108,13 +108,18 @@ end
 
 %_____________________initialize quantities______________________
    Praw.time  = nan(1,length(I));
-   Praw.T1    = nan(1,length(I));
-   Praw.T2    = nan(1,length(I));
-   Praw.vT1   = nan(1,length(I));
-   Praw.vT2   = nan(1,length(I));
    Praw.P     = nan(1,length(I));
    Praw.W     = nan(1,length(I));
    Praw.cmp   = nan(1,length(I));
+   if is_chipod
+      Praw.T1    = nan(1,length(I));
+      Praw.T2    = nan(1,length(I));
+      Praw.vT1   = nan(1,length(I));
+      Praw.vT2   = nan(1,length(I));
+   else  % gusT
+      Praw.T    = nan(1,length(I));
+      Praw.vT   = nan(1,length(I));
+   end
 
 %_____________________loop through dt intervals______________________
 
@@ -122,13 +127,19 @@ for i=1:length(I)
 
    %-------------normal bulk stuff-----------------
       Praw.time(i)  = nanmean( rdat.time(I{i}) ); 
-      Praw.T1(i)    = nanmean( rdat.T1(I{i}) ); 
-      Praw.T2(i)    = nanmean( rdat.T2(I{i}) ); 
       Praw.P(i)     = nanmean( rdat.P(I{i}) ); 
 
-   %----------------temperature variance--------
+   %----------------temperature--------
+
+   if is_chipod
+      Praw.T1(i)    = nanmean( rdat.T1(I{i}) ); 
+      Praw.T2(i)    = nanmean( rdat.T2(I{i}) ); 
       Praw.vT1(i)   = nanvar( rdat.T1(I{i}) ); 
       Praw.vT2(i)   = nanvar( rdat.T2(I{i}) ); 
+   else
+      Praw.T(i)    = nanmean( rdat.T(I{i}) ); 
+      Praw.vT(i)   = nanvar( rdat.T(I{i}) ); 
+   end
 
    %---------------------Pitot voltage--------------
       wtmp        = W(I{i}) ;
@@ -140,7 +151,7 @@ for i=1:length(I)
    %--------------------compass----------------------
       if is_chipod
          tmp = rdat.CMP(Ic{i})/10/180*pi; % transfor into rad
-      else gusT
+      else %gusT
          tmp = rdat.compass(Ic{i})/180*pi; % transfor into rad
       end
       tmp         = exp(1i * tmp);  % convert to complex plain

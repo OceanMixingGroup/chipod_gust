@@ -55,8 +55,8 @@ addpath(genpath('./chipod_gust/software/'));% include  path to preocessing routi
 
     %pflag.master.pumped = 1;    % do you use a surface pumped mooring (default = 0)
 
-    pflag.master.use_compass = 1; % if 0, assume chipod vane moves
-                                  % into into the flow perfectly
+    pflag.master.use_compass = 1; % if 0, assume chipod vane moves it
+                                  % into the flow perfectly
 
     pflag.master.parallel = 1;
 
@@ -106,5 +106,8 @@ disp('merge all days')
       disp('Pitot epsilon data are merged')
       chi_merge_and_avg(basedir, 'eps', 60);
    end
+
+   %_____________________combine all chi_data______________________
+   combine_turbulence;
 
 end % ~dry run

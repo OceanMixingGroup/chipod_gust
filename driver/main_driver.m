@@ -104,4 +104,7 @@ disp('merge all days')
       chi_merge_and_avg(basedir, 'eps', 0);
    end
 
+   %_____________________combine all chi_data______________________
+   combine_turbulence;
+
 end % ~dry run

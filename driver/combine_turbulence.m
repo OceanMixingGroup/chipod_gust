@@ -131,6 +131,7 @@ if do_plot
    
    load([basedir '/proc/Turb.mat']);
    ff = fields(Turb);
+   ff = {ff{1:end-1}}'; % remove readme structure
 
     fig = figure('Color',[1 1 1],'visible','on','Paperunits','centimeters',...
             'Papersize',[30 20],'PaperPosition',[0 0 30 20])

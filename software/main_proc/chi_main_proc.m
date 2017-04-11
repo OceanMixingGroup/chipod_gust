@@ -46,8 +46,9 @@ function [] = chi_main_proc(basedir, rfid, pflag, varargin)
             pflag = pflag.c_Tzm(0);
          end
       end
-    % load mooring stratification
-      if(pflag.master.Tzi)
+      % load mooring stratification
+      % if pumped chipod - and Tzi not set, use Tz_i.Tz* for masking
+      if(pflag.master.Tzi) | (pflag.master.pumped)
          fid = [basedir filesep 'input' filesep 'dTdz_i.mat'];
          if exist(fid, 'file');
             load(fid);
@@ -88,7 +89,7 @@ function [] = chi_main_proc(basedir, rfid, pflag, varargin)
             vel_p1 = vel_p;
             clear vel_p;
             [vel_p.time, vel_p.spd] = ...
-                chi_convert_vel_m_to_sensor_spd(vel_p1, data, pflag.master.use_compass);
+                chi_convert_vel_m_to_sensor_spd(vel_p1, data);
 
          else % case 2 not surface pumped mooring
 
@@ -148,7 +149,7 @@ for i = 1:length(pflag.id)
            end
 
            switch T_f
-            case 'T'
+            case 'T' % for gusT only
                Tp.tp   = data.TPt;
                Tp.time = data.time_tp;
                T.time  = data.time;
@@ -160,12 +161,24 @@ for i = 1:length(pflag.id)
                T.time  = data.time;
                T.T     = data.T1;
                T.depth = data.depth;
+               % if pumped use internal dT/dz for masking
+               if pflag.master.pumped
+                   if exist('Tz_i' , 'var')
+                      Tz.Tzmask = Tz_i.Tz1;
+                   end
+               end
            case 'T2'
                Tp.tp   = data.T2Pt;
                Tp.time = data.time_tp;
                T.time  = data.time;
                T.T     = data.T2;
                T.depth = data.depth;
+               % if pumped use internal dT/dz for masking
+               if pflag.master.pumped
+                   if exist('Tz_i' , 'var')
+                      Tz.Tzmask = Tz_i.Tz2;
+                   end
+               end
            end
 
            switch Tz_f
@@ -189,6 +202,13 @@ for i = 1:length(pflag.id)
                Tz.time  =  Tz_i.time;
                Tz.Tz    =  Tz_i.Tz12;
                Tz.N2    =  Tz_i.N2_12;
+           end
+
+           % if not pumped chipod or internal Tz was not processed
+           if ~isfield(Tz, 'Tzmask')
+               Tz.Tzmask = Tz;
+           else
+               Tz.Tzmask = interp1(Tz_i.time, Tz.Tzmask, Tz.time);
            end
          
          %--------------------- Chi Processing----------------------

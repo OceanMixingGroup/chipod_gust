@@ -11,6 +11,7 @@ function [chi] = chi_chi_proc_ic(Tp, S, Tz, T)
 %     Tz.time  :  time vector of Tz and N2   
 %     Tz.Tz    :  Tz
 %     Tz.N2    :  N2
+%     Tz.Tzmask : Tz variable used for masking
 %     T.time   :  time vector of T 
 %     T.T      :  T
 %     [T.S]    :  S (default set to 35 psu) 
@@ -91,9 +92,11 @@ thermistor_cutoff_frequency  = 32;
       if isempty(iiTz) % if there are no data points in the interval interp
          chi.dTdz(i)    = interp1( Tz.time, Tz.Tz, chi.time(i));
          chi.N2(i)      = interp1( Tz.time, Tz.N2, chi.time(i));
+         chi.Tzmask(i)    = interp1( Tz.time, Tz.Tzmask, chi.time(i));
       else % if there are datapoints in the interval average
          chi.dTdz(i)    = nanmean( Tz.Tz(iiTz) );
          chi.N2(i)      = nanmean( Tz.N2(iiTz) );
+         chi.Tzmask(i)  = nanmean( Tz.Tzmask(iiTz) );
       end
 
       % same for T structure
@@ -125,7 +128,7 @@ thermistor_cutoff_frequency  = 32;
    % avg.fspd(ik) >= 0.04  && dTdz(i)>min_dTdz 
    chi.mask = ones(size(chi.time));
 
-   chi.mask(abs(chi.dTdz)<min_dTdz) = 0;
+   chi.mask(abs(chi.Tzmask)<min_dTdz) = 0;
    chi.mask(isnan(chi.dTdz))        = 0;
    chi.mask(isnan(chi.N2))          = 0;
    chi.mask(chi.N2<0)               = 0;

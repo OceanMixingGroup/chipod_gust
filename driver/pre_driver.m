@@ -16,11 +16,12 @@ close all;
    do_dTdz_m   = 1;     % generate dTdz_m.mat
    do_dTdz_i   = 0;     % generate dTdz_i.mat 
    use_pmel    = 0;     % use TAO/TRITON/PIRATA/RAMA mooring data?
-   use_TS_relation = 0; % fit TS relation to estimate N2 from
-                        % mooring data?
-   use_mooring_sal = 1; % use mooring salinity along with dTdz_i
+   use_mooring_sal = 0; % use mooring salinity along with dTdz_i
                         % to estimate N^2 in dTdz_i.
                         % otherwise code assumes fixed salinity=35.
+   use_TS_relation = 0; % fit TS relation to estimate N2 from
+                        % mooring data? Use (with caution) when you
+                        % have only 1 salinity sensor
 
    use_rama    = 1;     % use prelim processed RAMA data
    RamaPrelimSalCutoff = 1/(1*60*60); % filter cutoff (Hz) for
@@ -190,7 +191,7 @@ if do_dTdz_m
       %     T2.S    = ones(size((T.T)))*35; 
 
       chi_generate_dTdz_m(T1.time, T1.z, T1.T, T1.S, ...
-                          T2.time, T2.z, T2.T, T2.S, sdir);
+                          T2.time, T2.z, T2.T, T2.S, sdir, use_TS_relation);
 
       %__________________recalculate N^2 using processed mooring salinity____________________
 

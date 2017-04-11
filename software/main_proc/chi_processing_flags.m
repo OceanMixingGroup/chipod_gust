@@ -43,7 +43,7 @@ classdef chi_processing_flags
     % master.ic     = 0;  % do inertial sub-range fit of temperature (1)
     % master.vc     = 0;  % do viscous convective sub-range fit of temperature (1)
     % master.pumped = 0;  % do we have a surface pumped mooring
-   
+    % master.use_compass = 1; % Use compass information by default
 
     % % normal processing
     %  % for pitot eps
@@ -159,7 +159,7 @@ classdef chi_processing_flags
          obj.master.vc     = 0;  % do vicous convective sub-range fit of temperature (1) (this is the standart proceedure)
          obj.master.epsp   = 0;  % intertial sub-range fit on pitot_velocities (1)
          obj.master.pumped = 0;  % do we have a surface pumped mooring
-
+         obj.master.use_compass = 1; % we use compass information by default
 
          %_____________ processing flags_________________________________
          for i=1:length(obj.id)
@@ -730,7 +730,8 @@ classdef chi_processing_flags
                'Tzi    :  use local (interal) stratification ';
                'Tzm    :  use mooring stratification ';
                'ic     :  do inertial sub-range fit of temperature (1)';
-               ' ';
+               'pumped : mooring is surface-pumped';
+               'use_compass : use compass information, 0 to disable';
                '';
                '% normal processing';
                 '% for pitot eps';

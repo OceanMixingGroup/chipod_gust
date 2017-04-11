@@ -55,6 +55,9 @@ addpath(genpath('./chipod_gust/software/'));% include  path to preocessing routi
 
     %pflag.master.pumped = 1;    % do you use a surface pumped mooring (default = 0)
 
+    pflag.master.use_compass = 1; % if 0, assume chipod vane moves it
+                                  % into the flow perfectly
+
     pflag.master.parallel = 1;
 
    %---------------------get flag status----------------------

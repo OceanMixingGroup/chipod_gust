@@ -16,7 +16,7 @@ close all;
    do_dTdz_m   = 0;     % generate dTdz_m.mat
    do_dTdz_i   = 0;     % generate dTdz_i.mat 
    use_pmel    = 0;     % use TAO/TRITON/PIRATA/RAMA mooring data?
-   use_mooring_sal = 1; % use mooring salinity along with dTdz_i
+   use_mooring_sal = 0; % use mooring salinity along with dTdz_i
                         % to estimate N^2 in dTdz_i.
                         % otherwise code assumes fixed salinity=35.
    use_TS_relation = 0; % fit TS relation to estimate N2 from

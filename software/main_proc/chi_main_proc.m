@@ -65,7 +65,8 @@ function [] = chi_main_proc(basedir, rfid, pflag, varargin)
             load(fid);
             vel_m1 = vel_m;
             clear vel_m;
-            [vel_m.time, vel_m.spd] = chi_convert_vel_m_to_sensor_spd(vel_m1, data);
+            [vel_m.time, vel_m.spd] = ...
+                chi_convert_vel_m_to_sensor_spd(vel_m1, data, pflag.master.use_compass);
          else
             disp([fid ' does not exit']);
             disp('corresponding processing flags are switched off');
@@ -86,7 +87,8 @@ function [] = chi_main_proc(basedir, rfid, pflag, varargin)
             load(fid);
             vel_p1 = vel_p;
             clear vel_p;
-            [vel_p.time, vel_p.spd] = chi_convert_vel_m_to_sensor_spd(vel_p1, data);
+            [vel_p.time, vel_p.spd] = ...
+                chi_convert_vel_m_to_sensor_spd(vel_p1, data, pflag.master.use_compass);
 
          else % case 2 not surface pumped mooring
 

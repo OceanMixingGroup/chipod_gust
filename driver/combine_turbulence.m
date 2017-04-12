@@ -41,7 +41,9 @@ addpath(genpath('./chipod_gust/software/'));% include  path to preocessing routi
 
 %_____________________find all available chi data______________________
 if(do_combine)
-   d = dir([basedir '/proc/chi/']);
+   runname = '/proc/2017-04-12/';
+   dirname = [basedir runname '/chi/'];
+   d = dir(dirname);
    % eliminate directories
    d = d(~[d(:).isdir]);
 
@@ -56,7 +58,7 @@ if(do_combine)
 
          ID = d(i).name(1:mat_test-1);
          disp(['adding ' ID ]);
-         load([basedir '/proc/chi/' ID '.mat'])
+         load([dirname ID '.mat'])
          
          % find desired time range
          iiTrange = find( chi.time>= time_range(1) & chi.time<= time_range(2) );
@@ -121,7 +123,7 @@ if(do_combine)
          };
 
 %_____________________save combined structure______________________
-   save([basedir '/proc/Turb.mat'], 'Turb');
+   save([dirname '/Turb.mat'], 'Turb');
 
     
 end

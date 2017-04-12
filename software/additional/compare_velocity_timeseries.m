@@ -139,9 +139,9 @@ end
   plot(axa(a), [0 0], [0 max(Ncnt{1})], '--k', 'Linewidth', 1);
   
   xlabel(axa(a), ['log_{10}|u_{' p_L '}|/|u_{' a_L '}|'])
-  t = text_corner(axa(a), ['mean ' num2str(nanmean(X{1}), '%1.2f') ' '], 3);
+  t = text_corner(axa(a), ['avg ' num2str(nanmean(X{1}), '%1.2f') ], 3);
   t.Color = col(4,:);
-  t = text_corner(axa(a), {'';['median ' num2str(nanmedian(X{1}), '%1.2f') ]}, 3);
+  t = text_corner(axa(a), {'';['med ' num2str(nanmedian(X{1}), '%1.2f') ]}, 3);
   t.Color = col(4,:);
   set(axa(a), 'Ycolor', [1 1 1]);
   xlim(axa(a), sl);
@@ -165,9 +165,10 @@ end
    set(axh(2), 'Ycolor', [1 1 1]);
    xlim(axh(2), sl);
    t = text_corner(axh(2), ['speed'], 1);
-      t = text_corner(axh(2), [a_L], 3);
+      t = text_corner(axh(2), ['    avg   med '], 3);
+      t = text_corner(axh(2), {'' ;[a_L '  ' num2str(nanmean(X{1}), '%1.2f') '  ' num2str(nanmedian(X{1}), '%1.2f') ' ']}, 3);
       t.Color = col(1,:);
-      t = text_corner(axh(2), {'';p_L}, 3);
+      t = text_corner(axh(2), {'' ;'' ;[p_L '  ' num2str(nanmean(X{2}), '%1.2f') '  ' num2str(nanmedian(X{2}), '%1.2f')]}, 3);
       t.Color = col(2,:);
 
    

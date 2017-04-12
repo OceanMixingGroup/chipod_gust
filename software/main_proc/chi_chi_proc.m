@@ -10,6 +10,7 @@ function [chi] = chi_chi_proc(Tp, S, Tz, T)
 %     S.spd    :  speed
 %     Tz.time  :  time vector of Tz and N2   
 %     Tz.Tz    :  Tz
+%     Tz.Tzmask : Tz timeseries used for masking
 %     Tz.N2    :  N2
 %     T.time   :  time vector of T 
 %     T.T      :  T
@@ -87,6 +88,8 @@ thermistor_cutoff_frequency  = 32;
    chi.T       = interp1( T.time, T.T, chi.time);
    chi.S       = interp1( T.time, T.S, chi.time);
    chi.depth   = interp1( T.time, T.depth, chi.time);
+   chi.Tzmask    = interp1( Tz.time, Tz.Tzmask, chi.time);
+
    %----------calculate viscosity and diffusivity-------------
       nu   = nan(Ni, 1);
       tdif = nan(Ni, 1);
@@ -102,7 +105,7 @@ thermistor_cutoff_frequency  = 32;
    % avg.fspd(ik) >= 0.04  && dTdz(i)>min_dTdz 
    chi.mask = ones(size(chi.time));
 
-   chi.mask(abs(chi.dTdz)<min_dTdz) = 0;
+   chi.mask(abs(chi.Tzmask)<min_dTdz) = 0;
    chi.mask(isnan(chi.dTdz))        = 0;
    chi.mask(isnan(chi.N2))          = 0;
    chi.mask(chi.N2<0)               = 0;

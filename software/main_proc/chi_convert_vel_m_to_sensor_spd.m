@@ -1,11 +1,12 @@
-function [spd_time, spd] = chi_convert_vel_m_to_sensor_spd(vel_m, data)
-%% [spd_time, spd] = chi_convert_vel_m_to_sensor_spd(vel_m, data)
+function [spd_time, spd] = chi_convert_vel_m_to_sensor_spd(vel_m, data, use_compass)
+%% [spd_time, spd] = chi_convert_vel_m_to_sensor_spd(vel_m, data, use_compass)
 %     This function converts mooring velocities (u,v) into 
 %     speeds passed the FP7 senaor for chipod processing
 %
 %     INPUT
 %        vel_m    : structure containing u,v,time
 %        data     : calibrated chipod/gust structure
+%     use_compass : If 0, assume chipod is vaned perfectly into the flow
 %
 %     OUTPUT
 %        spd_time : time array for the sensor speed (dt = 1s)
@@ -20,25 +21,27 @@ if ~isfield(vel_m, 'spd')
    vel_m.spd = abs(vel_m.u + 1i*vel_m.v);
 end
 
+if ~exist('use_compass', 'var')
+    % use compass info by default
+    use_compass = 1;
+end
 
 % interplate on common time step
    u   = interp1(vel_m.time, vel_m.u, data.time, 'linear','extrap');
    v   = interp1(vel_m.time, vel_m.v, data.time, 'linear','extrap');
    spd = interp1(vel_m.time, vel_m.spd, data.time, 'linear','extrap');
 
-   cmp = angle(interp1(data.time_cmp, exp(1i*data.cmp/180*pi), data.time, 'linear','extrap'));
+  if use_compass
+      % more sophisticated use compass
+      cmp = angle(interp1(data.time_cmp, exp(1i*data.cmp/180*pi), data.time, 'linear','extrap'));
 
-
-
-
-% Simple assuption chipod is perfectly stired in the flow
-  %velx = -spd; % current comming opposed the sensor
-  %vely = zeros(size(velx));
-
-% more sophisticated use compass
-  velx = u.*sin(cmp) + v.*cos(cmp); 
-  vely = u.*cos(cmp) + v.*sin(cmp); 
-
+      velx = u.*sin(cmp) + v.*cos(cmp);
+      vely = u.*cos(cmp) + v.*sin(cmp);
+  else
+      % Simple assuption chipod is perfectly stired in the flow
+      velx = -spd; % current comming opposed the sensor
+      vely = zeros(size(velx));
+  end
 
 % speed data
 spd      = sqrt( (data.a_vel_x-velx).^2 +(data.a_vel_y -vely).^2 +data.a_vel_z.^2 );

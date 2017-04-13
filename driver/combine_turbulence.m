@@ -17,6 +17,8 @@ close all;
    min_spd = 0.05;
    mask_dTdz = 'i'; % 'm' for mooring, 'i' for internal
 
+   avgwindow = 600; % averaging window in seconds
+
    % if you want to restrict the time range that should be combined use the following
    time_range(1)  = datenum(2000, 1, 1, 0, 0, 0); 
    time_range(2)  = datenum(2030, 1, 1, 0, 0, 0); 
@@ -100,7 +102,9 @@ if(do_combine)
 
          if isempty(ic_test) % not inertial convective estimate
             %% average data
-            ww =  round(600*diff(chi.time(1:2))*3600*24); % averaging window
+            % convert averaging window from seconds to points
+            ww =  round(avgwindow/(diff(chi.time(1:2))*3600*24));
+
             % NaN out some chi estimates based on min_dTz, min_spd
             chi.chi(full_mask) = NaN;
 

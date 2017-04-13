@@ -77,6 +77,8 @@ function [Tz_m] = chi_generate_dTdz_m(t1, z1, T1, S1, t2, z2, T2, ...
 
    % cal temperature gradient
    Tz_m.Tz = (T1_int-T2_int)/dz;
+   % cal salinity gradient
+   Tz_m.Sz = (S1_int-S2_int)/dz;
 
    if ~use_TS_relation
        % cal density

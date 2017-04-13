@@ -91,36 +91,61 @@ end
       ylabel(ax(a), 'm s^{-1}');
 
    %---------------------angle plot----------------------
-   hold(axa(1),'off')
-   rose(axa(1), angle(C.a_U), 50);
-   hold(axa(1),'on')
-   rose(axa(1), angle(C.p_U), 50);
-      t = text_corner(axa(1), [a_L], -7);
+   a=2
+   hold(axa(a),'off')
+   rose(axa(a), angle(C.a_U), 50);
+   hold(axa(a),'on')
+   rose(axa(a), angle(C.p_U), 50);
+      t = text_corner(axa(a), [a_L], -7);
       t.Color = col(1,:);
-      t = text_corner(axa(1), {'';p_L},-7);
+      t = text_corner(axa(a), {'';p_L},-7);
       t.Color = col(2,:);
+  t = text_corner(axa(2), ['flow direction'], -9);
    
    
    %---------------------angle histogram----------------------
-   X{1}   = angle(C.a_U);
-   X{2}   = angle(C.p_U);
-   al = [-pi pi];
-   bins = [al(1):(diff(al)/50):al(2)];
-   for i =1:length(X);
-      [Ncnt{i},~] = histcounts( X{i} , bins);
-      pj = i; p(pj) = plot( axa(2), bins(1:end-1)+diff(bins(1:2)*.5), ...
-                           Ncnt{i} , 'color', [col(pj,:) 1], 'Linewidth', 2);   
-      patch( [bins(1) bins(1:end)]+diff(bins(1:2)*.5), [0 Ncnt{i} 0], ...
-               col(i,:)*.5+.5,'Facealpha',.3, 'Parent', axa(2));
-   end
-   xlabel(axa(2), ['[rad]'])
-      t = text_corner(axa(2), [a_L], 3);
-      t.Color = col(1,:);
-      t = text_corner(axa(2), {'';p_L}, 3);
-      t.Color = col(2,:);
-   set(axa(2), 'Ycolor', [1 1 1]);
-   xlim(axa(2), al);
-   t = text_corner(axa(2), ['flow direction'], 1);
+  %X{1}   = angle(C.a_U);
+  %X{2}   = angle(C.p_U);
+  %al = [-pi pi];
+  %bins = [al(1):(diff(al)/50):al(2)];
+  %for i =1:length(X);
+  %   [Ncnt{i},~] = histcounts( X{i} , bins);
+  %   pj = i; p(pj) = plot( axa(2), bins(1:end-1)+diff(bins(1:2)*.5), ...
+  %                        Ncnt{i} , 'color', [col(pj,:) 1], 'Linewidth', 2);   
+  %   patch( [bins(1) bins(1:end)]+diff(bins(1:2)*.5), [0 Ncnt{i} 0], ...
+  %            col(i,:)*.5+.5,'Facealpha',.3, 'Parent', axa(2));
+  %end
+  %xlabel(axa(2), ['[rad]'])
+  %   t = text_corner(axa(2), [a_L], 3);
+  %   t.Color = col(1,:);
+  %   t = text_corner(axa(2), {'';p_L}, 3);
+  %   t.Color = col(2,:);
+  %set(axa(2), 'Ycolor', [1 1 1]);
+  %xlim(axa(2), al);
+  %t = text_corner(axa(2), ['flow direction'], 1);
+  
+  %_____________________speed ratio______________________
+  a=1;
+  X{1}   = log10(abs(C.p_U( abs(C.a_U)>.05 &  abs(C.p_U)>.05))./abs(C.a_U(abs(C.a_U)>.05 &  abs(C.p_U)>.05)));
+  sl = [min(X{1}) max(X{1})];
+  bins = [sl(1):(diff(sl)/50):sl(2)];
+  for i =1;
+     [Ncnt{i},~] = histcounts( X{i} , bins);
+     pj = i; p(pj) = plot( axa(a), bins(1:end-1)+diff(bins(1:2)*.5), ...
+                          Ncnt{i} , 'color', [col(4,:) 1], 'Linewidth', 2);   
+     patch( [bins(1) bins(1:end)]+diff(bins(1:2)*.5), [0 Ncnt{i} 0], ...
+              col(4,:)*.5+.5,'Facealpha',.3, 'Parent', axa(a));
+  end
+  plot(axa(a), [0 0], [0 max(Ncnt{1})], '--k', 'Linewidth', 1);
+  
+  xlabel(axa(a), ['log_{10}|u_{' p_L '}|/|u_{' a_L '}|'])
+  t = text_corner(axa(a), ['avg ' num2str(nanmean(X{1}), '%1.2f') ], 3);
+  t.Color = col(4,:);
+  t = text_corner(axa(a), {'';['med ' num2str(nanmedian(X{1}), '%1.2f') ]}, 3);
+  t.Color = col(4,:);
+  set(axa(a), 'Ycolor', [1 1 1]);
+  xlim(axa(a), sl);
+  
    
 
    
@@ -140,9 +165,10 @@ end
    set(axh(2), 'Ycolor', [1 1 1]);
    xlim(axh(2), sl);
    t = text_corner(axh(2), ['speed'], 1);
-      t = text_corner(axh(2), [a_L], 3);
+      t = text_corner(axh(2), ['    avg   med '], 3);
+      t = text_corner(axh(2), {'' ;[a_L '  ' num2str(nanmean(X{1}), '%1.2f') '  ' num2str(nanmedian(X{1}), '%1.2f') ' ']}, 3);
       t.Color = col(1,:);
-      t = text_corner(axh(2), {'';p_L}, 3);
+      t = text_corner(axh(2), {'' ;'' ;[p_L '  ' num2str(nanmean(X{2}), '%1.2f') '  ' num2str(nanmedian(X{2}), '%1.2f')]}, 3);
       t.Color = col(2,:);
 
    
@@ -167,8 +193,10 @@ end
                if size(Y,2)>size(Y,1)
                   Y = Y';
                end
-               r = corr(X( ~isnan(X) & ~isnan(Y) ), Y( ~isnan(X) & ~isnan(Y) ));
-               t = text_corner(axh(1),  ['      r = ' num2str(r*100, '%3.1f')  ' %'], 6);
+               [r, ~, rL, rH] = corrcoef(X( ~isnan(X) & ~isnan(Y) ), Y( ~isnan(X) & ~isnan(Y) ));
+               t = text_corner(axh(a),  {['r = ' num2str(r(2)*100, '%2.1f')  ' % ']; ...
+                           ['  [ ' num2str(rL(2)*100, '%2.1f') ', ' num2str(rH(2)*100, '%2.1f') ' ]']}, 6);
+               
             
        
    

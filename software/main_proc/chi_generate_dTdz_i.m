@@ -83,7 +83,7 @@ function [] = chi_generate_dTdz_i(basedir, rfid, varargin)
 
       Tz_i.S         = ones(length(I),1)*35;
       data.S         = ones(length(data.time),1)*35;
-      [Tz_i.N2,~,~]  = cal_N2_from_TS(data.time, data.T,  data.S, data.depth, Tz_i.time, Tz_i.Tz, 600);
+      [Tz_i.N2,Tz_i.Sz,~]  = cal_N2_from_TS(data.time, data.T,  data.S, data.depth, Tz_i.time, Tz_i.Tz, 600);
 
 
       %---------------------save data----------------------
@@ -128,7 +128,7 @@ function [] = chi_generate_dTdz_i(basedir, rfid, varargin)
       Tz_i.S         = ones(1,length(I))*35;
 
       % T1
-      [Tz_i.N2_1,~,~]  = cal_N2_from_TS(data.time, data.T1,  data.S, data.depth, Tz_i.time, Tz_i.Tz1, 600);
+      [Tz_i.N2_1,Tz_i.Sz,~]  = cal_N2_from_TS(data.time, data.T1,  data.S, data.depth, Tz_i.time, Tz_i.Tz1, 600);
 
       % T2
       [Tz_i.N2_2,~,~]  = cal_N2_from_TS(data.time, data.T2,  data.S, data.depth, Tz_i.time, Tz_i.Tz2, 600);

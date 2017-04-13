@@ -186,6 +186,7 @@ if do_plot
          
          a=1;
          for f = 1:length(ff)
+            if ~isstruct(Turb.(ff{f})), continue; end
             pj = f; p(pj) = plot(ax(a), Turb.(ff{f}).time, Turb.(ff{f}).chi, 'color', [col(pj,:) 1], 'Linewidth', 1);
          end
          t = text_corner(ax(a), ['\chi [K^2/s]'], 1);
@@ -195,6 +196,7 @@ if do_plot
          
          a=2;
          for f = 1:length(ff)
+            if ~isstruct(Turb.(ff{f})) == 1, continue; end
             pj = f; p(pj) = plot(ax(a), Turb.(ff{f}).time, Turb.(ff{f}).eps, 'color', [col(pj,:) 1], 'Linewidth', 1);
          end
          t = text_corner(ax(a), ['\epsilon [m^2/s^3]'], 1);
@@ -205,6 +207,7 @@ if do_plot
          
          a=3;
          for f = 1:length(ff)
+            if ~isstruct(Turb.(ff{f})) == 1, continue; end
             pj = f; p(pj) = plot(ax(a), Turb.(ff{f}).time, Turb.(ff{f}).N2, 'color', [col(pj,:) 1], 'Linewidth', 1);
          end
          t = text_corner(ax(a), ['N^2 [s^{-2}]'], 1);
@@ -215,6 +218,7 @@ if do_plot
 
          a=4;
          for f = 1:length(ff)
+            if ~isstruct(Turb.(ff{f})) == 1, continue; end
             pj = f; p(pj) = plot(ax(a), Turb.(ff{f}).time, Turb.(ff{f}).spd, 'color', [col(pj,:) 1], 'Linewidth', 1);
          end
          t = text_corner(ax(a), ['|u| [m/s]'], 1);
@@ -239,6 +243,7 @@ if do_plot
          yl = log10(get(ax(a), 'Ylim'));
          bins = yl(1):diff(yl)/100:yl(2);
          for f = 1:length(ff)
+            if ~isstruct(Turb.(ff{f})) == 1, continue; end
             [Nchi,~] = histcounts( log10(Turb.(ff{f}).chi) , bins);
             pj = f; p(pj) = plot(axh(a), Nchi , bins(1:end-1)+diff(bins(1:2)*.5), 'color', [col(pj,:) 1], 'Linewidth', 1);
          end
@@ -250,6 +255,7 @@ if do_plot
          yl = log10(get(ax(a), 'Ylim'));
          bins = yl(1):diff(yl)/100:yl(2);
          for f = 1:length(ff)
+            if ~isstruct(Turb.(ff{f})) == 1, continue; end
             [Nchi,~] = histcounts( log10(Turb.(ff{f}).eps) , bins);
             pj = f; p(pj) = plot(axh(a), Nchi , bins(1:end-1)+diff(bins(1:2)*.5), 'color', [col(pj,:) 1], 'Linewidth', 1);
          end
@@ -264,6 +270,7 @@ if do_plot
       
 
          for f = 1:length(ff)
+            if ~isstruct(Turb.(ff{f})) == 1, continue; end
             pj = f; p(pj) = plot(axl, [0 1] ,[0 1], 'color', [col(pj,:) 1], 'Linewidth', 1);
          end
          legend(p, ff);

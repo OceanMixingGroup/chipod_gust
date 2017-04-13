@@ -107,6 +107,7 @@ if(do_combine)
 
             % NaN out some chi estimates based on min_dTz, min_spd
             chi.chi(full_mask) = NaN;
+            chi.mask = chi.mask | ~full_mask;
 
             for f = 1:length(ff)  % run through all fields in chi
                if ( length(chi.(ff{f})) == length(chi.time) )

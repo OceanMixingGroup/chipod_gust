@@ -223,6 +223,7 @@ if do_dTdz_m
           end
 
           Tz_i.S = Smean;
+          Tz_i.Sz = dSdz;
           save('../input/dTdz_i.mat', 'Tz_i');
       end
 end

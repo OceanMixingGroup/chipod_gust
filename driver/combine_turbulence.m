@@ -15,7 +15,7 @@ close all;
    % set thresholds for masking
    min_dTdz = 1e-4;
    min_spd = 0.05;
-   mask_dTdz = 'i'; % 'm' for mooring, 'i' for internal
+   mask_dTdz = 'm'; % 'm' for mooring, 'i' for internal
 
    avgwindow = 600; % averaging window in seconds
 
@@ -23,7 +23,7 @@ close all;
    time_range(1)  = datenum(2000, 1, 1, 0, 0, 0); 
    time_range(2)  = datenum(2030, 1, 1, 0, 0, 0); 
 
-
+   runname = '2017-04-20';
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%% DO NOT CHANGE BELOW %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -39,7 +39,7 @@ addpath(genpath('./chipod_gust/software/'));% include  path to preocessing routi
 %_____________________set directories______________________    
    here    =   pwd;                % mfiles folder
    basedir =   here(1:(end-6));    % substract the mfile folder
-   savedir =   [basedir 'proc/'];  % directory directory to save data
+   savedir =   [basedir 'proc/' runname '/'];  % directory directory to save data
    unit    = chi_get_unit_name(basedir); % get unit name
 
 if do_mask
@@ -59,8 +59,7 @@ end
 
 %_____________________find all available chi data______________________
 if(do_combine)
-   runname = '/proc/2017-04-12/';
-   dirname = [basedir runname '/chi/'];
+   dirname = [savedir 'chi/'];
    d = dir(dirname);
    % eliminate directories
    d = d(~[d(:).isdir]);
@@ -167,7 +166,9 @@ if(do_combine)
          };
 
 %_____________________save combined structure______________________
-   save([dirname '/Turb.mat'], 'Turb');
+   save([savedir '/Turb.mat'], 'Turb');
+   system(['ln -s ' savedir '/Turb.mat ' savedir ...
+           '../combined/' runname '.mat']);
 
     
 end
@@ -175,7 +176,7 @@ end
 %_____________________comparison plot______________________
 if do_plot
    
-   load([basedir '/proc/Turb.mat']);
+   load([basedir '/proc/' runname '/Turb.mat']);
    ff = fields(Turb);
    ff = {ff{1:end-1}}'; % remove readme structure
 

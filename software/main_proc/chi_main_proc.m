@@ -161,24 +161,12 @@ for i = 1:length(pflag.id)
                T.time  = data.time;
                T.T     = data.T1;
                T.depth = data.depth;
-               % if pumped use internal dT/dz for masking
-               if pflag.master.pumped
-                   if exist('Tz_i' , 'var')
-                      Tz.Tzmask = Tz_i.Tz1;
-                   end
-               end
            case 'T2'
                Tp.tp   = data.T2Pt;
                Tp.time = data.time_tp;
                T.time  = data.time;
                T.T     = data.T2;
                T.depth = data.depth;
-               % if pumped use internal dT/dz for masking
-               if pflag.master.pumped
-                   if exist('Tz_i' , 'var')
-                      Tz.Tzmask = Tz_i.Tz2;
-                   end
-               end
            end
 
            switch Tz_f
@@ -204,13 +192,6 @@ for i = 1:length(pflag.id)
                Tz.N2    =  Tz_i.N2_12;
            end
 
-           % if not pumped chipod or internal Tz was not processed
-           if ~isfield(Tz, 'Tzmask')
-               Tz.Tzmask = Tz;
-           else
-               Tz.Tzmask = interp1(Tz_i.time, Tz.Tzmask, Tz.time);
-           end
-         
          %--------------------- Chi Processing----------------------
            if id([-1:0]+end) == 'ic'
              chi = chi_chi_proc_ic(Tp, S, Tz, T) ;

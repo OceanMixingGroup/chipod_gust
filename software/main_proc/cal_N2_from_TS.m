@@ -53,7 +53,7 @@ Sz =  s_TS .* Tz;
 %_____________________calculate N2______________________
 
    alpha = nanmean(sw_alpha(S, T,  P, 'temp'));
-   beta  = nanmean(sw_alpha(S, T,  P, 'temp'));
+   beta  = nanmean(sw_beta(S, T,  P, 'temp'));
    g     = 9.81;
 
    N2 = -g*( -alpha*Tz + beta*Sz );

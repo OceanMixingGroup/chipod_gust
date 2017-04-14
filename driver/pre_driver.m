@@ -37,6 +37,7 @@ addpath(genpath('./chipod_gust/software/'));% include  path to preocessing routi
    basedir =   here(1:(end-6));    % substract the mfile folder
    savedir =   [basedir 'proc/'];  % directory directory to save data
    unit    = chi_get_unit_name(basedir); % get unit name
+   rawdir       = [basedir filesep 'raw' filesep]; % raw files location
 
 %_____________________get list of all raw data______________________
    [fids, fdate] = chi_find_rawfiles(basedir);

@@ -333,24 +333,24 @@ classdef chi_processing_flags
             obj.proc.mig       = 1;  
             obj.proc.mm1       = 1;  
             obj.proc.mi11      = 1;  
-            obj.proc.mi112     = 1;  
+            obj.proc.mi112     = 0;
             obj.proc.mm2       = 1;  
             obj.proc.mi22      = 1;  
-            obj.proc.mi212     = 1;  
+            obj.proc.mi212     = 0;
             obj.proc.mmg_ic    = 1;  
             obj.proc.mig_ic    = 1;  
             obj.proc.mm1_ic    = 1;  
             obj.proc.mi11_ic   = 1;  
-            obj.proc.mi112_ic  = 1;  
+            obj.proc.mi112_ic  = 0;
             obj.proc.mm2_ic    = 1;  
             obj.proc.mi22_ic   = 1;  
-            obj.proc.mi212_ic  = 1;  
+            obj.proc.mi212_ic  = 0;
          else
             obj.proc.mmg       = 0;  
             obj.proc.mig       = 0;  
             obj.proc.mm1       = 0;  
             obj.proc.mi11      = 0;  
-            obj.proc.mi112     = 0;  
+            obj.proc.mi112     = 0;
             obj.proc.mm2       = 0;  
             obj.proc.mi22      = 0;  
             obj.proc.mi212     = 0;  
@@ -378,18 +378,18 @@ classdef chi_processing_flags
             obj.proc.pig       = 1;  
             obj.proc.pm1       = 1;  
             obj.proc.pi11      = 1;  
-            obj.proc.pi112     = 1;  
+            obj.proc.pi112     = 0;
             obj.proc.pm2       = 1;  
             obj.proc.pi22      = 1;  
-            obj.proc.pi212     = 1;  
+            obj.proc.pi212     = 0;
             obj.proc.pmg_ic    = 1;  
             obj.proc.pig_ic    = 1;  
             obj.proc.pm1_ic    = 1;  
             obj.proc.pi11_ic   = 1;  
-            obj.proc.pi112_ic  = 1;  
+            obj.proc.pi112_ic  = 0;
             obj.proc.pm2_ic    = 1;  
             obj.proc.pi22_ic   = 1;  
-            obj.proc.pi212_ic  = 1;  
+            obj.proc.pi212_ic  = 0;
          else
             obj.proc.pmg       = 0;  
             obj.proc.pig       = 0;  
@@ -452,14 +452,14 @@ classdef chi_processing_flags
             obj.proc.pm1_ic    = 1;  
             obj.proc.mi11_ic   = 1;  
             obj.proc.pi11_ic   = 1;  
-            obj.proc.mi112_ic  = 1;  
-            obj.proc.pi112_ic  = 1;  
+            obj.proc.mi112_ic  = 0;
+            obj.proc.pi112_ic  = 0;
             obj.proc.mm2_ic    = 1;  
             obj.proc.pm2_ic    = 1;  
-            obj.proc.mi22_ic   = 1;  
+            obj.proc.mi22_ic   = 1;
             obj.proc.pi22_ic   = 1;  
-            obj.proc.mi212_ic  = 1;  
-            obj.proc.pi212_ic  = 1;  
+            obj.proc.mi212_ic  = 0;
+            obj.proc.pi212_ic  = 0;
          else
             obj.proc.mmg_ic    = 0;  
             obj.proc.pmg_ic    = 0;  
@@ -497,14 +497,14 @@ classdef chi_processing_flags
             obj.proc.pm1    = 1;  
             obj.proc.mi11   = 1;  
             obj.proc.pi11   = 1;  
-            obj.proc.mi112  = 1;  
-            obj.proc.pi112  = 1;  
+            obj.proc.mi112  = 0;
+            obj.proc.pi112  = 0;
             obj.proc.mm2    = 1;  
             obj.proc.pm2    = 1;  
             obj.proc.mi22   = 1;  
             obj.proc.pi22   = 1;  
-            obj.proc.mi212  = 1;  
-            obj.proc.pi212  = 1;  
+            obj.proc.mi212  = 0;
+            obj.proc.pi212  = 0;
          else
             obj.proc.mmg    = 0;  
             obj.proc.pmg    = 0;  
@@ -539,18 +539,18 @@ classdef chi_processing_flags
             obj.proc.pm1       = 1;  
             obj.proc.mi11      = 1;  
             obj.proc.pi11      = 1;  
-            obj.proc.mi112     = 1;  
-            obj.proc.pi112     = 1;  
-            obj.proc.mi212     = 1;  
-            obj.proc.pi212     = 1;  
+            obj.proc.mi112     = 0;
+            obj.proc.pi112     = 0;
+            obj.proc.mi212     = 0;
+            obj.proc.pi212     = 0;
             obj.proc.mm1_ic    = 1;  
             obj.proc.pm1_ic    = 1;  
             obj.proc.mi11_ic   = 1;  
             obj.proc.pi11_ic   = 1;  
-            obj.proc.mi112_ic  = 1;  
-            obj.proc.pi112_ic  = 1;  
-            obj.proc.mi212_ic  = 1;  
-            obj.proc.pi212_ic  = 1;  
+            obj.proc.mi112_ic  = 0;
+            obj.proc.pi112_ic  = 0;
+            obj.proc.mi212_ic  = 0;
+            obj.proc.pi212_ic  = 0;
 
          else
             obj.proc.mm1       = 0;  
@@ -581,22 +581,22 @@ classdef chi_processing_flags
          obj.master.T2 = a;
 
          if(a==1) 
-            obj.proc.mi112     = 1;  
-            obj.proc.pi112     = 1;  
+            obj.proc.mi112     = 0;
+            obj.proc.pi112     = 0;
             obj.proc.mm2       = 1;  
             obj.proc.pm2       = 1;  
             obj.proc.mi22      = 1;  
             obj.proc.pi22      = 1;  
-            obj.proc.mi212     = 1;  
-            obj.proc.pi212     = 1;  
-            obj.proc.mi112_ic  = 1;  
-            obj.proc.pi112_ic  = 1;  
+            obj.proc.mi212     = 0;
+            obj.proc.pi212     = 0;
+            obj.proc.mi112_ic  = 0;
+            obj.proc.pi112_ic  = 0;
             obj.proc.mm2_ic    = 1;  
             obj.proc.pm2_ic    = 1;  
             obj.proc.mi22_ic   = 1;  
             obj.proc.pi22_ic   = 1;  
-            obj.proc.mi212_ic  = 1;  
-            obj.proc.pi212_ic  = 1;  
+            obj.proc.mi212_ic  = 0;
+            obj.proc.pi212_ic  = 0;
          else
             obj.proc.mi112     = 0;  
             obj.proc.pi112     = 0;  
@@ -630,22 +630,22 @@ classdef chi_processing_flags
             obj.proc.pig       = 1;  
             obj.proc.mi11      = 1;  
             obj.proc.pi11      = 1;  
-            obj.proc.mi112     = 1;  
-            obj.proc.pi112     = 1;  
+            obj.proc.mi112     = 0;
+            obj.proc.pi112     = 0;
             obj.proc.mi22      = 1;  
             obj.proc.pi22      = 1;  
-            obj.proc.mi212     = 1;  
-            obj.proc.pi212     = 1;  
+            obj.proc.mi212     = 0;
+            obj.proc.pi212     = 0;
             obj.proc.mig_ic    = 1;  
             obj.proc.pig_ic    = 1;  
             obj.proc.mi11_ic   = 1;  
             obj.proc.pi11_ic   = 1;  
-            obj.proc.mi112_ic  = 1;  
-            obj.proc.pi112_ic  = 1;  
+            obj.proc.mi112_ic  = 0;
+            obj.proc.pi112_ic  = 0;
             obj.proc.mi22_ic   = 1;  
             obj.proc.pi22_ic   = 1;  
-            obj.proc.mi212_ic  = 1;  
-            obj.proc.pi212_ic  = 1;  
+            obj.proc.mi212_ic  = 0;
+            obj.proc.pi212_ic  = 0;
             
             obj.master.pumped  = 1;
          else

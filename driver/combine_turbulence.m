@@ -10,6 +10,14 @@ close all;
 %_____________________set flags______________________
    do_combine  =  1; % do actually the averaging calculation (can take a couple o minutes)
    do_plot     =  1; % generate a comparison plot between the different estimates 
+   do_mask     =  1; % NaN chi estimates using min dTdz, speed thresholds
+
+   % set thresholds for masking
+   min_dTdz = 1e-4;
+   min_spd = 0.05;
+   mask_dTdz = 'i'; % 'm' for mooring, 'i' for internal
+
+   avgwindow = 600; % averaging window in seconds
 
    % if you want to restrict the time range that should be combined use the following
    time_range(1)  = datenum(2000, 1, 1, 0, 0, 0); 
@@ -24,11 +32,6 @@ close all;
 
 
 
-
-
-
-
-
 %_____________________include path of processing flies______________________
 addpath(genpath('./chipod_gust/software/'));% include  path to preocessing routines
 
@@ -38,6 +41,21 @@ addpath(genpath('./chipod_gust/software/'));% include  path to preocessing routi
    basedir =   here(1:(end-6));    % substract the mfile folder
    savedir =   [basedir 'proc/'];  % directory directory to save data
    unit    = chi_get_unit_name(basedir); % get unit name
+
+if do_mask
+    if mask_dTdz == 'm'
+        disp('masking using mooring dTdz')
+        load([basedir 'input/dTdz_m.mat'])
+        Tz = Tz_m;
+        clear Tz_m;
+
+    elseif mask_dTdz == 'i'
+        disp('masking using internal dTdz')
+        load([basedir 'input/dTdz_i.mat'])
+        Tz = Tz_i;
+        clear Tz_i;
+    end
+end
 
 %_____________________find all available chi data______________________
 if(do_combine)
@@ -63,12 +81,35 @@ if(do_combine)
          % find desired time range
          iiTrange = find( chi.time>= time_range(1) & chi.time<= time_range(2) );
 
+         if do_mask & ~exist('full_mask', 'var')
+             % only need to setup mask once
+             if mask_dTdz == 'i'
+                 % choose appropriate internal stratification for sensor
+                 Tz.Tz = Tz.(['Tz' ID(7)']);
+             end
+             Tzmask = interp1(Tz.time, Tz.Tz, chi.time(iiTrange));
+             percent_mask_dTdz = sum(abs(Tzmask) < min_dTdz)/length(chi.time(iiTrange))*100;
+             percent_mask_spd = sum(chi.spd < min_spd)/length(chi.time(iiTrange))*100;
+
+             disp([' dTdz will mask ' num2str(percent_mask_dTdz, '%.2f') ...
+                   ' % of estimates'])
+             disp([' speed will mask ' num2str(percent_mask_spd, '%.2f') ...
+                   '% of estimates'])
+
+             full_mask = (abs(Tzmask) < min_dTdz) | (chi.spd < min_spd);
+         end
+
          % get list of all fields to average
          ff = fields(chi);
 
          if isempty(ic_test) % not inertial convective estimate
             %% average data
-            ww =  round(600*diff(chi.time(1:2))*3600*24); % averaging window
+            % convert averaging window from seconds to points
+            ww =  round(avgwindow/(diff(chi.time(1:2))*3600*24));
+
+            % NaN out some chi estimates based on min_dTz, min_spd
+            chi.chi(full_mask) = NaN;
+            chi.mask = chi.mask | ~full_mask;
 
             for f = 1:length(ff)  % run through all fields in chi
                if ( length(chi.(ff{f})) == length(chi.time) )
@@ -96,7 +137,10 @@ if(do_combine)
       end
    end
 
-
+   Turb.do_mask = do_mask;
+   Turb.mask_dTdz = mask_dTdz;
+   Turb.min_dTdz = min_dTdz;
+   Turb.min_spd = min_spd;
    %---------------------add readme----------------------
    Turb.readme = {...
          '------------------sub-fields--------------------'; ...
@@ -145,6 +189,7 @@ if do_plot
          
          a=1;
          for f = 1:length(ff)
+            if ~isstruct(Turb.(ff{f})), continue; end
             pj = f; p(pj) = plot(ax(a), Turb.(ff{f}).time, Turb.(ff{f}).chi, 'color', [col(pj,:) 1], 'Linewidth', 1);
          end
          t = text_corner(ax(a), ['\chi [K^2/s]'], 1);
@@ -154,6 +199,7 @@ if do_plot
          
          a=2;
          for f = 1:length(ff)
+            if ~isstruct(Turb.(ff{f})) == 1, continue; end
             pj = f; p(pj) = plot(ax(a), Turb.(ff{f}).time, Turb.(ff{f}).eps, 'color', [col(pj,:) 1], 'Linewidth', 1);
          end
          t = text_corner(ax(a), ['\epsilon [m^2/s^3]'], 1);
@@ -164,6 +210,7 @@ if do_plot
          
          a=3;
          for f = 1:length(ff)
+            if ~isstruct(Turb.(ff{f})) == 1, continue; end
             pj = f; p(pj) = plot(ax(a), Turb.(ff{f}).time, Turb.(ff{f}).N2, 'color', [col(pj,:) 1], 'Linewidth', 1);
          end
          t = text_corner(ax(a), ['N^2 [s^{-2}]'], 1);
@@ -174,6 +221,7 @@ if do_plot
 
          a=4;
          for f = 1:length(ff)
+            if ~isstruct(Turb.(ff{f})) == 1, continue; end
             pj = f; p(pj) = plot(ax(a), Turb.(ff{f}).time, Turb.(ff{f}).spd, 'color', [col(pj,:) 1], 'Linewidth', 1);
          end
          t = text_corner(ax(a), ['|u| [m/s]'], 1);
@@ -198,6 +246,7 @@ if do_plot
          yl = log10(get(ax(a), 'Ylim'));
          bins = yl(1):diff(yl)/100:yl(2);
          for f = 1:length(ff)
+            if ~isstruct(Turb.(ff{f})) == 1, continue; end
             [Nchi,~] = histcounts( log10(Turb.(ff{f}).chi) , bins);
             pj = f; p(pj) = plot(axh(a), Nchi , bins(1:end-1)+diff(bins(1:2)*.5), 'color', [col(pj,:) 1], 'Linewidth', 1);
          end
@@ -209,6 +258,7 @@ if do_plot
          yl = log10(get(ax(a), 'Ylim'));
          bins = yl(1):diff(yl)/100:yl(2);
          for f = 1:length(ff)
+            if ~isstruct(Turb.(ff{f})) == 1, continue; end
             [Nchi,~] = histcounts( log10(Turb.(ff{f}).eps) , bins);
             pj = f; p(pj) = plot(axh(a), Nchi , bins(1:end-1)+diff(bins(1:2)*.5), 'color', [col(pj,:) 1], 'Linewidth', 1);
          end
@@ -223,6 +273,7 @@ if do_plot
       
 
          for f = 1:length(ff)
+            if ~isstruct(Turb.(ff{f})) == 1, continue; end
             pj = f; p(pj) = plot(axl, [0 1] ,[0 1], 'color', [col(pj,:) 1], 'Linewidth', 1);
          end
          legend(p, ff);

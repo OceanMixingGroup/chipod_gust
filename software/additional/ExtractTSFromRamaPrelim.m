@@ -2,7 +2,7 @@ function [T1, T2] = ExtractTSFromRamaPrelim(ramaname, ChipodDepth)
 
     rama = load(ramaname);
 
-    [z1,z2] = ChooseDepthLevels(rama.depth, ChipodDepth);
+    [z1,z2] = ChooseDepthLevels(floor(rama.depth), ChipodDepth);
 
     disp(['RamaPrelim: Choosing depths at ' ...
           num2str(rama.depth([z1, z2]), '%d m ')])

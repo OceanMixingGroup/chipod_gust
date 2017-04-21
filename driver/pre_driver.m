@@ -31,6 +31,11 @@ close all;
        rho_tanh_fit = 1; % Use N2 from fitted tanh profile
    end
 
+
+   % chipod location (positive North, East & Down)
+   ChipodLon = 90; ChipodLat = 12; ChipodDepth = 15;
+
+
 %_____________________include path of processing flies______________________
 addpath(genpath('./chipod_gust/software/'));% include  path to preocessing routines
 
@@ -46,9 +51,6 @@ addpath(genpath('./chipod_gust/software/'));% include  path to preocessing routi
    [fids, fdate] = chi_find_rawfiles(basedir);
 
 %_____________________for automated PMEL mooring processing____________
-   % chipod location (positive North, East & Down)
-   ChipodLon = 90; ChipodLat = 12; ChipodDepth = 15;
-
    if use_pmel
        pmeldir = '~/TaoTritonPirataRama/'; % directory with pmel mooring files
                                             % (can obtain an updated copy from ganges)

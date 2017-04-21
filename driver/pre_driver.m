@@ -23,32 +23,20 @@ close all;
                         % mooring data? Use (with caution) when you
                         % have only 1 salinity sensor
 
+
+   % chipod location (positive North, East & Down)
+   ChipodLon = 85.5; ChipodLat = 5; ChipodDepth = 5
+
+%_____________________RAMA preliminary data____________
    use_rama    = 0     % use prelim processed RAMA data
    if use_rama
        RamaPrelimSalCutoff = 1/(1*60*60); % filter cutoff (Hz) for
                                           % filtering prelim RAMA
                                           % salinity data (set NaN to disable)
        rho_tanh_fit = 1; % Use N2 from fitted tanh profile
+       ramaname = '~/rama/RamaPrelimProcessed/RAMA13.mat';
    end
 
-
-   % chipod location (positive North, East & Down)
-   ChipodLon = 90; ChipodLat = 12; ChipodDepth = 15;
-
-
-%_____________________include path of processing flies______________________
-addpath(genpath('./chipod_gust/software/'));% include  path to preocessing routines
-
-
-%____________________set directories______________________    
-   here    =   pwd;                % mfiles folder
-   basedir =   here(1:(end-6));    % substract the mfile folder
-   savedir =   [basedir 'proc/'];  % directory directory to save data
-   unit    = chi_get_unit_name(basedir); % get unit name
-   rawdir       = [basedir filesep 'raw' filesep]; % raw files location
-
-%_____________________get list of all raw data______________________
-   [fids, fdate] = chi_find_rawfiles(basedir);
 
 %_____________________for automated PMEL mooring processing____________
    if use_pmel
@@ -68,10 +56,19 @@ addpath(genpath('./chipod_gust/software/'));% include  path to preocessing routi
        deployEnd = data.datenum(end);
    end
 
-   % use RAMA preliminary data
-   if use_rama
-       ramaname = '~/rama/RamaPrelimProcessed/RAMA13.mat';
-   end
+%_____________________include path of processing flies______________________
+addpath(genpath('./chipod_gust/software/'));% include  path to preocessing routines
+
+
+%____________________set directories______________________    
+   here    =   pwd;                % mfiles folder
+   basedir =   here(1:(end-6));    % substract the mfile folder
+   savedir =   [basedir 'proc/'];  % directory directory to save data
+   unit    = chi_get_unit_name(basedir); % get unit name
+   rawdir       = [basedir filesep 'raw' filesep]; % raw files location
+
+%_____________________get list of all raw data______________________
+   [fids, fdate] = chi_find_rawfiles(basedir);
 
 %%%%%%%%%%%%%%%%%%% temp processing %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%55
 if do_temp

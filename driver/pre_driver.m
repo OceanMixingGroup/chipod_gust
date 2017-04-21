@@ -23,11 +23,13 @@ close all;
                         % mooring data? Use (with caution) when you
                         % have only 1 salinity sensor
 
-   use_rama    = 1;     % use prelim processed RAMA data
-   RamaPrelimSalCutoff = 1/(1*60*60); % filter cutoff (Hz) for
-                                      % filtering prelim RAMA
-                                      % salinity data (set NaN to disable)
-   rho_tanh_fit = 1; % Use N2 from fitted tanh profile
+   use_rama    = 0     % use prelim processed RAMA data
+   if use_rama
+       RamaPrelimSalCutoff = 1/(1*60*60); % filter cutoff (Hz) for
+                                          % filtering prelim RAMA
+                                          % salinity data (set NaN to disable)
+       rho_tanh_fit = 1; % Use N2 from fitted tanh profile
+   end
 
 %_____________________include path of processing flies______________________
 addpath(genpath('./chipod_gust/software/'));% include  path to preocessing routines

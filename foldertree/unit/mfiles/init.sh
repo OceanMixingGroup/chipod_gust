@@ -13,10 +13,10 @@ if [[ $(hostname) == matlab* ]]
 then
       echo You are logged on to the matlab server! 
       echo The github connection will be done via 128.193.69.189
-      ssh   mixing@128.193.69.189 'cd ~/ganges/work/chipod_gust; bash update.sh'
+      ssh   mixing@128.193.65.88 'cd ~/ganges/work/chipod_gust; bash update.sh'
 
       echo The sofware is pulled to the matlab server
-      git clone -o ganges mixing@128.193.69.189:~/ganges/work/chipod_gust
+      git clone -o ganges mixing@128.193.65.88:~/ganges/work/chipod_gust
       cd chipod_gust
       git remote add origin https://github.com/OceanMixingGroup/chipod_gust
       cd ../

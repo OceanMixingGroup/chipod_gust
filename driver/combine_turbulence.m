@@ -13,6 +13,7 @@ close all;
    do_mask     =  1; % NaN chi estimates using min dTdz, speed thresholds
 
    % set thresholds for masking
+   min_N2 = 3e-6;
    min_dTdz = 1e-4;
    min_spd = 0.05;
    mask_dTdz = 'm'; % 'm' for mooring, 'i' for internal
@@ -89,13 +90,17 @@ if(do_combine)
              Tzmask = interp1(Tz.time, Tz.Tz, chi.time(iiTrange));
              percent_mask_dTdz = sum(abs(Tzmask) < min_dTdz)/length(chi.time(iiTrange))*100;
              percent_mask_spd = sum(chi.spd < min_spd)/length(chi.time(iiTrange))*100;
+             percent_mask_N2 = sum(chi.N2 < min_N2)/length(chi.time(iiTrange))*100;
 
              disp([' dTdz will mask ' num2str(percent_mask_dTdz, '%.2f') ...
                    ' % of estimates'])
              disp([' speed will mask ' num2str(percent_mask_spd, '%.2f') ...
                    '% of estimates'])
+             disp([' N2 will mask ' num2str(percent_mask_N2, '%.2f') ...
+                   ' % of estimates'])
 
-             full_mask = (abs(Tzmask) < min_dTdz) | (chi.spd < min_spd);
+             full_mask = (abs(Tzmask) < min_dTdz) ...
+                 | (chi.spd < min_spd) | (chi.N2 < min_N2);
          end
 
          % get list of all fields to average
@@ -140,6 +145,7 @@ if(do_combine)
    Turb.mask_dTdz = mask_dTdz;
    Turb.min_dTdz = min_dTdz;
    Turb.min_spd = min_spd;
+   Turb.min_N2 = min_N2;
    %---------------------add readme----------------------
    Turb.readme = {...
          '------------------sub-fields--------------------'; ...

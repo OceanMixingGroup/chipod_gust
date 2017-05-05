@@ -16,8 +16,14 @@ close all;
    min_N2 = 1e-6;
    min_dTdz = 1e-4;
    min_spd = 0.05;
-   mask_dTdz = 'm'; % 'm' for mooring, 'i' for internal
-   mask_spd = ''; % 'm' for mooring, 'p' for pitot,
+   min_inst_spd = min_spd; % min instantaneous speed past sensor
+   mask_dTdz = 'i'; % 'm' for mooring, 'i' for internal
+   mask_inst_spd = 1; % estimates are crappy if sensor isn't moving
+                      % enough.
+                      % screws the spectrum calculation...
+   mask_spd = ''; % masking such that background flow flushes
+                  % sensed water volume
+                  % 'm' for mooring, 'p' for pitot,
                   % '' to choose based on what was used in chi estimate
 
    avgwindow = 600; % averaging window in seconds
@@ -86,8 +92,8 @@ if(do_combine)
          iiTrange = find( chi.time>= time_range(1) & chi.time<= time_range(2) );
 
          if do_mask
-             % only need to setup stratification mask once
-             if ~exist('strat_mask', 'var')
+             % only need to setup these masks once
+             if ~exist('const_mask', 'var')
                  if mask_dTdz == 'i'
                      % choose appropriate internal stratification for sensor
                      Tz.Tz = Tz.(['Tz' ID(7)']);
@@ -97,13 +103,18 @@ if(do_combine)
 
                  percent_mask_dTdz = sum(abs(Tzmask) < min_dTdz)/length(chi.time(iiTrange))*100;
                  percent_mask_N2 = sum(chi.N2 < min_N2)/length(chi.time(iiTrange))*100;
-
+                 percent_mask_inst_spd = sum(chi.spd(iiTrange) < min_inst_spd)/length(chi.time(iiTrange))*100;
                  disp([' dTdz will mask ' num2str(percent_mask_dTdz, '%.2f') ...
                        ' % of estimates'])
                  disp([' N2 will mask ' num2str(percent_mask_N2, '%.2f') ...
                        ' % of estimates'])
+                 disp([' Inst speed will mask ' num2str(percent_mask_inst_spd, '%.2f') ...
+                       ' % of estimates'])
 
-                 strat_mask = (abs(Tzmask) < min_dTdz) | (chi.N2 < min_N2);
+
+                 const_mask = (abs(Tzmask) < min_dTdz) ...
+                     | (chi.N2 < min_N2) ...
+                     | (chi.spd < min_inst_spd);
              end
 
              % speed mask could change depending on estimate
@@ -125,7 +136,7 @@ if(do_combine)
              disp([' speed will mask ' num2str(percent_mask_spd, '%.2f') ...
                    '% of estimates'])
 
-             full_mask = strat_mask | (spdmask < min_spd);
+             full_mask = const_mask | (spdmask < min_spd);
          end
 
          % get list of all fields to average
@@ -172,6 +183,7 @@ if(do_combine)
    Turb.mask_dTdz = mask_dTdz;
    Turb.min_dTdz = min_dTdz;
    Turb.min_spd = min_spd;
+   Turb.min_inst_spd = min_inst_spd;
    Turb.min_N2 = min_N2;
    Turb.mask_spd = mask_spd_initial;
    %---------------------add readme----------------------

@@ -216,6 +216,8 @@ if do_dTdz_m
                               use_TS_relation);
       end
 
+      save([basedir filesep 'proc' filesep 'T_m.mat'], ...
+           'T1', 'T2')
 
       %__________________recalculate N^2 using processed mooring salinity____________________
 

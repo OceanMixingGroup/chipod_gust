@@ -176,9 +176,12 @@ if(do_combine)
    Turb.mask_dTdz = mask_dTdz;
    Turb.min_dTdz = min_dTdz;
    Turb.min_spd = min_spd;
+
+   Turb.avgwindow = avgwindow;
    Turb.min_inst_spd = min_inst_spd;
    Turb.min_N2 = min_N2;
    Turb.mask_spd = mask_spd_initial;
+
    %---------------------add readme----------------------
    Turb.readme = {...
          '------------------sub-fields--------------------'; ...

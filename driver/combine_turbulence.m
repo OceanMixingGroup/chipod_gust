@@ -154,6 +154,23 @@ if(do_combine)
              chi.mask = chi.mask | ~full_mask;
          end
 
+         % get list of all fields to average
+         ff = fields(chi);
+
+         if isempty(ic_test) % not inertial convective estimate
+            %% average data
+            % convert averaging window from seconds to points
+            ww =  round(avgwindow/(diff(chi.time(1:2))*3600*24));
+
+            for f = 1:length(ff)  % run through all fields in chi
+               if ( length(chi.(ff{f})) == length(chi.time) )
+
+                  % deglitch chi and eps
+                  if strcmp(ff{f},'eps') | strcmp(ff{f},'chi')
+                     chi.(ff{f}) = deglitch(chi.(ff{f}), ww, 2,'b');
+                  end
+
+
          % convert averaging window from seconds to points
          ww =  round(avgwindow/(diff(chi.time(1:2))*3600*24));
 
@@ -185,9 +202,11 @@ if(do_combine)
    Turb.mask_dTdz = mask_dTdz;
    Turb.min_dTdz = min_dTdz;
    Turb.min_spd = min_spd;
+   Turb.avgwindow = avgwindow;
    Turb.min_inst_spd = min_inst_spd;
    Turb.min_N2 = min_N2;
    Turb.mask_spd = mask_spd_initial;
+
    %---------------------add readme----------------------
    Turb.readme = {...
          '------------------sub-fields--------------------'; ...

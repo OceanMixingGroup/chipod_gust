@@ -13,10 +13,10 @@ function []  = chi_qsum_plot(basedir, vis)
    
 
     fig = figure('Color',[1 1 1],'visible',vis,'Paperunits','centimeters',...
-            'Papersize',[30 20],'PaperPosition',[0 -1 30 20])
+            'Papersize',[30 30],'PaperPosition',[0 -1 30 30])
 
 
-            [ax, ~] = create_axes(fig, 3, 1, 0);
+            [ax, ~] = create_axes(fig, 5, 1, 0);
             
             a = 1;
             pj = 1; p(pj) = plot(ax(a), S.time, S.depth, 'color', [0  0 0 1], 'Linewidth', 2);
@@ -51,6 +51,15 @@ function []  = chi_qsum_plot(basedir, vis)
                t3 = text_corner(ax(a), ['AZ [m s^{-2}]'], 3);
                t3.Color = [col(3,:)];
             
+            a = 4;
+            pj = 1; p(pj) = plot(ax(a), S.time, S.cmp, 'color', [0  0 0 1], 'Linewidth', 2);
+               xlim(ax(a), tl);
+               t = text_corner(ax(a), ['compass [deg]'], 7);
+
+            a = 5;
+            pj = 1; p(pj) = plot(ax(a), S.time, S.W, 'color', [0  0 0 1], 'Linewidth', 2);
+               xlim(ax(a), tl);
+               t = text_corner(ax(a), ['pitot [volt]'], 7);
 
             linkaxes(ax, 'x');   
 

@@ -13,10 +13,18 @@ close all;
    do_mask     =  1; % NaN chi estimates using min dTdz, speed thresholds
 
    % set thresholds for masking
+   min_N2 = 1e-6;
    min_dTdz = 1e-4;
    min_spd = 0.05;
-   mask_dTdz = 'm'; % 'm' for mooring, 'i' for internal
-
+   min_inst_spd = min_spd; % min instantaneous speed past sensor
+   mask_dTdz = 'i'; % 'm' for mooring, 'i' for internal
+   mask_inst_spd = 1; % estimates are crappy if sensor isn't moving
+                      % enough.
+                      % screws the spectrum calculation...
+   mask_spd = ''; % masking such that background flow flushes
+                  % sensed water volume
+                  % 'm' for mooring, 'p' for pitot,
+                  % '' to choose based on what was used in chi estimate
    avgwindow = 600; % averaging window in seconds
 
    % if you want to restrict the time range that should be combined use the following
@@ -55,6 +63,8 @@ if do_mask
         Tz = Tz_i;
         clear Tz_i;
     end
+
+    mask_spd_initial = mask_spd;
 end
 
 %_____________________find all available chi data______________________
@@ -80,59 +90,94 @@ if(do_combine)
          % find desired time range
          iiTrange = find( chi.time>= time_range(1) & chi.time<= time_range(2) );
 
-         if do_mask & ~exist('full_mask', 'var')
-             % only need to setup mask once
+         ChipodDepth = round(chi.depth(1)/100); % in metres
+
+         % read in mooring salinity & calculate rho, cp
+         if ~exist('Smean', 'var')
+             try
+                 load ../proc/T_m.mat
+                 Smean = (T1.S .* abs(T2.z-ChipodDepth) ...
+                          + T2.S .* abs(T1.z-ChipodDepth)) ./ abs(T1.z-T2.z);
+                 Smean = interp1(T1.time, Smean, chi.time(iiTrange));
+                 chi.S = Smean;
+             end
+             rho = sw_pden(Smean, chi.T, ChipodDepth, 0);
+             cp = sw_cp(Smean, chi.T, ChipodDepth);
+         end
+
+         if do_mask
              if mask_dTdz == 'i'
                  % choose appropriate internal stratification for sensor
                  Tz.Tz = Tz.(['Tz' ID(7)']);
              end
-             Tzmask = interp1(Tz.time, Tz.Tz, chi.time(iiTrange));
-             percent_mask_dTdz = sum(abs(Tzmask) < min_dTdz)/length(chi.time(iiTrange))*100;
-             percent_mask_spd = sum(chi.spd < min_spd)/length(chi.time(iiTrange))*100;
 
+             Tzmask = interp1(Tz.time, Tz.Tz, chi.time(iiTrange));
+
+             percent_mask_dTdz = sum(abs(Tzmask) < min_dTdz)/length(chi.time(iiTrange))*100;
+             percent_mask_N2 = sum(chi.N2 < min_N2)/length(chi.time(iiTrange))*100;
+             percent_mask_inst_spd = sum(chi.spd(iiTrange) < min_inst_spd)/length(chi.time(iiTrange))*100;
              disp([' dTdz will mask ' num2str(percent_mask_dTdz, '%.2f') ...
                    ' % of estimates'])
+             disp([' N2 will mask ' num2str(percent_mask_N2, '%.2f') ...
+                   ' % of estimates'])
+             disp([' Inst speed will mask ' num2str(percent_mask_inst_spd, '%.2f') ...
+                   ' % of estimates'])
+
+             % speed mask could change depending on estimate
+             if strcmpi(mask_spd_initial, '')
+                 mask_spd = ID(5);
+             end
+
+             if mask_spd == 'm' & ~exist('vel_m', 'var')
+                 load ../input/vel_m.mat
+                 vel = vel_m;
+                 disp('masking using mooring speed');
+             elseif mask_spd == 'p' & ~exist('vel_p', 'var')
+                 load ../input/vel_p.mat
+                 vel = vel_p;
+                 disp('masking using pitot speed');
+             end
+             spdmask = interp1(vel.time, vel.spd, chi.time(iiTrange));
+             percent_mask_spd = sum(spdmask < min_spd)/length(chi.time(iiTrange))*100;
              disp([' speed will mask ' num2str(percent_mask_spd, '%.2f') ...
                    '% of estimates'])
 
-             full_mask = (abs(Tzmask) < min_dTdz) | (chi.spd < min_spd);
+             full_mask = (abs(Tzmask) < min_dTdz) ...
+                 | (chi.N2 < min_N2) ...
+                 | (chi.spd < min_inst_spd) ...
+                 | (spdmask < min_spd);
          end
+
+         % NaN out some chi estimates based on min_dTz, min_spd
+         if do_mask
+             chi.chi(full_mask) = NaN;
+             chi.mask = chi.mask | ~full_mask;
+         end
+
+         % convert averaging window from seconds to points
+         ww =  round(avgwindow/(diff(chi.time(1:2))*3600*24));
+
+         if isempty(ic_test)
+             % deglitch chi and eps before
+             % calculating Jq and Kt
+             % not required for IC estimate because that is already
+             % an averaged estimate
+             chi.chi = deglitch(chi.chi, ww, 2,'b');
+             chi.eps = deglitch(chi.eps, ww, 2, 'b');
+         end
+
+         chi.Kt = 0.5 * chi.chi ./ chi.dTdz.^2;
+         chi.Jq = -rho .* cp .* chi.Kt .* chi.dTdz;
 
          % get list of all fields to average
          ff = fields(chi);
 
-         if isempty(ic_test) % not inertial convective estimate
-            %% average data
-            % convert averaging window from seconds to points
-            ww =  round(avgwindow/(diff(chi.time(1:2))*3600*24));
-
-            % NaN out some chi estimates based on min_dTz, min_spd
-            chi.chi(full_mask) = NaN;
-            chi.mask = chi.mask | ~full_mask;
-
-            for f = 1:length(ff)  % run through all fields in chi
-               if ( length(chi.(ff{f})) == length(chi.time) )
-
-                  % deglitch chi and eps
-                  if strcmp(ff{f},'eps') | strcmp(ff{f},'chi')
-                     chi.(ff{f}) = deglitch(chi.(ff{f}), ww, 2,'b');
-                  end
-
-
-                  Turb.(ID).(ff{f}) = moving_average( chi.(ff{f})(iiTrange), ww, ww );
-               end
-            end
-
-         else % IC estimate is already time averaged
-
-            for f = 1:length(ff)  % run through all fields in chi
-               if ( length(chi.(ff{f})) == length(chi.time) )
-                  Turb.(ID).(ff{f}) = chi.(ff{f})(iiTrange);
-               end
-            end
-
+         %% average data
+         for f = 1:length(ff)  % run through all fields in chi
+             if ( length(chi.(ff{f})) == length(chi.time) )
+                 Turb.(ID).(ff{f}) = moving_average( chi.(ff{f})(iiTrange), ww, ww );
+             end
          end
-
       end
    end
 
@@ -140,6 +185,9 @@ if(do_combine)
    Turb.mask_dTdz = mask_dTdz;
    Turb.min_dTdz = min_dTdz;
    Turb.min_spd = min_spd;
+   Turb.min_inst_spd = min_inst_spd;
+   Turb.min_N2 = min_N2;
+   Turb.mask_spd = mask_spd_initial;
    %---------------------add readme----------------------
    Turb.readme = {...
          '------------------sub-fields--------------------'; ...

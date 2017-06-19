@@ -55,7 +55,7 @@ function [Tz_m] = chi_generate_dTdz_m(t1, z1, T1, S1, t2, z2, T2, ...
    dt2 = diff(t2(1:2));
 
    % vertical distance of both sensors in meter
-   dz = abs(z1-z2);
+   dz = nanmean(abs(z1-z2));
 
 %---------------------cal gradient----------------------
    % in case the time series are sampled much quicker then one minute 
@@ -74,6 +74,13 @@ function [Tz_m] = chi_generate_dTdz_m(t1, z1, T1, S1, t2, z2, T2, ...
    T2_int = interp1(t2, T2, time);
    S1_int = interp1(t1, S1, time);
    S2_int = interp1(t2, S2, time);
+
+   if length(z1) ~= 1
+       z1 = interp1(t1, z1, time);
+   end
+   if length(z2) ~= 1
+       z2 = interp1(t2, z2, time);
+   end
 
    % cal temperature gradient
    Tz_m.Tz = (T1_int-T2_int)/dz;

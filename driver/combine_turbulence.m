@@ -31,7 +31,7 @@ close all;
    time_range(1)  = datenum(2000, 1, 1, 0, 0, 0); 
    time_range(2)  = datenum(2030, 1, 1, 0, 0, 0); 
 
-   runname = '2017-04-20';
+   runname = '';
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%% DO NOT CHANGE BELOW %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -218,10 +218,10 @@ if(do_combine)
 
 %_____________________save combined structure______________________
    save([savedir '/Turb.mat'], 'Turb');
-   system(['ln -s ' savedir '/Turb.mat ' savedir ...
-           '../combined/' runname '.mat']);
-
-    
+   if runname ~= ''
+       system(['ln -s ' savedir '/Turb.mat ' savedir ...
+               '../combined/' runname '.mat']);
+   end
 end
 
 %_____________________comparison plot______________________

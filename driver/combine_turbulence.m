@@ -169,7 +169,9 @@ if(do_combine)
                   if strcmp(ff{f},'eps') | strcmp(ff{f},'chi')
                      chi.(ff{f}) = deglitch(chi.(ff{f}), ww, 2,'b');
                   end
-
+               end
+            end
+         end
 
          % convert averaging window from seconds to points
          ww =  round(avgwindow/(diff(chi.time(1:2))*3600*24));
@@ -197,7 +199,6 @@ if(do_combine)
          end
       end
    end
-
    Turb.do_mask = do_mask;
    Turb.mask_dTdz = mask_dTdz;
    Turb.min_dTdz = min_dTdz;

@@ -47,6 +47,8 @@ else     % in cse it is at a differnt depth interpolate
 
    if sz(2) == length(time) % fix dimension order  
        z_adcp = z_adcp';
+   end
+   if size(u,2) == length(time)
        u = u';
        v = v';
    end

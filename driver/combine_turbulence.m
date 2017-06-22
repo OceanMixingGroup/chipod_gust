@@ -27,10 +27,16 @@ close all;
                   % '' to choose based on what was used in chi estimate
    avgwindow = 600; % averaging window in seconds
 
-   % if you want to restrict the time range that should be combined use the following
-   time_range(1)  = datenum(2000, 1, 1, 0, 0, 0); 
-   time_range(2)  = datenum(2030, 1, 1, 0, 0, 0); 
 
+   % if you want to restrict the time range that should be combined
+   % use the following
+   % This restricts time range for BOTH sensors on chipods
+   time_range(1)  = datenum(2000, 1, 1, 0, 0, 0);
+   time_range(2)  = datenum(2030, 1, 1, 0, 0, 0);
+
+   % if on chipod one sensor dies earlier, specify that time here.
+   T1death = datenum(2060, 1, 1, 0, 0, 0);
+   T2death = datenum(2060, 1, 1, 0, 0, 0);
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -49,6 +55,14 @@ addpath(genpath('./chipod_gust/software/'));% include  path to preocessing routi
    basedir =   here(1:(end-6));    % substract the mfile folder
    savedir =   [basedir 'proc/'];  % directory directory to save data
    unit    = chi_get_unit_name(basedir); % get unit name
+
+   % determine if chipod or gusT
+   load ../calib/header.mat
+   if isfield(head.coef, 'T1')
+       isChipod = 1;
+   else
+       isChipod = 0;
+   end
 
 if do_mask
     if mask_dTdz == 'm'
@@ -83,7 +97,7 @@ if(do_combine)
       if ~isempty(mat_test) & ~isempty(chi_test)
 
          ID = d(i).name(1:mat_test-1);
-         disp(['adding ' ID ]);
+         disp(['----------> adding ' ID ]);
          load([basedir '/proc/chi/' ID '.mat'])
          
          % find desired time range
@@ -164,6 +178,26 @@ if(do_combine)
              % an averaged estimate
              chi.chi = deglitch(chi.chi, ww, 2,'b');
              chi.eps = deglitch(chi.eps, ww, 2, 'b');
+         end
+
+         if isChipod
+             if ID(end) == '1' % sensor T1
+                 death = find(chi.time > T1death, 1, 'first');
+                 if ~isempty(death)
+                     disp(['NaNing out sensor T1 after it died on ' datestr(T1death)])
+                     chi.chi(death:end) = NaN;
+                     chi.eps(death:end) = NaN;
+                 end
+             end
+
+             if ID(end) == '2' % sensor T2
+                 death = find(chi.time > T2death, 1, 'first');
+                 if ~isempty(death)
+                     disp(['NaNing out sensor T2 after it died on ' datestr(T2death)])
+                     chi.chi(death:end) = NaN;
+                     chi.eps(death:end) = NaN;
+                 end
+             end
          end
 
          chi.Kt = 0.5 * chi.chi ./ chi.dTdz.^2;
@@ -287,10 +321,10 @@ if do_plot
       squeeze_axes(ax, .8, 1)
 
       pos = get(ax(1), 'Position');
-      axh(1) = axes('Position', [ pos(1)+pos(3) pos(2) 1-pos(3)-pos(1)-.01 pos(4)] ) 
+      axh(1) = axes('Position', [ pos(1)+pos(3) pos(2) 1-pos(3)-pos(1)-.01 pos(4)] );
       
       pos = get(ax(2), 'Position');
-      axh(2) = axes('Position', [ pos(1)+pos(3) pos(2) 1-pos(3)-pos(1)-.01 pos(4)] ) 
+      axh(2) = axes('Position', [ pos(1)+pos(3) pos(2) 1-pos(3)-pos(1)-.01 pos(4)] );
 
          a=1;
          hold(axh(a),'all');
@@ -319,7 +353,7 @@ if do_plot
 
    %---------------------legend----------------------
       pos = get(ax(3), 'Position');
-      axl = axes('Position', [ pos(1)+pos(3) pos(2) 1-pos(3)-pos(1)-.01 pos(4)] ) 
+      axl = axes('Position', [ pos(1)+pos(3) pos(2) 1-pos(3)-pos(1)-.01 pos(4)] );
       hold(axl,'on');
       
 

@@ -105,5 +105,13 @@ function [Tz_m] = chi_generate_dTdz_m(t1, z1, T1, S1, t2, z2, T2, ...
 
    Tz_m.time  = time;
 
+   figure;
+   plot(Tz_m.time, Tz_m.N2); hold on;
+   plot(Tz_m.time(Tz_m.N2 < 0), Tz_m.N2(Tz_m.N2 < 0));
+   plot(xlim, [0, 0], '--', 'color', [1 1 1]*0.6);
+   ylabel('N^2')
+   title('Negative N^2 in red')
+   datetick
+
 %---------------------save----------------------
    save([sdir 'dTdz_m.mat'], 'Tz_m');

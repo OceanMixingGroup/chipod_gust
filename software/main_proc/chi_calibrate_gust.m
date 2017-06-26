@@ -59,6 +59,9 @@ function [data] = chi_calibrate_gust(rfid, head)
 
    % compass
          chi.cmp      = rdat.compass;
+            chi.cmp              = chi.cmp + head.coef.CMP(1);
+            chi.cmp(chi.cmp>360) = chi.cmp(chi.cmp>360)-360;
+            chi.cmp(chi.cmp<0)   = chi.cmp(chi.cmp<0)+360;
          chi.pitch    = rdat.pitch;
          chi.roll     = rdat.roll;
       

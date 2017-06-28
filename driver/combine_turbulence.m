@@ -252,7 +252,7 @@ if(do_combine)
 
 %_____________________save combined structure______________________
    save([savedir '/Turb.mat'], 'Turb');
-   if runname ~= ''
+   if length(runname) ~= 0
        system(['ln -s ' savedir '/Turb.mat ' savedir ...
                '../combined/' runname '.mat']);
    end

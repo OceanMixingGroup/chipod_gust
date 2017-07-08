@@ -11,6 +11,9 @@ function [T] = rawload_solo(fid)
 %     T.time   :  matlab time
 %     T.T      :  temperature
 %
+%
+%  !!!! NOTE this function requirres MATLAB2016a or newer!!!!
+%
 %   created by: 
 %        Johannes Becherer
 %        Sat Jul  8 00:13:24 GMT 2017
@@ -18,7 +21,7 @@ function [T] = rawload_solo(fid)
 
 if nargin<1
     [raw_name,rawdir]=uigetfile('*.*','Load Binary File');
-    fid=[temp raw_name];
+    fid=[rawdir raw_name];
     if raw_name==0
         error('File not found')
         return
@@ -33,7 +36,7 @@ db1 = sqlite(fid);
 data = fetch(db1,'select * from data');
 
 % temperature
-T.T    = double(cell2mat(data(:,2));
+T.T    = double(cell2mat(data(:,2)));
 
 % convert unix time from t logger into matlab time
-T.time = datenum(1970,1,1,0,0,double(cell2mat(data(:,1))/1000)));
+T.time = datenum(1970,1,1,0,0,double(cell2mat(data(:,1))/1000));

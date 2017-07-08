@@ -43,3 +43,8 @@ timetmp = datenum(1970,1,1,0,0,double(cell2mat(data(:,1))/1000));
 ttmp    = double(cell2mat(data(:,2)));
 T.T     = ttmp(ii);
 
+% get_instrument specifics
+inst = fetch(db1, 'SELECT serialID, model FROM instruments');
+
+T.sn = inst(1,1);
+T.model = inst(1,2);

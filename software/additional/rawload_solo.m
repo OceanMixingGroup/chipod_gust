@@ -35,8 +35,11 @@ db1 = sqlite(fid);
 % get data block
 data = fetch(db1,'select * from data');
 
-% temperature
-T.T    = double(cell2mat(data(:,2)));
-
 % convert unix time from t logger into matlab time
-T.time = datenum(1970,1,1,0,0,double(cell2mat(data(:,1))/1000));
+timetmp = datenum(1970,1,1,0,0,double(cell2mat(data(:,1))/1000));
+[T.time, ii]  = sort(timetmp); % the data require chronological sorting
+
+% temperature
+ttmp    = double(cell2mat(data(:,2)));
+T.T     = ttmp(ii);
+

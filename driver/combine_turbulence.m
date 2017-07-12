@@ -396,3 +396,12 @@ if do_plot
    print(gcf,'../pics/Compare_Turb.png','-dpng','-r200','-painters')
    
 end
+
+
+% Examples of using TestMask and DebugPlots to check masking
+% TestMask(chi, abs(chi.dTdz), '<', [1e-4, 3e-4, 1e-3], 'Tz', iiTrange);
+% t0 = datenum(2014, 01, 01);
+% t1 = datenum(2014, 03, 01);
+% DebugPlots([], t0, t1, chi, 'raw', 1)
+% chi1 = ApplyMask(chi, abs(chi.dTdz), '<', 3e-4, 'T_z', iiTrange);
+% DebugPlots([], t0, t1, chi1, 'T_z > 3e-4', 1)

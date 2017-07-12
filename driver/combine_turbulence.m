@@ -27,6 +27,8 @@ close all;
                   % '' to choose based on what was used in chi estimate
    avgwindow = 600; % averaging window in seconds
 
+   ChipodDepth = 30;
+
    % if you want to restrict the time range that should be combined
    % use the following
    % This restricts time range for BOTH sensors on chipods
@@ -102,19 +104,16 @@ if(do_combine)
          load([dirname ID '.mat'])
 
          % find desired time range
-         iiTrange = find( chi.time>= time_range(1) & chi.time<= time_range(2) );
-
-         ChipodDepth = round(nanmean(chi.depth(iiTrange))); % in metres
+         iiTrange = find( chi.time >= time_range(1) & chi.time<= time_range(2) );
 
          % read in mooring salinity & calculate rho, cp
          if ~exist('Smean', 'var')
              try
                  load ../proc/T_m.mat
-                 Smean = (T1.S .* abs(nanmean(T2.z)-ChipodDepth) ...
-                          + T2.S .* abs(nanmean(T1.z)-ChipodDepth)) ...
-                         ./ abs(nanmean(T1.z)-nanmean(T2.z));
-                 Smean = interp1(T1.time, Smean, chi.time);
+                 Smean = interp1(T1.time, (T1.S + T2.S)/2, chi.time);
                  chi.S = Smean;
+             catch ME
+                 Smean = 35*ones(size(chi.time));
              end
              rho = sw_pden(Smean, chi.T, ChipodDepth, 0);
              cp = sw_cp(Smean, chi.T, ChipodDepth);

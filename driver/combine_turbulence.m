@@ -172,6 +172,46 @@ if(do_combine)
              end
              spdmask = interp1(vel.time, vel.spd, chi.time);
 
+             % histograms for speed-based masking
+             if do_plot & exist('../proc/temp.mat', 'file')
+                 load ../proc/temp.mat
+                 load ../input/vel_m.mat
+                 figure('Color',[1 1 1],'visible','on', 'Position', ...
+                        [100 100 900 900]);
+
+                 dt = diff(T.time(1:2))*86400;
+                 trange = [find_approx(T.time, time_range(1)):find_approx(T.time, time_range(2))];
+                 subplot(211)
+                 histogram(T.a_vel_x(trange), 'normalization' ,'pdf');
+                 hold on;
+                 histogram(hypot(T.a_vel_x(trange), T.a_vel_y(trange)), 'normalization' ,'pdf');
+                 histogram(T.a_vel_z(trange), 'normalization' ,'pdf');
+
+                 trange2 = [find_approx(vel_m.time, time_range(1)):find_approx(vel_m.time, time_range(2))];
+                 histogram(vel_m.spd(trange2), 'normalization' ,'pdf')
+                 plot([1 1]*min_spd, ylim, 'k--');
+                 set(gca, 'XTick', sort([min_spd get(gca, 'XTick')]));
+                 ylim([0 20]); xlim([-0.25 1]*0.7*max(vel_m.spd))
+                 xlabel('m/s')
+                 ylabel('PDF')
+                 legend('v_x', '|v_x + v_y|', 'v_z', 'background flow', 'min. spd criterion');
+                 dt2 = diff(vel_m.time(1:2))*86400/60;
+                 title([ID(5:end) ' | ' num2str(round(dt)) 's avg for v_* | ' ...
+                        num2str(round(dt2)) 'minutes \Deltat for background'])
+
+                 subplot(212)
+                 histogram(log10(chi.eps(iiTrange)), 'normalization', 'pdf')
+                 hold on;
+                 histogram(log10(chi.eps(spdmask(iiTrange) < min_spd)), 'normalization', 'pdf')
+                 ylabel('PDF')
+                 xlabel('log_{10} \epsilon')
+                 xlim([-14 5])
+                 legend('raw', ['background flow < ' num2str(min_spd) 'm/s']);
+
+                 print(gcf,['../pics/velocity-masking-' ID(5:end) '.png'],'-dpng','-r200','-painters')
+             end
+
+
              chi = ApplyMask(chi, abs(chi.dTdz), '<', min_dTdz, 'Tz', iiTrange);
              if do_plot, Histograms(chi, hfig, normstr, 'Tz'); end
 

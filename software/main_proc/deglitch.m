@@ -29,12 +29,12 @@ try
         xd = xd';
     end
 
-    sd = movstd(xd, npts, 'omitnan');
-    mn = movmean(xd, npts, 'omitnan');
+    sd = movstd(xd, npts, 'omitnan', 'endpoints', 'discard');
+    mn = movmean(xd, npts, 'omitnan', 'endpoints', 'discard');
 
     % decimate to duplicate results of older version
-    sd = sd(floor(npts/2):npts:end);
-    mn = mn(floor(npts/2):npts:end);
+    sd = sd(1:npts:end);
+    mn = mn(1:npts:end);
 
     % make a 2d matrix and then flatten it to get mean, std in the
     % right places.
@@ -89,6 +89,4 @@ else
 end
 xs(id)=NaN;
 xd(np*nt+1:len)=xs;
-mnvec(np*nt+1:len)=xm;
-
 if size(xd,1)~=size(x,1); xd=xd'; end

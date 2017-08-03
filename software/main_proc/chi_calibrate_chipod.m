@@ -30,29 +30,70 @@ if ~isequal(head.coef, headtest.coef)
    disp(' ');
 end
 
+%_____________________Syncronize time______________________
+   % data on Tp time stemp (datenum, T1P, T2P)
+   %         T1 time stemp (T1, T2, AX, AY, AZ, W, WP. P)
+   %         CMP time stemp (CMP)
+
+   % time vector
+      chi.time_tp  = rdat.datenum;
+         % remove bad time glitches
+         Ntp   = length(chi.time_tp); 
+         Itp   = 1:Ntp;
+         Ibad  = ( chi.time_tp<(nanmedian(chi.time_tp)-1) |...
+                        chi.time_tp>(nanmedian(chi.time_tp)+1) | isnan(chi.time_tp) );    % usually time glitches are more than one day off
+         if ~isempty(Ibad)
+            chi.time_tp(Ibad) =  interp1( Itp(~Ibad), chi.time_tp(~Ibad), Itp(Ibad), 'linear','extrap');
+         end
+         % glitch data are also bad in the Tp signal 
+         rdat.T1P(Ibad) = nan; 
+         rdat.T2P(Ibad) = nan; 
+         % other signals are also glitched with 0 values 
+
+      % syncronize time by making Tp time step must be divdable by 20 to get syncronized times 
+      chi.time_tp  = chi.time_tp(1:(floor(Ntp/20)*20));
+         Ntp   = length(chi.time_tp); 
+      chi.time     = chi.time_tp(1:2:end);
+         Nt = length(chi.time);
+      chi.time_cmp = chi.time(1:10:end);
+         Ntc = length(chi.time_cmp);
 %_____________________calibrate data______________________
 
 
    % tempertuare
       chi.T1=calibrate_polynomial(rdat.T1,head.coef.T1);
       chi.T2=calibrate_polynomial(rdat.T2,head.coef.T2);
+         % remove glitches
+         chi.T1(chi.T1==0) = nan;
+         chi.T2(chi.T2==0) = nan;
+         % time sync
+         chi.T1 = chi.T1(1:Nt);
+         chi.T2 = chi.T2(1:Nt);
    % pressure
       chi.P=calibrate_polynomial(rdat.P,head.coef.P);
-      chi.depth = (chi.P-14.7)/1.47;
+         % remove glitches
+         chi.P(chi.P==0) = nan;
+         % time sync
+         chi.P = chi.P(1:Nt);
 
-   % time vector
-      chi.time    = rdat.datenum(1:2:end);
-      chi.time_tp  = rdat.datenum;
-      chi.time_cmp = chi.time(1:10:end);
+
       
    % accelerometer
          g=9.81;
          chi.AX=g.*calibrate_polynomial(rdat.AX,head.coef.AX);
          chi.AY=g.*calibrate_polynomial(rdat.AY,head.coef.AY);
          chi.AZ=g.*calibrate_polynomial(rdat.AZ,head.coef.AZ);
-          chi.AX=fillgap(chi.AX);
-          chi.AY=fillgap(chi.AY);
-          chi.AZ=fillgap(chi.AZ);
+            % remove glitched data
+            chi.AX(chi.AX==0) = nan;
+            chi.AY(chi.AY==0) = nan;
+            chi.AZ(chi.AZ==0) = nan;
+             chi.AX=fillgap(chi.AX);
+             chi.AY=fillgap(chi.AY);
+             chi.AZ=fillgap(chi.AZ);
+            % time sync
+            chi.AX = chi.AX(1:Nt);
+            chi.AY = chi.AY(1:Nt);
+            chi.AZ = chi.AZ(1:Nt);
           [dis,vel]=integrate_acc(chi,head);
 
           chi.Acc = sqrt((chi.AX-nanmean(chi.AX)).^2 + (chi.AY-nanmean(chi.AY)).^2 + (chi.AZ-nanmean(chi.AZ)).^2 );
@@ -71,12 +112,21 @@ end
    % compass
          chi.cmp = rdat.CMP/10+head.coef.CMP(1);
          % In case time_cmp is to long (sometimes its one index to long)
-         chi.time_cmp = chi.time_cmp(1:length(chi.cmp));
+         if length(chi.cmp)< Ntc
+            chi.time_cmp = chi.time_cmp(1:length(chi.cmp));
+         elseif length(chi.cmp)> Ntc
+            chi.cmp = chi.cmp(1:Ntc);
+         end
       
 
    % DTdt
       rdat.T1P = rdat.T1P - nanmean(rdat.T1P);
       rdat.T2P = rdat.T2P - nanmean(rdat.T2P);
+         % sync time
+         rdat.T1P = rdat.T1P(1:Ntp); 
+         rdat.T2P = rdat.T2P(1:Ntp); 
+         rdat.T1 = rdat.T1(1:Nt); 
+         rdat.T2 = rdat.T2(1:Nt); 
       chi.T1Pt = calibrate_tp( rdat.T1P, head.coef.T1P, rdat.T1, head.coef.T1, 100*ones(size(rdat.T1)) );
       chi.T2Pt = calibrate_tp( rdat.T2P, head.coef.T2P, rdat.T2, head.coef.T2, 100*ones(size(rdat.T1)) );
 
@@ -100,6 +150,11 @@ end
          end
        end
 
+       % sync time
+       chi.W  = chi.W(1:Nt);
+
+% change unit of pressure
+chi.depth = (chi.P-14.7)/1.47;
 %---------------------return data----------------------
 data = chi;
 

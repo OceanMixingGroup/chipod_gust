@@ -1,5 +1,7 @@
 function Histograms(chi, hfig, normstr, legstr)
 
+    figure(hfig)
+
     subplot(221);
     set(gca, 'color', 'none')
     myhist(chi.chi, normstr, legstr)
@@ -32,5 +34,5 @@ end
 function myhist(var, normstr, legstr)
     histogram(log10(var), 'normalization', normstr, ...
               'binmethod', 'sqrt', 'displayname', legstr, ...
-              'displaystyle', 'stairs')
+              'displaystyle', 'stairs', 'LineWidth', 1.5)
 end

@@ -105,6 +105,7 @@ if(do_combine)
       if ~isempty(mat_test) & ~isempty(chi_test)
 
          ID = d(i).name(1:mat_test-1);
+         disp(' ');
          disp(['----------> adding ' ID ]);
          load([dirname ID '.mat'])
 
@@ -155,8 +156,7 @@ if(do_combine)
          chi.Jq = -rho .* cp .* chi.Kt .* chi.dTdz;
 
          if do_plot
-             hfig = figure('Color',[1 1 1],'visible','on', ...
-                           'Position', [100 100 1400 900]);
+             hfig = CreateFigure;
              Histograms(chi, hfig, normstr, 'raw');
          end
 
@@ -181,19 +181,22 @@ if(do_combine)
              if do_plot & exist('../proc/temp.mat', 'file')
                  load ../proc/temp.mat
                  load ../input/vel_m.mat
-                 figure('Color',[1 1 1],'visible','on', 'Position', ...
-                        [100 100 900 900]);
+                 CreateFigure;
 
                  dt = diff(T.time(1:2))*86400;
                  trange = [find_approx(T.time, time_range(1)):find_approx(T.time, time_range(2))];
                  subplot(211)
-                 histogram(T.a_vel_x(trange), 'normalization' ,'pdf');
+                 histogram(T.a_vel_x(trange), 'normalization' ,'pdf', ...
+                           'displaystyle', 'stairs', 'linewidth', 1.5);
                  hold on;
-                 histogram(hypot(T.a_vel_x(trange), T.a_vel_y(trange)), 'normalization' ,'pdf');
-                 histogram(T.a_vel_z(trange), 'normalization' ,'pdf');
+                 histogram(hypot(T.a_vel_x(trange), T.a_vel_y(trange)), ...
+                           'normalization' ,'pdf', 'displaystyle', 'stairs', 'linewidth', 1.5);
+                 histogram(T.a_vel_z(trange), 'normalization' ,'pdf', ...
+                           'displaystyle', 'stairs', 'linewidth', 1.5);
 
                  trange2 = [find_approx(vel_m.time, time_range(1)):find_approx(vel_m.time, time_range(2))];
-                 histogram(vel_m.spd(trange2), 'normalization' ,'pdf')
+                 histogram(vel_m.spd(trange2), 'normalization' ,'pdf', ...
+                           'displaystyle', 'stairs', 'linewidth', 1.5);
                  plot([1 1]*min_spd, ylim, 'k--');
                  set(gca, 'XTick', sort([min_spd get(gca, 'XTick')]));
                  ylim([0 20]); xlim([-0.25 1]*0.7*max(vel_m.spd))
@@ -205,9 +208,10 @@ if(do_combine)
                         num2str(round(dt2)) 'minutes \Deltat for background'])
 
                  subplot(212)
-                 histogram(log10(chi.eps), 'normalization', 'pdf')
+                 histogram(log10(chi.eps), 'normalization', 'pdf', 'displaystyle', 'stairs', 'linewidth', 1.5);
                  hold on;
-                 histogram(log10(chi.eps(spdmask < min_spd)), 'normalization', 'pdf')
+                 histogram(log10(chi.eps(spdmask < min_spd)), ...
+                           'normalization', 'pdf', 'displaystyle', 'stairs', 'linewidth', 1.5);
                  ylabel('PDF')
                  xlabel('log_{10} \epsilon')
                  xlim([-14 5])
@@ -259,26 +263,30 @@ if(do_combine)
              % calculating Jq and Kt
              % not required for IC estimate because that is already
              % an averaged estimate
+             disp('Deglitch... itch... tch... ch')
+             tic;
              chi.chi = deglitch(chi.chi, ww, 2,'b');
              chi.eps = deglitch(chi.eps, ww, 2, 'b');
-         end
+             toc;
 
-         % get list of all fields to average
-         ff = fields(chi);
+             % get list of all fields to average
+             ff = fields(chi);
 
-         %% average data
-         disp('Running moving average')
-         ticstart = tic;
-         for f = 1:length(ff)  % run through all fields in chi
-             if ff{f}(1) == 'k', continue; end
-             if ( length(chi.(ff{f})) == length(chi.time) )
-                 Turb.(ID).(ff{f}) = moving_average( chi.(ff{f})(iiTrange), ww, ww );
+             %% average data
+             disp('Running moving average')
+             tic;
+             for f = 1:length(ff)  % run through all fields in chi
+                 if ( length(chi.(ff{f})) == length(chi.time) )
+                     Turb.(ID).(ff{f}) = moving_average( chi.(ff{f})(iiTrange), ww, ww );
+                 end
              end
+             toc;
+         else
+             Turb.(ID) = chi;
          end
-         toc(ticstart)
 
          if do_plot
-             hfig2 = figure;
+             hfig2 = CreateFigure;
              Histograms(Turb.(ID), hfig2, normstr, ...
                         ['Final ' num2str(avgwindow/60) ' min mean']);
 
@@ -342,8 +350,9 @@ if do_plot
    ff = fields(Turb);
    ff = {ff{1:end-1}}'; % remove readme structure
 
-    fig = figure('Color',[1 1 1],'visible','on','Paperunits','centimeters',...
-            'Papersize',[30 20],'PaperPosition',[0 0 30 20])
+   fig = CreateFigure;
+    % fig = figure('Color',[1 1 1],'visible','on','Paperunits','centimeters',...
+    %         'Papersize',[30 20],'PaperPosition',[0 0 30 20])
     
          [ax, ~] = create_axes(fig, 4, 1, 0);
       

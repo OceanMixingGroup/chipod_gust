@@ -274,12 +274,13 @@ if(do_combine)
              disp('Running moving average')
              tic;
              for f = 1:length(ff)  % run through all fields in chi
-                 if ff{f}(1) == 'k', continue; end
                  if ( length(chi.(ff{f})) == length(chi.time) )
                      Turb.(ID).(ff{f}) = moving_average( chi.(ff{f})(iiTrange), ww, ww );
                  end
              end
-             toc
+             toc;
+         else
+             Turb.(ID) = chi;
          end
 
          if do_plot

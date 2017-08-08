@@ -103,6 +103,7 @@ if(do_combine)
       if ~isempty(mat_test) & ~isempty(chi_test)
 
          ID = d(i).name(1:mat_test-1);
+         disp(' ');
          disp(['----------> adding ' ID ]);
          load([basedir '/proc/chi/' ID '.mat'])
 
@@ -260,23 +261,26 @@ if(do_combine)
              % calculating Jq and Kt
              % not required for IC estimate because that is already
              % an averaged estimate
+             disp('Deglitch... itch... tch... ch')
+             tic;
              chi.chi = deglitch(chi.chi, ww, 2,'b');
              chi.eps = deglitch(chi.eps, ww, 2, 'b');
-         end
+             toc;
 
-         % get list of all fields to average
-         ff = fields(chi);
+             % get list of all fields to average
+             ff = fields(chi);
 
-         %% average data
-         disp('Running moving average')
-         ticstart = tic;
-         for f = 1:length(ff)  % run through all fields in chi
-             if ff{f}(1) == 'k', continue; end
-             if ( length(chi.(ff{f})) == length(chi.time) )
-                 Turb.(ID).(ff{f}) = moving_average( chi.(ff{f})(iiTrange), ww, ww );
+             %% average data
+             disp('Running moving average')
+             tic;
+             for f = 1:length(ff)  % run through all fields in chi
+                 if ff{f}(1) == 'k', continue; end
+                 if ( length(chi.(ff{f})) == length(chi.time) )
+                     Turb.(ID).(ff{f}) = moving_average( chi.(ff{f})(iiTrange), ww, ww );
+                 end
              end
+             toc
          end
-         toc(ticstart)
 
          if do_plot
              hfig2 = CreateFigure;

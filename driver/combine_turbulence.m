@@ -236,7 +236,17 @@ if(do_combine)
                                  ['Additional Tz_' mask_dTdz]);
              end
 
-             % if do_plot, Histograms(chi, hfig, normstr, 'all masks'); end
+             if do_plot
+                 Histograms(chi, hfig, normstr, 'all masks');
+
+                 figure(hfig)
+                 subplot(221); legend(gca, 'show'); title(ID(5:end));
+                 subplot(222); legend(gca, 'show'); title(ID(5:end));
+                 subplot(223); legend(gca, 'show'); title(ID(5:end));
+                 subplot(224); legend(gca, 'show'); title(ID(5:end));
+
+                 print(gcf,['../pics/histograms-masking-' ID '.png'],'-dpng','-r200','-painters')
+             end
          end
 
          % convert averaging window from seconds to points
@@ -266,16 +276,18 @@ if(do_combine)
          toc(ticstart)
 
          if do_plot
-             Histograms(Turb.(ID), hfig, normstr, ...
+             hfig2 = figure;
+             Histograms(Turb.(ID), hfig2, normstr, ...
                         ['Final ' num2str(avgwindow/60) ' min mean']);
 
-             figure(hfig)
+             figure(hfig2)
              subplot(221); legend(gca, 'show'); title(ID(5:end));
              subplot(222); legend(gca, 'show'); title(ID(5:end));
              subplot(223); legend(gca, 'show'); title(ID(5:end));
              subplot(224); legend(gca, 'show'); title(ID(5:end));
 
-             print(gcf,['../pics/histograms-' ID '.png'],'-dpng','-r200','-painters')
+             print(gcf,['../pics/histograms-final-' ID '.png'],'-dpng','-r200','-painters')
+
          end
       end
    end

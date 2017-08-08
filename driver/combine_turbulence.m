@@ -17,7 +17,8 @@ close all;
    min_dTdz = 1e-4;
    min_spd = 0.05;
    min_inst_spd = min_spd; % min instantaneous speed past sensor
-   mask_dTdz = 'i'; % 'm' for mooring, 'i' for internal
+   mask_dTdz = ''; % '' for none, 'm' for mooring, 'i' for internal
+                    % in addition to whats in chi.dTdz
    mask_inst_spd = 1; % estimates are crappy if sensor isn't moving
                       % enough.
                       % screws the spectrum calculation...
@@ -27,6 +28,9 @@ close all;
                   % '' to choose based on what was used in chi estimate
    avgwindow = 600; % averaging window in seconds
 
+   ChipodDepth = 30;
+
+   normstr = 'count'; % normalization for histograms
 
    % if you want to restrict the time range that should be combined
    % use the following
@@ -66,16 +70,18 @@ addpath(genpath('./chipod_gust/software/'));% include  path to preocessing routi
 
 if do_mask
     if mask_dTdz == 'm'
-        disp('masking using mooring dTdz')
+        disp('additional masking using mooring dTdz')
         load([basedir 'input/dTdz_m.mat'])
         Tz = Tz_m;
         clear Tz_m;
 
     elseif mask_dTdz == 'i'
-        disp('masking using internal dTdz')
+        disp('additional masking using internal dTdz')
         load([basedir 'input/dTdz_i.mat'])
         Tz = Tz_i;
         clear Tz_i;
+    else
+        Tz = [];
     end
 
     mask_spd_initial = mask_spd;
@@ -97,89 +103,33 @@ if(do_combine)
       if ~isempty(mat_test) & ~isempty(chi_test)
 
          ID = d(i).name(1:mat_test-1);
+         disp(' ');
          disp(['----------> adding ' ID ]);
          load([basedir '/proc/chi/' ID '.mat'])
-         
+
          % find desired time range
-         iiTrange = find( chi.time>= time_range(1) & chi.time<= time_range(2) );
+         iiTrange = find( chi.time >= time_range(1) & chi.time<= time_range(2) );
 
-         ChipodDepth = round(nanmean(chi.depth(iiTrange))); % in metres
-
-         % read in mooring salinity & calculate rho, cp
-         if ~exist('Smean', 'var')
+         % extract valid time range here so that histograms work
+         ff = fieldnames(chi);
+         for nn = 1:length(ff)
              try
-                 load ../proc/T_m.mat
-                 Smean = (T1.S .* abs(nanmean(T2.z)-ChipodDepth) ...
-                          + T2.S .* abs(nanmean(T1.z)-ChipodDepth)) ...
-                         ./ abs(nanmean(T1.z)-nanmean(T2.z));
-                 Smean = interp1(T1.time, Smean, chi.time);
-                 chi.S = Smean;
+                 chi.(ff{nn}) = chi.(ff{nn})(iiTrange);
+             catch ME;
              end
-             rho = sw_pden(Smean, chi.T, ChipodDepth, 0);
-             cp = sw_cp(Smean, chi.T, ChipodDepth);
          end
 
-         if do_mask
-             if mask_dTdz == 'i'
-                 % choose appropriate internal stratification for sensor
-                 Tz.Tz = Tz.(['Tz' ID(7)']);
-             end
-
-             Tzmask = interp1(Tz.time, Tz.Tz, chi.time);
-
-             percent_mask_dTdz = sum(abs(Tzmask(iiTrange)) < min_dTdz)/length(chi.time(iiTrange))*100;
-             percent_mask_N2 = sum(chi.N2(iiTrange) < min_N2)/length(chi.time(iiTrange))*100;
-             percent_mask_inst_spd = sum(chi.spd(iiTrange) < min_inst_spd)/length(chi.time(iiTrange))*100;
-             disp([' dTdz will mask ' num2str(percent_mask_dTdz, '%.2f') ...
-                   ' % of estimates'])
-             disp([' N2 will mask ' num2str(percent_mask_N2, '%.2f') ...
-                   ' % of estimates'])
-             disp([' Inst speed will mask ' num2str(percent_mask_inst_spd, '%.2f') ...
-                   ' % of estimates'])
-
-             % speed mask could change depending on estimate
-             if strcmpi(mask_spd_initial, '')
-                 mask_spd = ID(5);
-             end
-
-             if mask_spd == 'm' & ~exist('vel_m', 'var')
-                 load ../input/vel_m.mat
-                 vel = vel_m;
-                 disp('masking using mooring speed');
-             elseif mask_spd == 'p' & ~exist('vel_p', 'var')
-                 load ../input/vel_p.mat
-                 vel = vel_p;
-                 disp('masking using pitot speed');
-             end
-             spdmask = interp1(vel.time, vel.spd, chi.time);
-             percent_mask_spd = sum(spdmask(iiTrange) < min_spd)/length(chi.time(iiTrange))*100;
-             disp([' speed will mask ' num2str(percent_mask_spd, '%.2f') ...
-                   '% of estimates'])
-
-             full_mask = (abs(Tzmask) < min_dTdz) ...
-                 | (chi.N2 < min_N2) ...
-                 | (chi.spd < min_inst_spd) ...
-                 | (spdmask < min_spd);
+         try
+             load ../proc/T_m.mat
+             Smean = interp1(T1.time, (T1.S + T2.S)/2, chi.time);
+             chi.S = Smean;
+         catch ME
+             Smean = 35*ones(size(chi.time));
          end
+         rho = sw_pden(Smean, chi.T, ChipodDepth, 0);
+         cp = sw_cp(Smean, chi.T, ChipodDepth);
 
-         % NaN out some chi estimates based on min_dTz, min_spd
-         if do_mask
-             chi.chi(full_mask) = NaN;
-             chi.mask = chi.mask | ~full_mask;
-         end
-
-         % convert averaging window from seconds to points
-         ww =  round(avgwindow/(diff(chi.time(1:2))*3600*24));
-
-         if isempty(ic_test)
-             % deglitch chi and eps before
-             % calculating Jq and Kt
-             % not required for IC estimate because that is already
-             % an averaged estimate
-             chi.chi = deglitch(chi.chi, ww, 2,'b');
-             chi.eps = deglitch(chi.eps, ww, 2, 'b');
-         end
-
+         % NaN out after sensor death
          if isChipod
              if ID(end) == '1' % sensor T1
                  death = find(chi.time > T1death, 1, 'first');
@@ -203,15 +153,149 @@ if(do_combine)
          chi.Kt = 0.5 * chi.chi ./ chi.dTdz.^2;
          chi.Jq = -rho .* cp .* chi.Kt .* chi.dTdz;
 
-         % get list of all fields to average
-         ff = fields(chi);
+         if do_plot
+             hfig = CreateFigure;
+             Histograms(chi, hfig, normstr, 'raw');
+         end
 
-         %% average data
-         disp('Running moving average')
-         for f = 1:length(ff)  % run through all fields in chi
-             if ( length(chi.(ff{f})) == length(chi.time) )
-                 Turb.(ID).(ff{f}) = moving_average( chi.(ff{f})(iiTrange), ww, ww );
+         if do_mask
+             % speed mask could change depending on estimate
+             if strcmpi(mask_spd_initial, '')
+                 mask_spd = ID(5);
              end
+
+             if mask_spd == 'm' & ~exist('vel_m', 'var')
+                 load ../input/vel_m.mat
+                 vel = vel_m;
+                 disp('masking using mooring speed');
+             elseif mask_spd == 'p' & ~exist('vel_p', 'var')
+                 load ../input/vel_p.mat
+                 vel = vel_p;
+                 disp('masking using pitot speed');
+             end
+             spdmask = interp1(vel.time, vel.spd, chi.time);
+
+             % histograms for speed-based masking
+             if do_plot & exist('../proc/temp.mat', 'file')
+                 load ../proc/temp.mat
+                 load ../input/vel_m.mat
+                 CreateFigure;
+
+                 dt = diff(T.time(1:2))*86400;
+                 trange = [find_approx(T.time, time_range(1)):find_approx(T.time, time_range(2))];
+                 subplot(211)
+                 histogram(T.a_vel_x(trange), 'normalization' ,'pdf', ...
+                           'displaystyle', 'stairs', 'linewidth', 1.5);
+                 hold on;
+                 histogram(hypot(T.a_vel_x(trange), T.a_vel_y(trange)), ...
+                           'normalization' ,'pdf', 'displaystyle', 'stairs', 'linewidth', 1.5);
+                 histogram(T.a_vel_z(trange), 'normalization' ,'pdf', ...
+                           'displaystyle', 'stairs', 'linewidth', 1.5);
+
+                 trange2 = [find_approx(vel_m.time, time_range(1)):find_approx(vel_m.time, time_range(2))];
+                 histogram(vel_m.spd(trange2), 'normalization' ,'pdf', ...
+                           'displaystyle', 'stairs', 'linewidth', 1.5);
+                 plot([1 1]*min_spd, ylim, 'k--');
+                 set(gca, 'XTick', sort([min_spd get(gca, 'XTick')]));
+                 ylim([0 20]); xlim([-0.25 1]*0.7*max(vel_m.spd))
+                 xlabel('m/s')
+                 ylabel('PDF')
+                 legend('v_x', '|v_x + v_y|', 'v_z', 'background flow', 'min. spd criterion');
+                 dt2 = diff(vel_m.time(1:2))*86400/60;
+                 title([ID(5:end) ' | ' num2str(round(dt)) 's avg for v_* | ' ...
+                        num2str(round(dt2)) 'minutes \Deltat for background'])
+
+                 subplot(212)
+                 histogram(log10(chi.eps), 'normalization', 'pdf', 'displaystyle', 'stairs', 'linewidth', 1.5);
+                 hold on;
+                 histogram(log10(chi.eps(spdmask < min_spd)), ...
+                           'normalization', 'pdf', 'displaystyle', 'stairs', 'linewidth', 1.5);
+                 ylabel('PDF')
+                 xlabel('log_{10} \epsilon')
+                 xlim([-14 5])
+                 legend('raw', ['background flow < ' num2str(min_spd) 'm/s']);
+
+                 print(gcf,['../pics/velocity-masking-' ID(5:end) '.png'],'-dpng','-r200','-painters')
+             end
+
+
+             chi = ApplyMask(chi, abs(chi.dTdz), '<', min_dTdz, 'Tz');
+             if do_plot, Histograms(chi, hfig, normstr, 'Tz'); end
+
+             chi = ApplyMask(chi, chi.N2, '<', min_N2, 'N2');
+             if do_plot, Histograms(chi, hfig, normstr, 'N2'); end
+
+             chi = ApplyMask(chi, chi.spd, '<', min_inst_spd, 'inst speed');
+             chi = ApplyMask(chi, spdmask, '<', min_spd, 'background flow');
+
+             % additional Tz masking?
+             if ~isempty(Tz)
+                 if mask_dTdz == 'i'
+                     % choose appropriate internal stratification for sensor
+                     Tz.Tz = Tz.(['Tz' ID(7)']);
+                 end
+
+                 Tzmask = interp1(Tz.time, Tz.Tz, chi.time);
+                 chi = ApplyMask(chi, abs(Tzmask), '<', 1e-4, ...
+                                 ['Additional Tz_' mask_dTdz]);
+             end
+
+             if do_plot
+                 Histograms(chi, hfig, normstr, 'all masks');
+
+                 figure(hfig)
+                 subplot(221); legend(gca, 'show'); title(ID(5:end));
+                 subplot(222); legend(gca, 'show'); title(ID(5:end));
+                 subplot(223); legend(gca, 'show'); title(ID(5:end));
+                 subplot(224); legend(gca, 'show'); title(ID(5:end));
+
+                 print(gcf,['../pics/histograms-masking-' ID '.png'],'-dpng','-r200','-painters')
+             end
+         end
+
+         % convert averaging window from seconds to points
+         ww =  round(avgwindow/(diff(chi.time(1:2))*3600*24));
+
+         if isempty(ic_test)
+             % deglitch chi and eps before
+             % calculating Jq and Kt
+             % not required for IC estimate because that is already
+             % an averaged estimate
+             disp('Deglitch... itch... tch... ch')
+             tic;
+             chi.chi = deglitch(chi.chi, ww, 2,'b');
+             chi.eps = deglitch(chi.eps, ww, 2, 'b');
+             toc;
+
+             % get list of all fields to average
+             ff = fields(chi);
+
+             %% average data
+             disp('Running moving average')
+             tic;
+             for f = 1:length(ff)  % run through all fields in chi
+                 if ( length(chi.(ff{f})) == length(chi.time) )
+                     Turb.(ID).(ff{f}) = moving_average( chi.(ff{f})(iiTrange), ww, ww );
+                 end
+             end
+             toc;
+         else
+             Turb.(ID) = chi;
+         end
+
+         if do_plot
+             hfig2 = CreateFigure;
+             Histograms(Turb.(ID), hfig2, normstr, ...
+                        ['Final ' num2str(avgwindow/60) ' min mean']);
+
+             figure(hfig2)
+             subplot(221); legend(gca, 'show'); title(ID(5:end));
+             subplot(222); legend(gca, 'show'); title(ID(5:end));
+             subplot(223); legend(gca, 'show'); title(ID(5:end));
+             subplot(224); legend(gca, 'show'); title(ID(5:end));
+
+             print(gcf,['../pics/histograms-final-' ID '.png'],'-dpng','-r200','-painters')
+
          end
       end
    end
@@ -264,8 +348,9 @@ if do_plot
    ff = fields(Turb);
    ff = {ff{1:end-1}}'; % remove readme structure
 
-    fig = figure('Color',[1 1 1],'visible','on','Paperunits','centimeters',...
-            'Papersize',[30 20],'PaperPosition',[0 0 30 20])
+   fig = CreateFigure;
+    % fig = figure('Color',[1 1 1],'visible','on','Paperunits','centimeters',...
+    %         'Papersize',[30 20],'PaperPosition',[0 0 30 20])
     
          [ax, ~] = create_axes(fig, 4, 1, 0);
       
@@ -371,3 +456,12 @@ if do_plot
    print(gcf,'../pics/Compare_Turb.png','-dpng','-r200','-painters')
    
 end
+
+
+% Examples of using TestMask and DebugPlots to check masking
+% TestMask(chi, abs(chi.dTdz), '<', [1e-4, 3e-4, 1e-3], 'Tz');
+% t0 = datenum(2014, 01, 01);
+% t1 = datenum(2014, 03, 01);
+% DebugPlots([], t0, t1, chi, 'raw', 1)
+% chi1 = ApplyMask(chi, abs(chi.dTdz), '<', 3e-4, 'T_z');
+% DebugPlots([], t0, t1, chi1, 'T_z > 3e-4', 1)

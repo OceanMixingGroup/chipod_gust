@@ -11,4 +11,4 @@ then
    s=${s%?}
 fi
 
-nohup matlab.2014b -nodisplay -nosplash -r $s > ./out/out_$s & echo $! > ./out/pid_$s
+nohup matlab.2017a -nodisplay -nosplash -r $s > ./out/out_$s & echo $! > ./out/pid_$s

@@ -15,10 +15,9 @@ close all;
    % set thresholds for masking
    min_N2 = 1e-6;
    min_dTdz = 1e-4;
-   max_N2oTz2 = 1e4; % 1e4 is a good value.
    min_spd = 0.05;
    min_inst_spd = min_spd; % min instantaneous speed past sensor
-   mask_dTdz = 'i'; % '' for none, 'm' for mooring, 'i' for internal
+   mask_dTdz = ''; % '' for none, 'm' for mooring, 'i' for internal
                     % in addition to whats in chi.dTdz
    mask_inst_spd = 1; % estimates are crappy if sensor isn't moving
                       % enough.
@@ -112,18 +111,24 @@ if(do_combine)
          % find desired time range
          iiTrange = find( chi.time >= time_range(1) & chi.time<= time_range(2) );
 
-         % read in mooring salinity & calculate rho, cp
-         if ~exist('Smean', 'var')
+         % extract valid time range here so that histograms work
+         ff = fieldnames(chi);
+         for nn = 1:length(ff)
              try
-                 load ../proc/T_m.mat
-                 Smean = interp1(T1.time, (T1.S + T2.S)/2, chi.time);
-                 chi.S = Smean;
-             catch ME
-                 Smean = 35*ones(size(chi.time));
+                 chi.(ff{nn}) = chi.(ff{nn})(iiTrange);
+             catch ME;
              end
-             rho = sw_pden(Smean, chi.T, ChipodDepth, 0);
-             cp = sw_cp(Smean, chi.T, ChipodDepth);
          end
+
+         try
+             load ../proc/T_m.mat
+             Smean = interp1(T1.time, (T1.S + T2.S)/2, chi.time);
+             chi.S = Smean;
+         catch ME
+             Smean = 35*ones(size(chi.time));
+         end
+         rho = sw_pden(Smean, chi.T, ChipodDepth, 0);
+         cp = sw_cp(Smean, chi.T, ChipodDepth);
 
          % NaN out after sensor death
          if isChipod
@@ -200,9 +205,9 @@ if(do_combine)
                         num2str(round(dt2)) 'minutes \Deltat for background'])
 
                  subplot(212)
-                 histogram(log10(chi.eps(iiTrange)), 'normalization', 'pdf')
+                 histogram(log10(chi.eps), 'normalization', 'pdf')
                  hold on;
-                 histogram(log10(chi.eps(spdmask(iiTrange) < min_spd)), 'normalization', 'pdf')
+                 histogram(log10(chi.eps(spdmask < min_spd)), 'normalization', 'pdf')
                  ylabel('PDF')
                  xlabel('log_{10} \epsilon')
                  xlim([-14 5])
@@ -212,17 +217,14 @@ if(do_combine)
              end
 
 
-             chi = ApplyMask(chi, abs(chi.dTdz), '<', min_dTdz, 'Tz', iiTrange);
+             chi = ApplyMask(chi, abs(chi.dTdz), '<', min_dTdz, 'Tz');
              if do_plot, Histograms(chi, hfig, normstr, 'Tz'); end
 
-             chi = ApplyMask(chi, chi.N2./chi.dTdz.^2, '>', max_N2oTz2, 'N2/Tz2', iiTrange);
-             if do_plot, Histograms(chi, hfig, normstr, 'N2/Tz2'); end
-
-             chi = ApplyMask(chi, chi.N2, '<', min_N2, 'N2', iiTrange);
+             chi = ApplyMask(chi, chi.N2, '<', min_N2, 'N2');
              if do_plot, Histograms(chi, hfig, normstr, 'N2'); end
 
-             chi = ApplyMask(chi, chi.spd, '<', min_inst_spd, 'inst speed', iiTrange);
-             chi = ApplyMask(chi, spdmask, '<', min_spd, 'background flow', iiTrange);
+             chi = ApplyMask(chi, chi.spd, '<', min_inst_spd, 'inst speed');
+             chi = ApplyMask(chi, spdmask, '<', min_spd, 'background flow');
 
              % additional Tz masking?
              if ~isempty(Tz)
@@ -233,10 +235,20 @@ if(do_combine)
 
                  Tzmask = interp1(Tz.time, Tz.Tz, chi.time);
                  chi = ApplyMask(chi, abs(Tzmask), '<', 1e-4, ...
-                                 ['Additional Tz_' mask_dTdz], iiTrange);
+                                 ['Additional Tz_' mask_dTdz]);
              end
 
-             % if do_plot, Histograms(chi, hfig, normstr, 'all masks'); end
+             if do_plot
+                 Histograms(chi, hfig, normstr, 'all masks');
+
+                 figure(hfig)
+                 subplot(221); legend(gca, 'show'); title(ID(5:end));
+                 subplot(222); legend(gca, 'show'); title(ID(5:end));
+                 subplot(223); legend(gca, 'show'); title(ID(5:end));
+                 subplot(224); legend(gca, 'show'); title(ID(5:end));
+
+                 print(gcf,['../pics/histograms-masking-' ID '.png'],'-dpng','-r200','-painters')
+             end
          end
 
          % convert averaging window from seconds to points
@@ -266,16 +278,17 @@ if(do_combine)
          toc(ticstart)
 
          if do_plot
-             Histograms(Turb.(ID), hfig, normstr, ...
+             hfig2 = figure;
+             Histograms(Turb.(ID), hfig2, normstr, ...
                         ['Final ' num2str(avgwindow/60) ' min mean']);
 
-             figure(hfig)
+             figure(hfig2)
              subplot(221); legend(gca, 'show'); title(ID(5:end));
              subplot(222); legend(gca, 'show'); title(ID(5:end));
              subplot(223); legend(gca, 'show'); title(ID(5:end));
              subplot(224); legend(gca, 'show'); title(ID(5:end));
 
-             print(gcf,['../pics/histograms-' ID '.png'],'-dpng','-r200','-painters')
+             print(gcf,['../pics/histograms-final-' ID '.png'],'-dpng','-r200','-painters')
          end
       end
    end
@@ -439,9 +452,9 @@ end
 
 
 % Examples of using TestMask and DebugPlots to check masking
-% TestMask(chi, abs(chi.dTdz), '<', [1e-4, 3e-4, 1e-3], 'Tz', iiTrange);
+% TestMask(chi, abs(chi.dTdz), '<', [1e-4, 3e-4, 1e-3], 'Tz');
 % t0 = datenum(2014, 01, 01);
 % t1 = datenum(2014, 03, 01);
 % DebugPlots([], t0, t1, chi, 'raw', 1)
-% chi1 = ApplyMask(chi, abs(chi.dTdz), '<', 3e-4, 'T_z', iiTrange);
+% chi1 = ApplyMask(chi, abs(chi.dTdz), '<', 3e-4, 'T_z');
 % DebugPlots([], t0, t1, chi1, 'T_z > 3e-4', 1)

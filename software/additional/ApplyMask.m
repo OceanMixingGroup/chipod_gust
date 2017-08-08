@@ -1,4 +1,7 @@
 function [chi] = ApplyMask(chi, maskvar, relation, criterion, maskname, Trange)
+
+    if ~exist('Trange', 'var'), Trange = 1:length(chi.chi); end
+
     if relation == '>'
         mask = maskvar > criterion;
     elseif relation == '<'

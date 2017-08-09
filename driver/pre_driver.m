@@ -22,7 +22,11 @@ close all;
    use_TS_relation = 0; % fit TS relation to estimate N2 from
                         % mooring data? Use (with caution) when you
                         % have only 1 salinity sensor
+   modify_header = 0;   % if 1, specify header corrections below
 
+   % declination - get values from https://www.ngdc.noaa.gov/geomag-web/#declination
+   DeployDecl = 0; % at deployment location
+   CorvallisDecl = 15+44/60; % at corvallis
 
    % chipod location (positive North, East & Down)
    ChipodLon = 85.5; ChipodLat = 5; ChipodDepth = 5
@@ -38,24 +42,6 @@ close all;
    end
 
 
-%_____________________for automated PMEL mooring processing____________
-   if use_pmel
-       pmeldir = '~/TaoTritonPirataRama/'; % directory with pmel mooring files
-                                            % (can obtain an updated copy from ganges)
-       % which high-freq data file should I use?
-       % 2m/10m/30m/hr
-       velfreq = '30m';
-       Tfreq = '10m';
-       Sfreq = 'dy';
-
-       % find start and end of depoyment from raw files
-       rawdir = [basedir filesep 'raw' filesep];
-       data = raw_load_chipod([rawdir fids{1}]);
-       deployStart = data.datenum(1);
-       data = raw_load_chipod([rawdir fids{end}]);
-       deployEnd = data.datenum(end);
-   end
-
 %_____________________include path of processing flies______________________
 addpath(genpath('./chipod_gust/software/'));% include  path to preocessing routines
 
@@ -69,6 +55,68 @@ addpath(genpath('./chipod_gust/software/'));% include  path to preocessing routi
 
 %_____________________get list of all raw data______________________
    [fids, fdate] = chi_find_rawfiles(basedir);
+
+%_______________create header files if necessary______________________
+
+   % will create header.mat file if necessary
+   % if header.mat exists, it will read it
+   head = chi_get_calibration_coefs(basedir);
+
+   % will create header.mat file if necessary
+   % if header_p.mat exists, it will read it
+   W  = chi_get_calibration_coefs_pitot(basedir);
+
+%_____________________make header corrections if necessary______________
+
+    if modify_header
+
+        % _____usual calibrations______
+        head.coef.CMP(1) = 3.9; % from compass calibration file.
+
+        % _____ account for declination _______
+        % (this section should not be changed)
+        disp('accounting for declination ...');
+        % chi_calibrate_chipod adds head.coef.CMP(1) to raw_data.CMP/10
+        % hence, we need to change sign here.
+        head.coef.CMP(1) = -head.coef.CMP(1) - CorvallisDecl + DeployDecl;
+
+        % save header in proper destination
+        fid = [basedir filesep 'calib' filesep 'header.mat'] ;
+        save(fid, 'head');
+
+        % _____pitot calibrations______
+        % W.T  = [0 -0.003154669 0 0 0];
+        % W.Ps = [0 0 0 0 0]; % pressure sensor is bad; accounted for in offset
+        % W.Tilt = [0 0.000088684 0 0 0];
+        % W.Pd = [0 0.0003995 0 0 0]; %if slope>1 else W.Pd = [0 slope 0 0 0];
+        % assert(W.Pd(2) < 1, 'WPd(2) > 1 !');
+        % % offsets
+        % W.V0 = 0;
+        % W.P0 = 0;
+        % W.T0 = 0;
+        % save header in proper destination
+        % fid = [basedir filesep 'calib' filesep 'header_p.mat'] ;
+        % save(fid, 'W');
+
+    end
+
+
+%_____________________for automated PMEL mooring processing____________
+    if use_pmel
+        pmeldir = '~/ganges/data/TaoTritonPirataRama/'; % directory with pmel mooring files
+                                            % (can obtain an updated copy from ganges)
+        % which high-freq data file should I use?
+        % 2m/10m/30m/hr
+        velfreq   = '30m';
+        Tfreq     = '10m';
+        Sfreq     = 'dy';
+
+        % find start and end of depoyment from raw files
+        data         = raw_load_chipod([rawdir fids{1}]);
+        deployStart  = data.datenum(1);
+        data         = raw_load_chipod([rawdir fids{end}]);
+        deployEnd    = data.datenum(end);
+    end
 
 %%%%%%%%%%%%%%%%%%% temp processing %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%55
 if do_temp

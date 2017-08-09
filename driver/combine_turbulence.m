@@ -105,6 +105,17 @@ if(do_combine)
       if ~isempty(mat_test) & ~isempty(chi_test)
 
          ID = d(i).name(1:mat_test-1);
+         if isChipod
+             if ID(end) == '1' | strcmpi(ID(end-3:end), '1_ic') % sensor T1
+                 sensor = 1;
+             end
+             if ID(end) == '2' | strcmpi(ID(end-3:end), '2_ic') % sensor T1
+                 sensor = 2;
+             end
+         else
+             sensor = 1; % gusT has only one sensor
+         end
+
          disp(' ');
          disp(['----------> adding ' ID ]);
          load([dirname ID '.mat'])
@@ -133,7 +144,7 @@ if(do_combine)
 
          % NaN out after sensor death
          if isChipod
-             if ID(end) == '1' % sensor T1
+             if sensor == 1 % sensor T1
                  death = find(chi.time > T1death, 1, 'first');
                  if ~isempty(death)
                      disp(['NaNing out sensor T1 after it died on ' datestr(T1death)])
@@ -142,7 +153,7 @@ if(do_combine)
                  end
              end
 
-             if ID(end) == '2' % sensor T2
+             if sensor == 2 % sensor T2
                  death = find(chi.time > T2death, 1, 'first');
                  if ~isempty(death)
                      disp(['NaNing out sensor T2 after it died on ' datestr(T2death)])
@@ -277,7 +288,7 @@ if(do_combine)
              tic;
              for f = 1:length(ff)  % run through all fields in chi
                  if ( length(chi.(ff{f})) == length(chi.time) )
-                     Turb.(ID).(ff{f}) = moving_average( chi.(ff{f})(iiTrange), ww, ww );
+                     Turb.(ID).(ff{f}) = moving_average( chi.(ff{f}), ww, ww );
                  end
              end
              toc;
@@ -286,19 +297,20 @@ if(do_combine)
          end
 
          if do_plot
-             hfig2 = CreateFigure;
-             Histograms(Turb.(ID), hfig2, normstr, ...
-                        ['Final ' num2str(avgwindow/60) ' min mean']);
-
-             figure(hfig2)
-             subplot(221); legend(gca, 'show'); title(ID(5:end));
-             subplot(222); legend(gca, 'show'); title(ID(5:end));
-             subplot(223); legend(gca, 'show'); title(ID(5:end));
-             subplot(224); legend(gca, 'show'); title(ID(5:end));
-
-             print(gcf,['../pics/histograms-final-' ID '.png'],'-dpng','-r200','-painters')
+             if ~exist('hfig2', 'var'), hfig2 = CreateFigure; end
+             Histograms(Turb.(ID), hfig2, 'pdf', ID);
          end
       end
+   end
+
+   if do_plot
+       figure(hfig2)
+       subplot(221); legend(gca, 'show'); title(['Final ' num2str(avgwindow/60) ' min mean']);
+       subplot(222); legend(gca, 'show'); title(['Final ' num2str(avgwindow/60) ' min mean']);
+       subplot(223); legend(gca, 'show'); title(['Final ' num2str(avgwindow/60) ' min mean']);
+       subplot(224); legend(gca, 'show'); title(['Final ' num2str(avgwindow/60) ' min mean']);
+
+       print(gcf,['../pics/histograms-final.png'],'-dpng','-r200','-painters')
    end
 
    Turb.do_mask = do_mask;

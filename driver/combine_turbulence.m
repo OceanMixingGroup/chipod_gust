@@ -501,3 +501,67 @@ end
 % DebugPlots([], t0, t1, chi, 'raw', 1)
 % chi1 = ApplyMask(chi, abs(chi.dTdz), '<', 3e-4, 'T_z');
 % DebugPlots([], t0, t1, chi1, 'T_z > 3e-4', 1)
+
+% load ../proc/temp.mat
+% load ../proc/Turb.mat
+
+% t0 = T.time(1);
+% dt = 21; % in days
+% overlap = 5; % in days
+% ii=1;
+% trange = [t0:dt:time_range(end)];
+
+% for ii=1:length(trange)
+
+%     tt = trange(ii);
+%     t1 = tt + dt + overlap;
+%     if t1 > time_range(end)
+%         t1 = time_range(end);
+%     end
+%     CreateFigure;
+%     set(gcf, 'Position', [100 100 1800 900]);
+%     set(gcf, 'renderer', 'opengl')
+%     set(gcf, 'DefaultLineLineWidth', 0.5);
+%     ax = DebugRawData(T, tt-overlap, t1, Turb, nantimes);
+%     ax(1).Title.String = ['i = ' num2str(ii) ' | ' ax(1).Title.String];
+
+%     print('-dpng', ['../pics/debug-' num2str(ii) '.png']);
+%     ii=ii+1;
+% end
+
+% % hudhud
+% tind = 449988:454308;
+
+% tindsal = 447840:452160;
+
+% tind = 26900000:27300000; % in sec
+% chi.chi(tind) = deglitch(chi.chi(tind), 60, 3);
+% chi.eps(tind) = deglitch(chi.eps(tind), 60, 3);
+
+% c = chi;
+% c = mm1;
+
+
+% figure;
+% semilogy(c.time(tind), c.eps(tind));
+% hold on;
+% datetick('keeplimits')
+
+% ww = 3600;
+% figure;
+% % plot(c.time(tind), c.Jq(tind)); hold on;
+% plot(c.time(tind), c.dTdz(tind)*1e4)
+% plot(moving_average(c.time(tind), ww, ww), ...
+%      moving_average(c.Jq(tind), ww, ww), 'k'); hold on;
+% plot(moving_average(c.time(tind), ww, ww), ...
+%      moving_average(c.dTdz(tind), ww, ww)*1e4)
+% semilogy(c.time(tind),c.N2(tind)./c.dTdz(tind).^2);
+% datetick('x', 'mm/dd HH:MM', 'keeplimits')
+
+% N2oTz2 = chi.N2./chi.dTdz.^2;
+
+% t0 = datenum(2014, 10, 8);
+% t1 = datenum(2014, 10, 11)
+% hfig = figure;
+% DebugPlots(hfig, t0, t1, Turb.chi_mm1, 'mine')
+% DebugPlots(hfig, t0, t1, avgchi, 'sally')

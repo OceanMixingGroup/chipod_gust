@@ -317,6 +317,11 @@ if(do_combine)
              if ~exist('hfig2', 'var'), hfig2 = CreateFigure; end
              Histograms(Turb.(ID), hfig2, 'pdf', ID);
          end
+
+         % 2D histograms
+         Histograms2D(Turb.(ID), ID)
+         print(gcf,['../pics/histograms-2D-' ID '.png'],'-dpng','-r200','-painters')
+
       end
    end
 

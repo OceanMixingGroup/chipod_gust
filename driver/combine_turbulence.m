@@ -214,23 +214,23 @@ if(do_combine)
                  dt = diff(T.time(1:2))*86400;
                  trange = [find_approx(T.time, time_range(1)):find_approx(T.time, time_range(2))];
                  subplot(211)
-                 histogram(T.a_vel_x(trange), 'normalization' ,'pdf', ...
+                 histogram(abs(T.a_vel_x(trange)), 'normalization' ,'pdf', ...
                            'displaystyle', 'stairs', 'linewidth', 1.5);
                  hold on;
                  histogram(hypot(T.a_vel_x(trange), T.a_vel_y(trange)), ...
                            'normalization' ,'pdf', 'displaystyle', 'stairs', 'linewidth', 1.5);
-                 histogram(T.a_vel_z(trange), 'normalization' ,'pdf', ...
+                 histogram(abs(T.a_vel_z(trange)), 'normalization' ,'pdf', ...
                            'displaystyle', 'stairs', 'linewidth', 1.5);
 
                  trange2 = [find_approx(vel_m.time, time_range(1)):find_approx(vel_m.time, time_range(2))];
                  histogram(vel_m.spd(trange2), 'normalization' ,'pdf', ...
                            'displaystyle', 'stairs', 'linewidth', 1.5);
                  plot([1 1]*min_spd, ylim, 'k--');
+                 xlim([-0.25 1]*0.7*max(vel_m.spd))
                  set(gca, 'XTick', sort([min_spd get(gca, 'XTick')]));
-                 ylim([0 20]); xlim([-0.25 1]*0.7*max(vel_m.spd))
                  xlabel('m/s')
                  ylabel('PDF')
-                 legend('v_x', '|v_x + v_y|', 'v_z', 'background flow', 'min. spd criterion');
+                 legend('|v_x|', '|v_x + v_y|', '|v_z|', 'background flow', 'min. spd criterion');
                  dt2 = diff(vel_m.time(1:2))*86400/60;
                  title([ID(5:end) ' | ' num2str(round(dt)) 's avg for v_* | ' ...
                         num2str(round(dt2)) 'minutes \Deltat for background'])
@@ -247,7 +247,6 @@ if(do_combine)
 
                  print(gcf,['../pics/velocity-masking-' ID(5:end) '.png'],'-dpng','-r200','-painters')
              end
-
 
              chi = ApplyMask(chi, abs(chi.dTdz), '<', min_dTdz, 'Tz');
              if do_plot, Histograms(chi, hfig, normstr, 'Tz'); end

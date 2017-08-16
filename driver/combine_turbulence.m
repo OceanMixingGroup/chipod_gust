@@ -42,6 +42,13 @@ close all;
    T1death = datenum(2060, 1, 1, 0, 0, 0);
    T2death = datenum(2060, 1, 1, 0, 0, 0);
 
+   % additional time ranges to NaN out as necessary
+   % make an array that looks like
+   % nantimes{sensor_number} = [start_time1, end_time1;
+   %                            start_time2, end_time2;]
+   % start_time & end_time must be datenum
+   nantimes{1} = [];
+   nantimes{2} = [];
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%% DO NOT CHANGE BELOW %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -159,6 +166,15 @@ if(do_combine)
                      chi.eps(death:end) = NaN;
                  end
              end
+         end
+
+         % NaN out specific time ranges as necessary
+         if ~isempty(nantimes{sensor})
+             for tt = 1:size(nantimes{sensor}, 1)
+                 chi.chi(find_approx(chi.time, nantimes{sensor}(tt, 1), 1): ...
+                         find_approx(chi.time, nantimes{sensor}(tt, 2), 1)) = NaN;
+             end
+             chi.eps(isnan(chi.chi)) = NaN;
          end
 
          chi.Kt = 0.5 * chi.chi ./ chi.dTdz.^2;

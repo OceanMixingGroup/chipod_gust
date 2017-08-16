@@ -58,33 +58,7 @@ addpath(genpath('./chipod_gust/software/'));% include  path to preocessing routi
 
 %%%%%%%%%%%%%%%%%%% temp processing %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%55
 if do_temp
-   %_____________processing loop through all raw files__________________
-
-      % init parallel pool
-      if(do_parallel)
-         parpool;
-         % parallel for-loop
-         parfor f=1:length(fids)
-            try % take care if script crashes that the parpoo is shut down
-               disp(['calculating file ' num2str(f) ' of ' num2str(length(fids))]);
-               chi_T_proc(basedir, fids{f});
-            catch
-               disp(['!!!!!! ' fids{f} ' crashed while processing T structure !!!!!!' ]);
-            end
-         end
-         % close parpool
-         delete(gcp);
-      else
-         for f=1:length(fids)
-            disp(['calculating file ' num2str(f) ' of ' num2str(length(fids))]);
-            chi_T_proc(basedir, fids{f});
-         end
-      end
-
-   %____________________merge individual files______________________
-      
-      % average 20 sec
-      chi_merge_and_avg(basedir, 'temp', 20);
+	do_temp_proc;
 end
 
 %%%%%%%%%%%%%%%%%%% mooring velocity %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%55

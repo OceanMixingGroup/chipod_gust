@@ -151,4 +151,5 @@ if do_plot
 	%_____________________save pic______________________
 
 	print(gcf,[basedir 'pics' filesep 'temp.png' ],'-dpng','-r200','-painters') 
+	savefig(gcf,[basedir 'pics' filesep 'temp.fig' ]) 
 end

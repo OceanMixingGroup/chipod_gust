@@ -141,36 +141,5 @@ end
 
 %%%%%%%%%%%%%%%%%%% internal dTdz %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%55
 if do_dTdz_i
-   %_____________processing loop through all raw files__________________
-
-      dt   = 60; % sec bits of data for analysis
-      do_P = 0; % use pressure instead of acceleration to get z 
-
-      disp('calculating the intrenal dTdz');
-      % init parallel pool
-      if(do_parallel)
-         parpool;
-         % parallel for-loop
-         parfor f=1:length(fids)
-            try % take care if script crashes that the parpoo is shut down
-               disp(['calculating file ' num2str(f) ' of ' num2str(length(fids))]);
-               chi_generate_dTdz_i(basedir, fids{f}, dt, do_P);
-            catch
-               disp(['!!!!!! ' fids{f} ' crashed while processing  internal dTdz structure !!!!!!' ]);
-            end
-         end
-         % close parpool
-         delete(gcp);
-      else
-         for f=1:length(fids)
-            disp(['calculating file ' num2str(f) ' of ' num2str(length(fids))]);
-            chi_generate_dTdz_i(basedir, fids{f}, dt, do_P);
-         end
-      end
-
-   %____________________merge individual files______________________
-      chi_merge_and_avg(basedir, 'dTdz', 600);
-
-   %_____________________cp result to the input directory______________________
-   ! cp ../proc/dTdz.mat ../input/dTdz_i.mat
+   do_dTdz_i_proc;
 end

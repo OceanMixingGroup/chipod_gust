@@ -11,7 +11,6 @@ close all;
 %_____________________set processing flags______________________
    do_parallel = 0;     % use paralelle computing 
    do_temp     = 0;     % generate temp.mat 
-   do_vel_p    = 0;     % generate vel_p.mat
    do_vel_m    = 0;     % generate vel_m.mat
    do_dTdz_m   = 1;     % generate dTdz_m.mat
    do_dTdz_i   = 0;     % generate dTdz_i.mat 
@@ -120,64 +119,8 @@ addpath(genpath('./chipod_gust/software/'));% include  path to preocessing routi
 
 %%%%%%%%%%%%%%%%%%% temp processing %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%55
 if do_temp
-   %_____________processing loop through all raw files__________________
-
-      % init parallel pool
-      if(do_parallel)
-         parpool;
-         % parallel for-loop
-         parfor f=1:length(fids)
-            try % take care if script crashes that the parpoo is shut down
-               disp(['calculating file ' num2str(f) ' of ' num2str(length(fids))]);
-               chi_T_proc(basedir, fids{f});
-            catch
-               disp(['!!!!!! ' fids{f} ' crashed while processing T structure !!!!!!' ]);
-            end
-         end
-         % close parpool
-         delete(gcp);
-      else
-         for f=1:length(fids)
-            disp(['calculating file ' num2str(f) ' of ' num2str(length(fids))]);
-            chi_T_proc(basedir, fids{f});
-         end
-      end
-
-   %____________________merge individual files______________________
-      
-      % average 20 sec
-      chi_merge_and_avg(basedir, 'temp', 20);
+	do_temp_proc;
 end
-
-
-%%%%%%%%%%%%%%%%%%% generating Pitot velocity input file %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%55
-if do_vel_p
-
-   fidf = '../proc/P_fit.mat';
-   fids = '../proc/P_self.mat';
-   
-   if exist(fidf, 'file');
-      load(fidf);
-      vel_p.text = 'vel_p.mat is generated based on the ADCP fitted Pitot signal';
-      disp(vel_p.text);
-   elseif exist(fids, 'file');
-      load(fids);
-      vel_p.text = 'vel_p.mat is generated in the self contained way';
-      disp(vel_p.text);
-   else
-      disp([fid ' does not exist. Run calibrate_pitot first !']);
-   end
-
-   vel_p.time  = P.time;
-   vel_p.spd   = P.spd;
-   vel_p.U     = P.U;
-   vel_p.u     = real(P.U);
-   vel_p.v     = imag(P.U);
-
-   save('../input/vel_p.mat', 'vel_p');
-   
-end
-
 
 %%%%%%%%%%%%%%%%%%% mooring velocity %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%55
 if do_vel_m
@@ -304,36 +247,5 @@ end
 
 %%%%%%%%%%%%%%%%%%% internal dTdz %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%55
 if do_dTdz_i
-   %_____________processing loop through all raw files__________________
-
-      dt   = 60; % sec bits of data for analysis
-      do_P = 0; % use pressure instead of acceleration to get z 
-
-      disp('calculating the intrenal dTdz');
-      % init parallel pool
-      if(do_parallel)
-         parpool;
-         % parallel for-loop
-         parfor f=1:length(fids)
-            try % take care if script crashes that the parpoo is shut down
-               disp(['calculating file ' num2str(f) ' of ' num2str(length(fids))]);
-               chi_generate_dTdz_i(basedir, fids{f}, dt, do_P);
-            catch
-               disp(['!!!!!! ' fids{f} ' crashed while processing  internal dTdz structure !!!!!!' ]);
-            end
-         end
-         % close parpool
-         delete(gcp);
-      else
-         for f=1:length(fids)
-            disp(['calculating file ' num2str(f) ' of ' num2str(length(fids))]);
-            chi_generate_dTdz_i(basedir, fids{f}, dt, do_P);
-         end
-      end
-
-   %____________________merge individual files______________________
-      chi_merge_and_avg(basedir, 'dTdz', 600);
-
-   %_____________________cp result to the input directory______________________
-   ! cp ../proc/dTdz.mat ../input/dTdz_i.mat
+   do_dTdz_i_proc;
 end

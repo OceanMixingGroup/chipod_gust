@@ -8,9 +8,15 @@ function [] = DebugPlots(hfig, t0, t1, chi, name, ww)
     tind = i0:i1;
 
     figure(hfig);
+
+    try
+        figure(hfig);
+    catch ME
+        CreateFigure;
+    end
     ax(1) = subplot(511);
-    semilogy(chi.time(tind), chi.N2(tind)./chi.dTdz(tind).^2, 'displayname', name)
-    ylabel('N^2/T_z^2')
+    semilogy(time, chi.chi(tind), 'displayname', name)
+    ylabel('\chi')
     Common()
 
     ax(2) = subplot(512);
@@ -22,11 +28,12 @@ function [] = DebugPlots(hfig, t0, t1, chi, name, ww)
 
     ax(3) = subplot(513);
     try
-        semilogy(chi.time(tind), chi.eps(tind), 'displayname', name)
+        semilogy(time, chi.eps(tind), 'displayname', name)
     catch ME
-        semilogy(chi.time(tind), chi.eps1(tind), 'displayname', name)
+        semilogy(time, chi.eps1(tind), 'displayname', name)
     end
     ylabel('\epsilon')
+    ylim([10.^[-7, -3]])
     Common()
 
     ax(4) = subplot(514);
@@ -36,6 +43,7 @@ function [] = DebugPlots(hfig, t0, t1, chi, name, ww)
         semilogy(chi.time(tind), chi.Kt1(tind), 'displayname', name)
     end
     ylabel('K_t')
+    ylim([10.^[-7, 0]])
     Common()
 
     ax(5) = subplot(515);

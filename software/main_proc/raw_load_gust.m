@@ -31,7 +31,7 @@ frewind(fid); % move back to beginning of file
 % record  or 1636 bytes
 
 nseconds=floor((pos2)/1636); % number of one second blocks
-disp(sprintf('%d seconds of data in the file',nseconds));
+%disp(sprintf('%d seconds of data in the file',nseconds));
 trec.sync = 0;
 trec.sernum = 0;
 trec.time = 0;
@@ -60,9 +60,9 @@ dout = zeros(100*(nseconds-1),8);
 dblock = zeros(100,8);
 %dout = [];
 dtemp = zeros(100,8);
-disp('sync found at ');
+%disp('sync found at ');
 syncpos = ftell(fid);
-disp(ftell(fid));
+%disp(ftell(fid));
 yidx = 1;
 
 
@@ -125,7 +125,7 @@ end;
 
 %  now put in the starting time for the file as first time block -1
 time1 = time(2,1)-1;
-disp('read complete');
+%disp('read complete');
 % convert to raw volts and move to output
 if errcount == 0
     data.AY = dout(2:end,1).*(4.096/65536);

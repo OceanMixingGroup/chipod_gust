@@ -260,7 +260,7 @@ if(do_combine)
                  legend('raw', ['background flow < ' num2str(min_spd) 'm/s']);
 
                  print(gcf,['../pics/velocity-masking-' ID(5:end) '.png'],'-dpng','-r200','-painters')
-                 savefig(fig,['../pics/velocity-masking-' ID(5:end) '.png'])
+                 savefig(gcf,['../pics/velocity-masking-' ID(5:end) '.fig'])
              end
 
 
@@ -295,7 +295,7 @@ if(do_combine)
                  subplot(224); legend(gca, 'show'); title(ID(5:end));
 
                  print(gcf,['../pics/histograms-masking-' ID '.png'],'-dpng','-r200','-painters')
-                 savefig(gcf,['../pics/histograms-masking-' ID '.png'])
+                 savefig(gcf,['../pics/histograms-masking-' ID '.fig'])
              end
          end
 
@@ -344,7 +344,7 @@ if(do_combine)
        subplot(224); legend(gca, 'show'); title(['Final ' num2str(avgwindow/60) ' min mean']);
 
        print(gcf,['../pics/histograms-final.png'],'-dpng','-r200','-painters')
-       savefig(gcf,['../pics/histograms-final.png'])
+       savefig(gcf,['../pics/histograms-final.fig'])
    end
 
    Turb.do_mask = do_mask;
@@ -501,7 +501,7 @@ if do_plot
    %---------------------save imagage----------------------
 
    print(gcf,'../pics/Compare_Turb.png','-dpng','-r200','-painters')
-   savefig(gcf,'../pics/Compare_Turb.png')
+   savefig(gcf,'../pics/Compare_Turb.fig')
    
 end
 

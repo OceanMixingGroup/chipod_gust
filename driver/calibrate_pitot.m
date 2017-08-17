@@ -240,7 +240,7 @@ if do_v0_adcp
       p_L    = 'Pitot V0_{fit}';
       [fig] =  compare_velocity_timeseries(vel_m.time, vel_m.U, a_L, P.time, P.U, p_L);
       print(fig,'../pics/Pitot_vs_ADCP_V0_fit.png','-dpng','-r200','-painters')
-      savefig(fig,'../pics/Pitot_vs_ADCP_V0_fit.png')
+      savefig(fig,'../pics/Pitot_vs_ADCP_V0_fit.fig')
    end
 
 end
@@ -256,7 +256,7 @@ if (do_v0_adcp & do_v0_self & do_plot)
       p_L    = 'V0_{self}';
       [fig] =  compare_velocity_timeseries(Pf.P.time, Pf.P.U, a_L, Ps.P.time, Ps.P.U, p_L);
       print(gcf,'../pics/V0_fit_vs_self.png','-dpng','-r200','-painters')
-      savefig(fig,'../pics/V0_fit_vs_self.png')
+      savefig(fig,'../pics/V0_fit_vs_self.fig')
 end
 
 %___________________generating Pitot velocity input_________________

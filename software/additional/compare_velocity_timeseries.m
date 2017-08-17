@@ -48,7 +48,7 @@ end
  sl = [0 max([ max(abs(a_U)), max(abs(p_U)) ])]; 
 
  fig = figure('Color',[1 1 1],'visible',vis,'Paperunits','centimeters',...
-         'Papersize',[15 20],'PaperPosition',[0 0 15 20])
+         'Papersize',[15 20],'PaperPosition',[0 0 15 20]);
    
          % angle axes
           [axa, ~] = create_axes(fig,1,2, 0);
@@ -91,7 +91,7 @@ end
       ylabel(ax(a), 'm s^{-1}');
 
    %---------------------angle plot----------------------
-   a=2
+   a=2;
    hold(axa(a),'off')
    rose(axa(a), angle(C.a_U), 50);
    hold(axa(a),'on')

@@ -22,13 +22,13 @@ function [data] = chi_calibrate_chipod(rfid, head)
 
 %____________ check if raw_file head corresponds to given head___________
 
-if ~isequal(head.coef, headtest.coef)
-   disp(' ');
-   disp('!!! WARNING !!!!!');
-   disp('the raw file header is different from the given header');
-   disp('the given header is used and the raw-file header ignored');
-   disp(' ');
-end
+% if ~isequal(head.coef, headtest.coef)
+%    disp(' ');
+%    disp('!!! WARNING !!!!!');
+%    disp('the raw file header is different from the given header');
+%    disp('the given header is used and the raw-file header ignored');
+%    disp(' ');
+% end
 
 %_____________________Syncronize time______________________
    % data on Tp time stemp (datenum, T1P, T2P)

@@ -8,6 +8,9 @@
 
 do_parallel = 1;     % use paralelle computing 
 
+do_proc     = 1;  % do you actually want to do the processing
+do_plot     = 1;  % do you want to generate graphical output
+
 dt          = 60;    % sec bits of data for analysis
 do_P        = 0;     % use pressure instead of acceleration to get z 
 
@@ -22,11 +25,14 @@ addpath(genpath('./chipod_gust/software/'));% include  path to preocessing routi
    unit    = chi_get_unit_name(basedir); % get unit name
    rawdir       = [basedir filesep 'raw' filesep]; % raw files location
 
-%_____________________get list of all raw data______________________
+
+if do_proc  
+
+ %_____________________get list of all raw data______________________
    [fids, fdate] = chi_find_rawfiles(basedir);
 
 
-%_____________processing loop through all raw files__________________
+ %_____________processing loop through all raw files__________________
 
 
    disp('calculating the intrenal dTdz');
@@ -52,9 +58,51 @@ addpath(genpath('./chipod_gust/software/'));% include  path to preocessing routi
       end
    end
 
-%____________________merge individual files______________________
+ %____________________merge individual files______________________
    chi_merge_and_avg(basedir, 'dTdz', 600);
 
-%_____________________cp result to the input directory______________________
-! cp ../proc/dTdz.mat ../input/dTdz_i.mat
+ %_____________________cp result to the input directory______________________
+   ! cp ../proc/dTdz.mat ../input/dTdz_i.mat
+else
+   load ../input/dTdz_i.mat;
+end
 
+%_____________________plotting______________________
+if do_plot
+    fig = figure('Color',[1 1 1],'visible','on','Paperunits','centimeters',...
+            'Papersize',[30 20],'PaperPosition',[0 0 30 20])
+    
+            [ax, ~] = create_axes(fig, 3, 1, 0);
+
+            tl = Tz_i.time([1 end]);
+
+            a = 1;
+            plot(ax(a), Tz_i.time, Tz_i.T, 'Linewidth', 1);
+               xlim(ax(a), tl);
+               t = text_corner(ax(a), ['Temperature [^\circ C]'], 1);
+               
+            a = 2;
+               po10 = floor(log10(max(abs(Tz_i.Tz))));
+            plot(ax(a), Tz_i.time, Tz_i.Tz/10^po10, 'Linewidth', 1);
+            plot(ax(a), tl, [0 0],':k', 'Linewidth', 1);
+            
+               xlim(ax(a), tl);
+               t = text_corner(ax(a), ['T_z [10^{' num2str(po10) '}K/m]'], 1);
+               
+            a = 3;
+               po10 = floor(log10(max(abs(Tz_i.N2))));
+            plot(ax(a), Tz_i.time, Tz_i.N2/10^po10, 'Linewidth', 1);
+            plot(ax(a), tl, [0 0],':k', 'Linewidth', 1);
+               xlim(ax(a), tl);
+               t = text_corner(ax(a), ['N^2 [10^{' num2str(po10) '} s^{-2}]'], 1);
+
+            datetick(ax(a), 'keeplimits');
+            
+            t = text_corner(ax(1), ['T_z of unit ' unit], -2);
+            
+
+            print(gcf,'../pics/dTdz_i.png','-dpng','-r200','-painters');
+            savefig(fig, '../pics/dTdz_i.fig');
+            
+            
+end

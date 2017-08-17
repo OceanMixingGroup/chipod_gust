@@ -41,7 +41,7 @@ addpath(genpath('./chipod_gust/software/'));% include  path to preocessing routi
     %pflag = pflag.c_T1(0);       % switch off T1 if bad
     %pflag = pflag.c_T2(0);       % switch off T2 if bad
 
-    %pflag = pflag.c_ic(0);       % switch on ic processing (default off)
+    %pflag = pflag.c_ic(1);       % switch on ic processing (default off)
     %pflag = pflag.c_vc(0);      % switch off viscous convective processing (default on)
     %pflag.master.epsp = 1;       % switch on eps calculation from pitot (default on)
   

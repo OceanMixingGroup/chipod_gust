@@ -51,13 +51,12 @@ if do_plot
 
    ax(2) = subplot(212);
    hold on;
-   plot(p_time, .5*1025/s_pd*p_ref_spd.^2);
    plot(p_time, p_v_cal - v0);
+   plot(p_time, .5*1025/s_pd*p_ref_spd.^2);
    plot(get(gca, 'XLim'), [0 0], '--', 'color', [1 1 1]*0.6)
    xlim([nanmin(p_time) nanmax(p_time)])
    title(['num(negative speeds) = ' num2str(sum(p_v_cal-v0 < 0))])
-   legend('pitot calibrated voltage', 'ref spd converted to voltage', ...
-          'pitot calibrated voltage with offset correction')
+   legend('pitot calibrated voltage', 'ref spd converted to voltage')
    datetick('keeplimits')
 
    linkaxes(ax, 'x')

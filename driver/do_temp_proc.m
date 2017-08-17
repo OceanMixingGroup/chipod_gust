@@ -7,8 +7,8 @@
 %        Wed Aug 16 16:01:26 PDT 2017
 
 
-do_parallel = 1;     % use paralelle computing 
-do_raw_proc = 1;     % do the raw data processing 
+do_parallel = 0;     % use paralelle computing 
+do_raw_proc = 0;     % do the raw data processing 
 do_plot     = 1;     % generate a over view plot 
 
 
@@ -66,33 +66,34 @@ end
 if do_plot
      load([basedir 'proc' filesep 'temp.mat']);
 
+
    tl = T.time([1 end]);
 
 
    col = get(groot,'DefaultAxesColorOrder');
    
 
-    fig = figure('Color',[1 1 1],'visible',vis,'Paperunits','centimeters',...
+    fig = figure('Color',[1 1 1],'visible','on','Paperunits','centimeters',...
             'Papersize',[30 30],'PaperPosition',[0 -1 30 30])
 
 
             [ax, ~] = create_axes(fig, 6, 1, 0);
             
             a = 1;
-            pj = 1; p(pj) = plot(ax(a), T.time, T.depth, 'color', [0  0 0 1], 'Linewidth', 2);
+            pj = 1; p(pj) = plot(ax(a), T.time, T.depth, 'color', [0  0 0 1], 'Linewidth', 1);
                xlim(ax(a), tl);
                t = text_corner(ax(a), ['P [dbar]'], 7);
                
             a = 2;
             if isfield(T, 'T1') 
-               pj = 1; p(pj) = plot(ax(a), T.time, T.T1, 'color', [col(pj,:) 1], 'Linewidth', 2);
-               pj = 2; p(pj) = plot(ax(a), T.time, T.T2, 'color', [col(pj,:) 1], 'Linewidth', 2);
+               pj = 1; p(pj) = plot(ax(a), T.time, T.T1, 'color', [col(pj,:) 1], 'Linewidth', 1);
+               pj = 2; p(pj) = plot(ax(a), T.time, T.T2, 'color', [col(pj,:) 1], 'Linewidth', 1);
                   t1 = text_corner(ax(a), ['T1 [^\circ C]'], 1);
                   t1.Color = [col(1,:)];
                   t2 = text_corner(ax(a), ['T2 [^\circ C]'], 3);
                   t2.Color = [col(2,:)];
             else
-               pj = 1; p(pj) = plot(ax(a), T.time, T.T, 'color', [0  0 0 1], 'Linewidth', 2);
+               pj = 1; p(pj) = plot(ax(a), T.time, T.T, 'color', [0  0 0 1], 'Linewidth', 1);
                   xlim(ax(a), tl);
                   t = text_corner(ax(a), ['T [^\circ C]'], 1);
             end
@@ -100,9 +101,9 @@ if do_plot
                
             
             a = 3;
-            pj = 1; p(pj) = plot(ax(a), T.time, T.AX, 'color', [col(pj,:) 1], 'Linewidth', 2);
-            pj = 2; p(pj) = plot(ax(a), T.time, T.AY, 'color', [col(pj,:) 1], 'Linewidth', 2);
-            pj = 3; p(pj) = plot(ax(a), T.time, T.AZ, 'color', [col(pj,:) 1], 'Linewidth', 2);
+            pj = 1; p(pj) = plot(ax(a), T.time, T.AX, 'color', [col(pj,:) 1], 'Linewidth', 1);
+            pj = 2; p(pj) = plot(ax(a), T.time, T.AY, 'color', [col(pj,:) 1], 'Linewidth', 1);
+            pj = 3; p(pj) = plot(ax(a), T.time, T.AZ, 'color', [col(pj,:) 1], 'Linewidth', 1);
                xlim(ax(a), tl);
                t1 = text_corner(ax(a), ['AX [m s^{-2}]'], 1);
                t1.Color = [col(1,:)];
@@ -112,23 +113,30 @@ if do_plot
                t3.Color = [col(3,:)];
             
             a = 4;
-            pj = 1; p(pj) = plot(ax(a), T.time, T.cmp, '.', 'color', [0  0 0 1], 'Linewidth', 2);
+            pj = 1; p(pj) = plot(ax(a), T.time, T.cmp, '.', 'color', [0  0 0 1], 'Linewidth', 1);
                xlim(ax(a), tl);
                t = text_corner(ax(a), ['compass [deg]'], 7);
 
             a = 5;
-            pj = 1; p(pj) = plot(ax(a), T.time, T.W, 'color', [0  0 0 1], 'Linewidth', 2);
+            pj = 1; p(pj) = plot(ax(a), T.time, T.W, 'color', [0  0 0 1], 'Linewidth', 1);
                xlim(ax(a), tl);
                t = text_corner(ax(a), ['pitot [volt]'], 7);
 
             a = 6;
-            pj = 1; p(pj) = plot(ax(a), T.time, T.T1Pt, 'color', [col(pj,:) 1], 'Linewidth', 2);
-            pj = 2; p(pj) = plot(ax(a), T.time, T.T2Pt, 'color', [col(pj,:) 1], 'Linewidth', 2);
-               xlim(ax(a), tl);
-               t1 = text_corner(ax(a), ['T1P [volt]'], 1);  
-               t1.Color = [col(1,:)];
-               t2 = text_corner(ax(a), ['T2P [volt]'], 3);  
-               t2.Color = [col(2,:)];
+            if isfield(T, 'T1') 
+               pj = 1; p(pj) = plot(ax(a), T.time, T.T1Pt, 'color', [col(pj,:) 1], 'Linewidth', 1);
+               pj = 2; p(pj) = plot(ax(a), T.time, T.T2Pt, 'color', [col(pj,:) 1], 'Linewidth', 1);
+                  xlim(ax(a), tl);
+                  t1 = text_corner(ax(a), ['T1P [volt]'], 1);  
+                  t1.Color = [col(1,:)];
+                  t2 = text_corner(ax(a), ['T2P [volt]'], 3);  
+                  t2.Color = [col(2,:)];
+            else
+               pj = 1; p(pj) = plot(ax(a), T.time, T.TPt, 'color', [col(pj,:) 1], 'Linewidth', 1);
+                  xlim(ax(a), tl);
+                  t1 = text_corner(ax(a), ['TP [volt]'], 1);  
+                  t1.Color = [col(1,:)];
+            end
                
             linkaxes(ax, 'x');   
 
@@ -151,5 +159,5 @@ if do_plot
 	%_____________________save pic______________________
 
 	print(gcf,[basedir 'pics' filesep 'temp.png' ],'-dpng','-r200','-painters') 
-	savefig(gcf,[basedir 'pics' filesep 'temp.fig' ]) 
+%	savefig(gcf,[basedir 'pics' filesep 'temp.fig' ]) 
 end

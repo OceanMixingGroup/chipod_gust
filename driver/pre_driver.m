@@ -74,8 +74,15 @@ if do_vel_m
 
     %_______ EXAMPLE________________
     % load('../../../mooring_data/mooring_Pirata14_524.mat') ;
+    
+    if length(moor.depth) == 1
+        ChipodDepth = moor.depth;
+    else
+        disp('Please indicate the depth of this chipod in line 81 of pre-driver')
+        %ChipodDepth = 
+    end
 
-    chi_generate_vel_adcp(moor.time, moor.depth, moor.u, moor.v, moor.depth, sdir);
+    chi_generate_vel_adcp(moor.time, moor.depth, moor.u, moor.v, ChipodDepth, sdir);
 end
 
 

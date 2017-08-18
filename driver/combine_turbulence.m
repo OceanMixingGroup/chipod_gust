@@ -381,10 +381,6 @@ if(do_combine)
 
 %_____________________save combined structure______________________
    save([savedir '/Turb.mat'], 'Turb');
-   if length(runname) ~= 0
-       system(['ln -s ' savedir '/Turb.mat ' savedir ...
-               '../combined/' runname '.mat']);
-   end
 end
 
 %_____________________comparison plot______________________

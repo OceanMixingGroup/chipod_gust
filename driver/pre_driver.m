@@ -25,6 +25,7 @@ close all;
                         % (e.g. declination)
 
    % declination - get values from https://www.ngdc.noaa.gov/geomag-web/#declination
+   CompassOffset = NaN; % from calibration file.
    DeployDecl = 0; % at deployment location
    CorvallisDecl = 15+44/60; % at corvallis
 
@@ -60,7 +61,12 @@ addpath(genpath('./chipod_gust/software/'));% include  path to preocessing routi
         W  = chi_get_calibration_coefs_pitot(basedir);
 
         % _____usual calibrations______
-        head.coef.CMP(1) = 3.9; % from compass calibration file.
+        if isnan(CompassOffset)
+            error(['Compass offset is NaN and modify_header = 1. Check!']);
+        else
+            disp('Setting compass offset')
+            head.coef.CMP(1) = -CompassOffset; % from compass calibration file.
+        end
 
         % _____ account for declination _______
         % (this section should not be changed)

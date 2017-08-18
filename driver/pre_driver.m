@@ -21,26 +21,12 @@ close all;
    use_TS_relation = 0; % fit TS relation to estimate N2 from
                         % mooring data? Use (with caution) when you
                         % have only 1 salinity sensor
-   modify_header = 1;   % if 1, specify header corrections below
+   modify_header = 0;   % if 1, specify header corrections below
                         % (e.g. declination)
 
    % declination - get values from https://www.ngdc.noaa.gov/geomag-web/#declination
    DeployDecl = 0; % at deployment location
    CorvallisDecl = 15+44/60; % at corvallis
-
-   % chipod location (positive North, East & Down)
-   ChipodLon = 85.5; ChipodLat = 5; ChipodDepth = 5
-
-%_____________________RAMA preliminary data____________
-   use_rama    = 0     % use prelim processed RAMA data
-   if use_rama
-       RamaPrelimSalCutoff = 1/(1*60*60); % filter cutoff (Hz) for
-                                          % filtering prelim RAMA
-                                          % salinity data (set NaN to disable)
-       rho_tanh_fit = 1; % Use N2 from fitted tanh profile
-       ramaname = '~/rama/RamaPrelimProcessed/RAMA13.mat';
-   end
-
 
 %_____________________include path of processing flies______________________
 addpath(genpath('./chipod_gust/software/'));% include  path to preocessing routines
@@ -56,19 +42,18 @@ addpath(genpath('./chipod_gust/software/'));% include  path to preocessing routi
 %_____________________get list of all raw data______________________
    [fids, fdate] = chi_find_rawfiles(basedir);
 
-%_______________create header files if necessary______________________
-
-   % will create header.mat file if necessary
-   % if header.mat exists, it will read it
-   head = chi_get_calibration_coefs(basedir);
-
-   % will create header.mat file if necessary
-   % if header_p.mat exists, it will read it
-   W  = chi_get_calibration_coefs_pitot(basedir);
-
 %_____________________make header corrections if necessary______________
 
     if modify_header
+        %______create header files if necessary_____
+
+        % will create header.mat file if necessary
+        % if header.mat exists, it will read it
+        head = chi_get_calibration_coefs(basedir);
+
+        % will create header.mat file if necessary
+        % if header_p.mat exists, it will read it
+        W  = chi_get_calibration_coefs_pitot(basedir);
 
         % _____usual calibrations______
         head.coef.CMP(1) = 3.9; % from compass calibration file.
@@ -116,6 +101,11 @@ addpath(genpath('./chipod_gust/software/'));% include  path to preocessing routi
         deployStart  = data.datenum(1);
         data         = raw_load_chipod([rawdir fids{end}]);
         deployEnd    = data.datenum(end);
+
+
+         % chipod location (positive North, East & Down)
+         ChipodLon = 85.5; ChipodLat = 5; ChipodDepth = 5
+
     end
 
 %%%%%%%%%%%%%%%%%%% temp processing %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%55

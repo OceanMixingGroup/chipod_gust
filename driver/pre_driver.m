@@ -12,7 +12,7 @@ close all;
    do_parallel = 0;     % use paralelle computing 
    do_temp     = 0;     % generate temp.mat 
    do_vel_m    = 0;     % generate vel_m.mat
-   do_dTdz_m   = 1;     % generate dTdz_m.mat
+   do_dTdz_m   = 0;     % generate dTdz_m.mat
    do_dTdz_i   = 0;     % generate dTdz_i.mat 
    use_pmel    = 0;     % use TAO/TRITON/PIRATA/RAMA mooring data?
    use_mooring_sal = 0; % use mooring salinity along with dTdz_i
@@ -21,6 +21,8 @@ close all;
    use_TS_relation = 0; % fit TS relation to estimate N2 from
                         % mooring data? Use (with caution) when you
                         % have only 1 salinity sensor
+   use_old_moor_file = 0;   % use mooring file from an older deployment with
+                            % pre-calculated velocity, dTdz and N2
    modify_header = 0;   % if 1, specify header corrections below
                         % (e.g. declination)
 
@@ -32,7 +34,14 @@ close all;
 
 
    % chipod location (positive North, East & Down)
-   ChipodLon = 85.5; ChipodLat = 5; ChipodDepth = 5;
+   ChipodLon = 140; ChipodLat = 0; ChipodDepth = 29;
+   
+   % name of old mooring file
+   if use_old_moor_file
+       ChipodDeployment = 'tao14_140';      % change deployment name
+       moorname = ['../input/mooring_' ChipodDeployment '.mat'];
+   end
+   
 
 %_____________________include path of processing flies______________________
 addpath(genpath('./chipod_gust/software/'));% include  path to preocessing routines
@@ -127,16 +136,13 @@ if do_vel_m
                                                 deployEnd, pmeldir, ...
                                                 'RAMA', velfreq);
     end
+    
+    if use_old_moor_file
+        load(moorname);
+    end
 
     %_______ EXAMPLE________________
     % load('../../../mooring_data/mooring_Pirata14_524.mat') ;
-    
-    if length(moor.depth) == 1
-        ChipodDepth = moor.depth;
-    else
-        disp('Please indicate the depth of this chipod in line 81 of pre-driver')
-        %ChipodDepth = 
-    end
 
     chi_generate_vel_adcp(moor.time, moor.depth, moor.u, moor.v, ChipodDepth, sdir);
 end
@@ -152,26 +158,32 @@ if do_dTdz_m
                                                       deployEnd, pmeldir, 'RAMA', ...
                                                       Tfreq, Sfreq);
       end
+      
+      if use_old_moor_file
+            load(moorname);
+            chi_generate_dTdz_m_oldmoorfiles(moor,ChipodDepth,sdir);
+      else
 
-      %_______ EXAMPLE________________
-      %  load('../../G002/proc/temp.mat') ; % surounding instruments
-      %     T1.time = T.time; 
-      %     T1.z    = nanmedian(T.depth); 
-      %     T1.T    = T.T; 
-      %     T1.S    = ones(size((T.T)))*35; 
-      %  load('../../G011/proc/temp.mat') ; % surounding instruments
-      %     T2.time = T.time; 
-      %     T2.z    = nanmedian(T.depth); 
-      %     T2.T    = T.T; 
-      %     T2.S    = ones(size((T.T)))*35; 
+          %_______LOAD EXAMPLE________________
+          %  load('../../G002/proc/temp.mat') ; % surounding instruments
+          %     T1.time = T.time; 
+          %     T1.z    = nanmedian(T.depth); 
+          %     T1.T    = T.T; 
+          %     T1.S    = ones(size((T.T)))*35; 
+          %  load('../../G011/proc/temp.mat') ; % surounding instruments
+          %     T2.time = T.time; 
+          %     T2.z    = nanmedian(T.depth); 
+          %     T2.T    = T.T; 
+          %     T2.S    = ones(size((T.T)))*35; 
 
-      chi_generate_dTdz_m(T1.time, T1.z, T1.T, T1.S, ...
-                          T2.time, T2.z, T2.T, T2.S, sdir, ...
-                          use_TS_relation);
+          chi_generate_dTdz_m(T1.time, T1.z, T1.T, T1.S, ...
+                              T2.time, T2.z, T2.T, T2.S, sdir, ...
+                              use_TS_relation);
 
-      save([basedir filesep 'proc' filesep 'T_m.mat'], ...
-           'T1', 'T2')
+          save([basedir filesep 'proc' filesep 'T_m.mat'], ...
+               'T1', 'T2')
 
+      end
       %__________________recalculate N^2 using processed mooring salinity____________________
 
       if use_mooring_sal

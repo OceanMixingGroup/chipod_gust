@@ -14,7 +14,7 @@ close all;
 
    % set thresholds for masking
    min_N2 = 1e-9;
-   min_dTdz = 1e-4;
+   min_dTdz = 1e-3;
    min_spd = 0.05;
    min_inst_spd = min_spd; % min instantaneous speed past sensor
    mask_dTdz = ''; % '' for none, 'm' for mooring, 'i' for internal
@@ -281,17 +281,21 @@ if(do_combine)
              end
 
              [chi, percentage] = ApplyMask(chi, abs(chi.dTdz), '<', min_dTdz, 'Tz');
+             chi.stats.dTdz_mask_percentage = percentage;
              perlabel = [' -' num2str(percentage, '%.1f') '%'];
              if do_plot, Histograms(chi, hfig, normstr, ['|Tz| > ' num2str(min_dTdz, '%.1e') perlabel]); end
 
              [chi, percentage] = ApplyMask(chi, chi.N2, '<', min_N2, 'N2');
+             chi.stats.N2_mask_percentage = percentage;
              if percentage > 0.5
                  perlabel = [' -' num2str(percentage, '%.1f') '%'];
                  if do_plot, Histograms(chi, hfig, normstr, ['N2' perlabel]); end
              end
 
-             chi = ApplyMask(chi, chi.spd, '<', min_inst_spd, 'inst speed');
-             chi = ApplyMask(chi, spdmask, '<', min_spd, 'background flow');
+             [chi, percentage] = ApplyMask(chi, chi.spd, '<', min_inst_spd, 'inst speed');
+             chi.stats.inst_speed_mask_percentage = percentage;
+             [chi, percentage] = ApplyMask(chi, spdmask, '<', min_spd, 'background flow');
+             chi.stats.background_flow_mask_percentage = percentage;
 
              % additional Tz masking?
              if ~isempty(Tz)
@@ -303,6 +307,7 @@ if(do_combine)
                  Tzmask = interp1(Tz.time, Tz.Tz, chi.time);
                  [chi, percentage] = ApplyMask(chi, abs(Tzmask), '<', 1e-4, ...
                                                ['Additional Tz_' mask_dTdz]);
+                 chi.stats.additional_dTdz_mask_percentage = percentage;                          
                  perlabel = [' -' num2str(percentage, '%.1f') '%'];
                  if do_plot, Histograms(chi, hfig, normstr, ['Additional Tz_' mask_dTdz perlabel]); end
              end
@@ -344,6 +349,8 @@ if(do_combine)
                  if ( length(chi.(ff{f})) == length(chi.time) )
                      if strcmpi(ff{f}, 'Kt') | strcmpi(ff{f}, 'Jq'), continue; end
                      Turb.(ID).(ff{f}) = moving_average( chi.(ff{f}), ww, ww );
+                 else
+                     Turb.(ID).(ff{f}) = chi.(ff{f});
                  end
              end
              toc;
@@ -361,7 +368,20 @@ if(do_combine)
              if ~exist('hfig2', 'var'), hfig2 = CreateFigure; end
              Histograms(Turb.(ID), hfig2, 'pdf', ID);
          end
-
+         
+         % include statistics
+         Turb.(ID).stats.chimean = nanmean(Turb.(ID).chi);
+         Turb.(ID).stats.epsmean = nanmean(Turb.(ID).eps);
+         Turb.(ID).stats.Ktmean  = nanmean(Turb.(ID).Kt);
+         Turb.(ID).stats.Jqmean  = nanmean(Turb.(ID).Jq);
+         Turb.(ID).stats.chimedian = nanmedian(Turb.(ID).chi);
+         Turb.(ID).stats.epsmedian = nanmedian(Turb.(ID).eps);
+         Turb.(ID).stats.Ktmedian  = nanmedian(Turb.(ID).Kt);
+         Turb.(ID).stats.Jqmedian  = nanmedian(Turb.(ID).Jq);
+         Turb.(ID).stats.chistd = nanstd(Turb.(ID).chi);
+         Turb.(ID).stats.epsstd = nanstd(Turb.(ID).eps);
+         Turb.(ID).stats.Ktstd  = nanstd(Turb.(ID).Kt);
+         Turb.(ID).stats.Jqstd  = nanstd(Turb.(ID).Jq);
       end
    end
 
@@ -423,7 +443,11 @@ end
 %_____________________comparison plot______________________
 if do_plot
    
-   load([basedir '/proc/' runname '/Turb.mat']);
+   if exist(runname,'var') == 1 
+        load([basedir '/proc/' runname '/Turb.mat']);
+   else
+        load([basedir '/proc/Turb.mat']);
+   end
    ff = fields(Turb);
    ff = {ff{1:end-1}}'; % remove readme structure
 

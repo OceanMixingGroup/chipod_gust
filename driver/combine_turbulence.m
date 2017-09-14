@@ -202,7 +202,7 @@ if(do_combine)
              Histograms(chi, hfig, normstr, 'raw');
 
              if ~exist('hfraw', 'var'), hfraw = CreateFigure; end
-             Histograms(chi, hfraw, 'pdf', ID(5:end));
+             Histograms(chi, hfraw, 'pdf', fix_underscore(ID(5:end)));
 
              clear hfstrat
              if ~exist('hfstrat', 'var')
@@ -211,7 +211,7 @@ if(do_combine)
              end
 
              if isempty(strfind(shown_Tz, ID(6)))
-                 StratHist(hfstrat, chi, ID);
+                 StratHist(hfstrat, chi, fix_underscore(ID));
                  subplot(222);
                  hplt = plot(avgwindow/60*[1, 1], ylim, 'k--');
                  legend(hplt, 'averaging window')
@@ -263,7 +263,7 @@ if(do_combine)
                  ylabel('PDF')
                  legend('|v_x|', '|v_x + v_y|', '|v_z|', 'background flow', 'min. spd criterion');
                  dt2 = diff(vel_m.time(1:2))*86400/60;
-                 title([ID(5:end) ' | ' num2str(round(dt)) 's avg for v_* | ' ...
+                 title([fix_underscore(ID(5:end)) ' | ' num2str(round(dt)) 's avg for v_* | ' ...
                         num2str(round(dt2)) 'minutes \Deltat for background'])
 
                  subplot(212)
@@ -315,10 +315,10 @@ if(do_combine)
              if do_plot
                  figure(hfig)
                  set(hfig, 'DefaultLegendBox', 'off');
-                 subplot(221); legend(gca, 'show'); title(ID(5:end));
-                 subplot(222); legend(gca, 'show'); title(ID(5:end));
-                 subplot(223); legend(gca, 'show'); title(ID(5:end));
-                 subplot(224); legend(gca, 'show'); title(ID(5:end));
+                 subplot(221); legend(gca, 'show'); title(fix_underscore(ID(5:end)));
+                 subplot(222); legend(gca, 'show'); title(fix_underscore(ID(5:end)));
+                 subplot(223); legend(gca, 'show'); title(fix_underscore(ID(5:end)));
+                 subplot(224); legend(gca, 'show'); title(fix_underscore(ID(5:end)));
 
                  print(gcf,['../pics/histograms-masking-' ID '.png'],'-dpng','-r200','-painters')
                  savefig(gcf,['../pics/histograms-masking-' ID '.fig'])
@@ -366,7 +366,7 @@ if(do_combine)
 
          if do_plot
              if ~exist('hfig2', 'var'), hfig2 = CreateFigure; end
-             Histograms(Turb.(ID), hfig2, 'pdf', ID);
+             Histograms(Turb.(ID), hfig2, 'pdf', fix_underscore(ID));
          end
          
          % include statistics
@@ -550,8 +550,9 @@ if do_plot
          for f = 1:length(ff)
             if ~isstruct(Turb.(ff{f})) == 1, continue; end
             pj = f; p(pj) = plot(axl, [0 1] ,[0 1], 'color', [col(pj,:) 1], 'Linewidth', 1);
+            ffstr{f} = fix_underscore(ff{f});
          end
-         legend(p, ff);
+         legend(p, ffstr);
          set(axl, 'visible', 'off')
          ylim(axl,[-1 -.5])
 

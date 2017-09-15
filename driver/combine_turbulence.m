@@ -443,7 +443,7 @@ end
 %_____________________comparison plot______________________
 if do_plot
    
-   if exist(runname,'var') == 1 
+   if exist('runname','var') == 1 
         load([basedir '/proc/' runname '/Turb.mat']);
    else
         load([basedir '/proc/Turb.mat']);

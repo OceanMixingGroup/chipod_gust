@@ -211,7 +211,7 @@ if(do_combine)
              end
 
              if isempty(strfind(shown_Tz, ID(6)))
-                 StratHist(hfstrat, chi, fix_underscore(ID));
+                 StratHist(hfstrat, chi, ID);
                  subplot(222);
                  hplt = plot(avgwindow/60*[1, 1], ylim, 'k--');
                  legend(hplt, 'averaging window')

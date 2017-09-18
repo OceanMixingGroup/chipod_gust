@@ -208,7 +208,6 @@ if(do_combine)
              if ~exist('hfraw', 'var'), hfraw = CreateFigure; end
              Histograms(chi, hfraw, 'pdf', fix_underscore(ID(5:end)));
 
-             clear hfstrat
              if ~exist('hfstrat', 'var')
                  hfstrat = CreateFigure;
                  shown_Tz = '';

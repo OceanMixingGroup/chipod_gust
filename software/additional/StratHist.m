@@ -21,6 +21,7 @@ function [] = StratHist(hfig, chi, ID)
          'LineStyle', '--', 'LineWidth', 1.5, 'Color', co(ico, :), ...
          'HandleVisibility', 'off')
     xlabel('dTdz')
+    ylabel('pdf; cdf');
     xlim(cbins([find_approx(cdf, 0.05) find_approx(cdf, 0.85)]))
     legend('-dynamiclegend')
 
@@ -30,6 +31,7 @@ function [] = StratHist(hfig, chi, ID)
               'LineWidth', 1.5)
     hold on
     xlabel('Buoyancy period (2*\pi/N min)')
+    ylabel('pdf')
     xlim([0 90])
     set(gca, 'XTick', [0:5:90])
 
@@ -39,6 +41,7 @@ function [] = StratHist(hfig, chi, ID)
               'LineWidth', 1.5)
     hold on
     xlabel('log_{10} |1/(dTdz)|')
+    ylabel('pdf')
 
     subplot(224)
     histogram(log10(1./chi.dTdz.^2),  'DisplayStyle', 'stairs', ...
@@ -46,4 +49,5 @@ function [] = StratHist(hfig, chi, ID)
               'LineWidth', 1.5)
     hold on
     xlabel('log_{10}1/(dTdz)^2')
+    ylabel('pdf')
 end

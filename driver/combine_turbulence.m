@@ -17,16 +17,17 @@ close all;
    min_dTdz = 1e-3;
    min_spd = 0.05;
    min_inst_spd = min_spd; % min instantaneous speed past sensor
-   mask_dTdz = ''; % '' for none, 'm' for mooring, 'i' for internal
-                    % in addition to whats in chi.dTdz
    mask_inst_spd = 1; % estimates are crappy if sensor isn't moving
                       % enough.
                       % screws the spectrum calculation...
-   mask_spd = ''; % masking such that background flow flushes
-                  % sensed water volume
-                  % 'm' for mooring, 'p' for pitot,
-                  % '' to choose based on what was used in chi estimate
+
    avgwindow = 600; % averaging window in seconds
+
+   % we always mask using speed & dTdz used to calculate chi.
+   % the next two are for *additional* masking using a different
+   % speed (or dTdz) estimate
+   additional_mask_spd = ''; % '' for none, 'm' for mooring, 'p' for pitot
+   additional_mask_dTdz = ''; % '' for none, 'm' for mooring, 'i' for internal
 
    mask_flushing = 0; % mask so that chipod is always sensing fresh fluid
                       % beta version! turned off by default
@@ -82,13 +83,13 @@ addpath(genpath('./chipod_gust/software/'));% include  path to preocessing routi
    end
 
 if do_mask
-    if mask_dTdz == 'm'
+    if additional_mask_dTdz == 'm'
         disp('additional masking using mooring dTdz')
         load([basedir 'input/dTdz_m.mat'])
         Tz = Tz_m;
         clear Tz_m;
 
-    elseif mask_dTdz == 'i'
+    elseif additional_mask_dTdz == 'i'
         disp('additional masking using internal dTdz')
         load([basedir 'input/dTdz_i.mat'])
         Tz = Tz_i;
@@ -96,8 +97,6 @@ if do_mask
     else
         Tz = [];
     end
-
-    mask_spd_initial = mask_spd;
 end
 
 %_____________________find all available chi data______________________
@@ -226,20 +225,27 @@ if(do_combine)
 
          if do_mask
              % speed mask could change depending on estimate
-             if strcmpi(mask_spd_initial, '')
-                 mask_spd = ID(5);
-             end
+             mask_spd = ID(5);
 
              if mask_spd == 'm' & ~exist('vel_m', 'var')
                  load ../input/vel_m.mat
                  vel = vel_m;
-                 disp('masking using mooring speed');
              elseif mask_spd == 'p' & ~exist('vel_p', 'var')
                  load ../input/vel_p.mat
                  vel = vel_p;
-                 disp('masking using pitot speed');
              end
              spdmask = interp1(vel.time, vel.spd, chi.time);
+
+             if additional_mask_spd ~= ''
+                 if additional_mask_spd == 'm' & ~exist('vel_m', 'var')
+                     load ../input/vel_m.mat
+                     vel = vel_m;
+                 elseif additional_mask_spd == 'p' & ~exist('vel_p', 'var')
+                     load ../input/vel_p.mat
+                     vel = vel_p;
+                 end
+                 addspdmask = interp1(vel.time, vel.spd, chi.time);
+             end
 
              if mask_flushing
                  if ~exist(motionfile, 'file')
@@ -336,19 +342,24 @@ if(do_combine)
              [chi, percentage] = ApplyMask(chi, spdmask, '<', min_spd, 'background flow');
              chi.stats.background_flow_mask_percentage = percentage;
 
+             if additional_mask_spd ~= ''
+                 [chi, percentage] = ApplyMask(chi, addspdmask, '<', min_spd, 'background flow');
+                 chi.stats.additional_background_flow_mask_percentage = percentage;
+             end
+
              % additional Tz masking?
              if ~isempty(Tz)
-                 if mask_dTdz == 'i'
+                 if additional_mask_dTdz == 'i'
                      % choose appropriate internal stratification for sensor
                      Tz.Tz = Tz.(['Tz' ID(7)']);
                  end
 
                  Tzmask = interp1(Tz.time, Tz.Tz, chi.time);
                  [chi, percentage] = ApplyMask(chi, abs(Tzmask), '<', 1e-4, ...
-                                               ['Additional Tz_' mask_dTdz]);
-                 chi.stats.additional_dTdz_mask_percentage = percentage;                          
+                                               ['Additional Tz_' additional_mask_dTdz]);
+                 chi.stats.additional_dTdz_mask_percentage = percentage;
                  perlabel = [' -' num2str(percentage, '%.1f') '%'];
-                 if do_plot, Histograms(chi, hfig, normstr, ['Additional Tz_' mask_dTdz perlabel]); end
+                 if do_plot, Histograms(chi, hfig, normstr, ['Additional Tz_' additional_mask_dTdz perlabel]); end
              end
 
              if do_plot
@@ -442,13 +453,13 @@ if(do_combine)
    end
 
    Turb.do_mask = do_mask;
-   Turb.mask_dTdz = mask_dTdz;
+   Turb.additional_mask_dTdz = additional_mask_dTdz;
+   Turb.additional_mask_spd = additional_mask_spd;
    Turb.min_dTdz = min_dTdz;
    Turb.min_spd = min_spd;
    Turb.avgwindow = avgwindow;
    Turb.min_inst_spd = min_inst_spd;
    Turb.min_N2 = min_N2;
-   Turb.mask_spd = mask_spd_initial;
 
    %---------------------add readme----------------------
    Turb.readme = {...

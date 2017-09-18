@@ -24,6 +24,20 @@ function [fids, fdate] = chi_find_rawfiles(basedir)
             else
                disp([d(i).name ' does not fit unit ' unit]);
             end
+         else % for some older deployments, no 'raw_' at beginning of filenames
+             if ~strcmp(d(i).name(1),'.')
+                 if(d(i).name([-2:0]+end)== unit([-2:0]+end)) % check if correct unit
+                    % read in the file date from file name
+                    is1 = 0;  % no underscore
+                    is2 = strfind(d(i).name,'.');  % find dot
+
+                    fdate{cnt} = d(i).name((is1+1):(is2-1));
+                    fids{cnt} = d(i).name;
+                    cnt = cnt+1;
+                 else
+                    disp([d(i).name ' does not fit unit ' unit]);
+                 end  
+             end
          end
       end
    end

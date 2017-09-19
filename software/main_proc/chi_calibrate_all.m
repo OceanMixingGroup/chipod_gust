@@ -19,11 +19,11 @@ function [data] = chi_calibrate_all(rfid, head)
 
 if isfield(head.coef, 'T1')
    is_chipod = 1;
-   disp(' instrument identified as CHIPOD')
+%   disp(' instrument identified as CHIPOD')
    data = chi_calibrate_chipod(rfid, head);
 else
    is_chipod = 0;
-   disp(' instrument identified as GUST')
+%   disp(' instrument identified as GUST')
    data = chi_calibrate_gust(rfid, head);
 end
 

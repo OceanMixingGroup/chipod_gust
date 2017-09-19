@@ -409,7 +409,9 @@ if(do_combine)
              % recalculate using averaged quantities
              % if we average over a time period greater than
              % sampling period of dTdz, this estimate will differ!
-             Turb.(ID).Kt = 0.5 * Turb.(ID).chi ./ Turb.(ID).dTdz.^2;
+             Turb.(ID).Kt = 0.5 * Turb.(ID).chi ./ Turb.(ID).dTdz.^2 + ...
+                 sw_tdif(interp1(chi.time, Smean, Turb.(ID).time), ...
+                         Turb.(ID).T, ChipodDepth);
              Turb.(ID).Jq = -1025 .* 4200 .* Turb.(ID).Kt .* Turb.(ID).dTdz;
          else
              Turb.(ID) = chi;

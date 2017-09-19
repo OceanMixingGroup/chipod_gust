@@ -5,4 +5,4 @@ function tdif=sw_tdif(s,t,p)
 %  uses functions sw_cp, sw_dens, sw_tcond
 %
 %                          dave hebert   15/04/86
-      tdif=sw_tcond(s,t,p)/sw_cp(s,t,p)/sw_dens(s,t,p);
+      tdif=sw_tcond(s,t,p)./sw_cp(s,t,p)./sw_dens(s,t,p);

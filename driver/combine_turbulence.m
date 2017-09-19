@@ -48,6 +48,13 @@ close all;
    T1death = datenum(2060, 1, 1, 0, 0, 0); % chipod T1 or gustT T sensor
    T2death = datenum(2060, 1, 1, 0, 0, 0); % T2 sensor
 
+   % which estimates should I process?
+   do = ChooseEstimates(); % get defaults
+   % EXAMPLE: turn off all mm estimates
+   % do = ChooseEstimates(do, 'no_mm');
+   % EXAMPLE: turn off mm1 specifically
+   % do.chi_mm1 = 0;
+
    % additional time ranges to NaN out as necessary
    % make an array that looks like
    % nantimes{sensor_number} = [start_time1, end_time1;
@@ -118,6 +125,11 @@ if(do_combine)
       if ~isempty(mat_test) & ~isempty(chi_test)
 
          ID = d(i).name(1:mat_test-1);
+         if ~do.(ID)
+             disp(['do.' ID ' is disabled!']);
+             continue;
+         end
+
          if isChipod
              if ID(end) == '1' | strcmpi(ID(end-3:end), '1_ic') % sensor T1
                  sensor = 1;

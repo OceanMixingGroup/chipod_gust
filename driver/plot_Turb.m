@@ -19,39 +19,14 @@ runname = NaN;
 % PROCESSING MODES TO PLOT
 % There are up to 24 processing modes, which would you like to plot?
 % Note: if any of these have not been processed, they will not plot
-% automatically. 
+% automatically.
+if ~exist('do', 'var')
+    do = ChooseEstimates();
+end
 
-% turn off vc estimates
-    do.chi_mi11     = 1;
-    do.chi_mi22     = 1;
-    do.chi_mm1      = 1;
-    do.chi_mm2      = 1;
-    do.chi_pi11     = 1;
-    do.chi_pi22     = 1;
-    do.chi_pm1      = 1;
-    do.chi_pm2      = 1;
-
-% turn off ic estimates    
-    do.chi_mi11_ic  = 1;
-    do.chi_mi22_ic  = 1;
-    do.chi_mm1_ic   = 1;
-    do.chi_mm2_ic   = 1;
-    do.chi_pi11_ic  = 1;
-    do.chi_pi22_ic  = 1;
-    do.chi_pm1_ic   = 1;
-    do.chi_pm2_ic   = 1;
-
-% turn off cases where 1&2 was used for dT/dz
-    do.chi_mi112	= 0;
-    do.chi_mi212	= 0;
-    do.chi_pi112	= 0;
-    do.chi_pi212	= 0;
-    do.chi_mi112_ic	= 0;
-    do.chi_mi212_ic = 0;
-    do.chi_pi112_ic	= 0;
-    do.chi_pi212_ic = 0;    
-
-
+% filter out estimates here:
+% EXAMPLE 1: do = ChooseEstimates(do, 'no_ic')
+% EXAMPLE 2: do = ChooseEstimates([], 'none'); do.chi_pm1 = 1; % only pm1
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%% DO NOT CHANGE BELOW %%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

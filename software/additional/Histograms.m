@@ -32,7 +32,7 @@ function Histograms(chi, hfig, normstr, ID)
     hax(4) = subplot(224);
     set(gca, 'color', 'none')
     myhist(abs(chi.Jq), normstr, ID)
-    xlim([-8, 5])
+    xlim([-5, 4.5])
     hold on;
     xlabel('log_{10} |J_q|')
     ylabel(normstr)

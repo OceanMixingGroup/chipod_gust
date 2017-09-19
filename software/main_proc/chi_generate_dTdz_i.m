@@ -43,6 +43,11 @@ function [] = chi_generate_dTdz_i(basedir, rfid, varargin)
       savestamp   = [rfid((is1):(is2)) 'mat'];
       savedir     = [basedir filesep 'proc' filesep 'dTdz' filesep];
 
+      % in cases where no 'raw_' preceeds the date for the raw filenames,
+      % need different string for savestamp
+      if isempty(is1)
+         savestamp   = ['_' rfid(1:(is2)) 'mat'];
+      end
 
 %_____________________load raw_file______________________
    % load header

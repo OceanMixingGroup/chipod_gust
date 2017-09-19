@@ -10,10 +10,8 @@ close all;
 
 %_____________________set processing flags______________________
    do_parallel = 0;     % use paralelle computing 
-   do_temp     = 0;     % generate temp.mat 
    do_vel_m    = 0;     % generate vel_m.mat
    do_dTdz_m   = 0;     % generate dTdz_m.mat
-   do_dTdz_i   = 0;     % generate dTdz_i.mat 
    use_pmel    = 0;     % use TAO/TRITON/PIRATA/RAMA mooring data?
    use_mooring_sal = 0; % use mooring salinity along with dTdz_i
                         % to estimate N^2 in dTdz_i.
@@ -121,10 +119,7 @@ addpath(genpath('./chipod_gust/software/'));% include  path to preocessing routi
 
     end
 
-%%%%%%%%%%%%%%%%%%% temp processing %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%55
-if do_temp
-	do_temp_proc;
-end
+
 
 %%%%%%%%%%%%%%%%%%% mooring velocity %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%55
 if do_vel_m
@@ -218,7 +213,4 @@ if do_dTdz_m
       end
 end
 
-%%%%%%%%%%%%%%%%%%% internal dTdz %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%55
-if do_dTdz_i
-   do_dTdz_i_proc;
-end
+

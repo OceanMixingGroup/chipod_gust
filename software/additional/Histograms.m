@@ -1,50 +1,72 @@
-function Histograms(chi, hfig, normstr, legstr)
+function Histograms(chi, hfig, normstr, ID)
 
     figure(hfig)
     hfig.Position(3) = 2000;
+    hfig.Position(4) = 1065;
     set(hfig, 'DefaultLegendBox', 'off')
 
-    subplot(221);
+    hax(1) = subplot(221);
     set(gca, 'color', 'none')
-    myhist(chi.chi, normstr, legstr)
+    myhist(chi.chi, normstr, ID)
     hold on;
     xlabel('log_{10} \chi')
+    xlim([-12, -4])
     ylabel(normstr)
 
-    subplot(222);
+    hax(2) = subplot(222);
     set(gca, 'color', 'none')
-    myhist(chi.eps, normstr, legstr)
+    myhist(chi.eps, normstr, ID)
+    xlim([-12, -2])
     xlabel('log_{10} \epsilon')
     ylabel(normstr)
     hold on;
 
-    subplot(223)
+    hax(3) = subplot(223);
     set(gca, 'color', 'none')
-    myhist(chi.Kt, normstr, legstr)
+    myhist(chi.Kt, normstr, ID)
+    xlim([-8, 2])
     hold on;
     xlabel('log_{10} K_T')
     ylabel(normstr)
 
-    subplot(224)
+    hax(4) = subplot(224);
     set(gca, 'color', 'none')
-    myhist(abs(chi.Jq), normstr, legstr)
+    myhist(abs(chi.Jq), normstr, ID)
+    xlim([-8, 5])
     hold on;
     xlabel('log_{10} |J_q|')
     ylabel(normstr)
 end
 
-function myhist(var, normstr, legstr)
+function myhist(var, normstr, ID)
     nbins = ceil(sqrt(numel(var)));
-    legstr = getstats(var, legstr);
-    histogram(log10(var), nbins, 'normalization', normstr, ...
-              'displayname', legstr, ...
-              'displaystyle', 'stairs', 'LineWidth', 1.5);
-    legend('-dynamiclegend');
-end
 
-function str = getstats(var, strin)
+    avg = nanmean(var);
+    med = nanmedian(var);
 
-    str = [' | \mu=' num2str(nanmean(var), '%.1e')];
-    str = [str ', mdn=' num2str(nanmedian(var), '%.1e')];
-    str = [strin str];
+    ms = 8; % markersize
+
+    str = [ID ', \mu=' num2str(avg, '%.1e')];
+    str = [str ', mdn=' num2str(med, '%.1e')];
+
+    color = choose_color(ID,'color');
+    lw = choose_color(ID,'width');
+
+    hh = histogram(log10(var), nbins, 'normalization', normstr, ...
+                   'displayname', str, 'displaystyle', 'stairs', ...
+                   'LineWidth', lw, 'EdgeColor', color);
+
+    if strcmpi(normstr, 'pdf')
+        ylim([0 max([0.5, ylim])])
+    end
+    hold on;
+
+    ylims = ylim;
+    plot(log10(avg), ylims(2)*0.9, 'v', 'color', hh.EdgeColor, ...
+         'markersize', ms, 'handlevisibility', 'off');
+
+    plot(log10(med), ylims(2)*0.9 , '+', 'color', hh.EdgeColor, ...
+         'markersize', ms, 'handlevisibility', 'off');
+
+    legend('-dynamiclegend', 'Location', 'northeastoutside');
 end

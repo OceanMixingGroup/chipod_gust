@@ -415,7 +415,7 @@ if(do_combine)
 
          if do_plot
              if ~exist('hfig2', 'var'), hfig2 = CreateFigure; end
-             Histograms(Turb.(ID), hfig2, 'pdf', fix_underscore(ID));
+             Histograms(Turb.(ID), hfig2, 'count', fix_underscore(ID(5:end)));
          end
          
          % include statistics

@@ -83,7 +83,7 @@ elseif strcmp(name(5:end),'pm1_ic')
     color = cols(15,:);
 elseif strcmp(name(5:end),'pm2_ic')
     color = cols(16,:);
-else 
+elseif ~isempty(strfind(name, '12'))
     disp('repeating colors for mi112, mi212, pi112 or pi212')
     if strcmp(name(5:end),'mi112')
         color = cols(2,:);
@@ -102,6 +102,20 @@ else
     elseif strcmp(name(5:end),'pi212_ic')
         color = cols(15,:);
     end
+end
+
+if ~exist('color', 'var')
+    % fallback to axes.ColorOrder
+    hax = gca;
+    color = hax.ColorOrder(hax.ColorOrderIndex, :);
+end
+
+if ~exist('style', 'var')
+    style = '-';
+end
+
+if ~exist('width', 'var')
+    width = 1.5;
 end
 
 % determine output

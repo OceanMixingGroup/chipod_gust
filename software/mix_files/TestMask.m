@@ -20,8 +20,10 @@ function [] = TestMask(chi, mask_var, mask_sign, mask_vals, name, t0, t1)
         perlabel = [' | -' num2str(percentage, '%.1f') '%'];
         if mask_sign == '>'
             label = [name ' < ' num2str(mask_vals(ii), '%.1e')];
-        else
+        elseif mask_sign == '<'
             label = [name ' > ' num2str(mask_vals(ii), '%.1e')];
+        elseif mask_sign == '='
+            label = [name ' ~= ' num2str(mask_vals(ii), '%.1e')];
         end
         Histograms(chi, hfig, 'count', [label perlabel]);
 

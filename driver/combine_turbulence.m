@@ -28,6 +28,9 @@ close all;
                   % '' to choose based on what was used in chi estimate
    avgwindow = 600; % averaging window in seconds
 
+   mask_flushing = 0; % mask so that chipod is always sensing fresh fluid
+                      % beta version! turned off by default
+
    ChipodDepth = 30;
 
    normstr = 'count'; % normalization for histograms
@@ -67,6 +70,8 @@ addpath(genpath('./chipod_gust/software/'));% include  path to preocessing routi
    basedir =   here(1:(end-6));    % substract the mfile folder
    savedir =   [basedir 'proc/'];  % directory directory to save data
    unit    = chi_get_unit_name(basedir); % get unit name
+
+   motionfile = [basedir 'proc' filesep '/motion.mat'];
 
    % determine if chipod or gusT
    load ../calib/header.mat
@@ -236,6 +241,35 @@ if(do_combine)
              end
              spdmask = interp1(vel.time, vel.spd, chi.time);
 
+             if mask_flushing
+                 if ~exist(motionfile, 'file')
+                     error(['proc/motion.mat not found. IGNORING ' ...
+                            'FLUSHING MASKING. Run do_temp_proc ' ...
+                            'to create proc/motion.mat']);
+                 end
+
+                 if ~exist('motion', 'var')
+                     load(motionfile);
+                 end
+
+                 if ~isequal(motion.time, chi.time)
+                     ff = fieldnames(motion);
+                     for f=1:length(ff)
+                         if strcmpi(ff{f}, 'time'), continue; end
+                         motion.(ff{f}) = interp1(motion.time, motion.(ff{f}), chi.time);
+                     end
+                     motion.time = chi.time;
+                 end
+
+                 if ~exist('badMotion', 'var') | length(badMotion)~=length(chi.chi)
+                     badMotion = make_flushing_mask(motion, mask_spd, vel, do_plot);
+                     if do_plot
+                         print(gcf, [basedir 'pics' filesep 'angles.png'], '-r200', '-painters', '-bestfit')
+                         % savefig(gcf, [basedir 'pics' filesep 'angles.fig'])
+                     end
+                 end
+             end
+
              % histograms for speed-based masking
              if do_plot & exist('../proc/temp.mat', 'file')
                  load ../proc/temp.mat
@@ -278,6 +312,11 @@ if(do_combine)
 
                  print(gcf,['../pics/velocity-masking-' ID(5:end) '.png'],'-dpng','-r200','-painters')
                  savefig(gcf,['../pics/velocity-masking-' ID(5:end) '.fig'])
+             end
+
+             if mask_flushing
+                 chi = ApplyMask(chi, badMotion, '=', 1, 'volume not being flushed');
+                 if do_plot, Histograms(chi, hfig, normstr, 'volume flushed'); end
              end
 
              [chi, percentage] = ApplyMask(chi, abs(chi.dTdz), '<', min_dTdz, 'Tz');

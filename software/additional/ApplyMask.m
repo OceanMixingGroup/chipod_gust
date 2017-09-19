@@ -6,6 +6,8 @@ function [chi, percentage] = ApplyMask(chi, maskvar, relation, criterion, maskna
         mask = maskvar > criterion;
     elseif relation == '<'
         mask = maskvar < criterion;
+    elseif relation == '='
+        mask = maskvar == criterion;
     end
 
     numnans = sum(isnan(chi.chi(Trange)));

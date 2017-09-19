@@ -162,7 +162,14 @@ end
 %_____________________save data______________________
       sdir = [basedir 'proc' filesep 'Praw' filesep];
       [~, ~, ~] = mkdir(sdir);
-           is1 = strfind(rfid,'_');  % find under score
-           is2 = strfind(rfid,'.');  % find dot
-           savestamp   = [rfid((is1):(is2)) 'mat'];
-           save([sdir filesep  'Praw' savestamp], 'Praw');
+      is1 = strfind(rfid,'_');  % find under score
+      is2 = strfind(rfid,'.');  % find dot
+      savestamp   = [rfid((is1):(is2)) 'mat'];
+      
+      % in cases where no 'raw_' preceeds the date for the raw filenames,
+      % need different string for savestamp
+      if isempty(is1)
+          savestamp   = ['_' rfid(1:(is2)) 'mat'];
+      end
+      
+      save([sdir filesep  'Praw' savestamp], 'Praw');

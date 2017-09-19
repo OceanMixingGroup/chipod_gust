@@ -23,6 +23,12 @@ close all;
                       % enough.
                       % screws the spectrum calculation...
 
+   % maximum values; anything greater is NaNed out
+   max_chi = 1e-3;
+   max_eps = 1e-2;
+   max_Kt = 1;
+   max_Jq = 1e4;
+
    avgwindow = 600; % averaging window in seconds
 
    % we always mask using speed & dTdz used to calculate chi.
@@ -374,6 +380,12 @@ if(do_combine)
                  perlabel = [' -' num2str(percentage, '%.1f') '%'];
                  if do_plot, Histograms(chi, hfig, normstr, ['Additional Tz_' additional_mask_dTdz perlabel]); end
              end
+
+             % remove values greater than thresholds
+             [chi, chi.stats.max_chi_percentage] = ApplyMask(chi, chi.chi, '>', max_chi, 'max_chi');
+             [chi, chi.stats.max_eps_percentage] = ApplyMask(chi, chi.eps, '>', max_eps, 'max_eps');
+             [chi, chi.stats.max_Kt_percentage] = ApplyMask(chi, chi.Kt, '>', max_Kt, 'max_Kt');
+             [chi, chi.stats.max_Jq_percentage] = ApplyMask(chi, chi.Jq, '>', max_Jq, 'max_Jq');
 
              if do_plot
                  figure(hfig)

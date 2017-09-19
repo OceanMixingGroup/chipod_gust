@@ -453,6 +453,7 @@ if(do_combine)
        print(gcf,['../pics/histograms-stratification.png'],'-dpng','-r200','-painters')
    end
 
+   Turb.hash = githash('driver/combine_turbulence.m');
    Turb.do_mask = do_mask;
    Turb.additional_mask_dTdz = additional_mask_dTdz;
    Turb.additional_mask_spd = additional_mask_spd;

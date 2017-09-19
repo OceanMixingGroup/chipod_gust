@@ -112,6 +112,6 @@ disp('merge all days')
    end
 
    %_____________________combine all chi_data______________________
-   combine_turbulence;
+   % combine_turbulence;
 
 end % ~dry run

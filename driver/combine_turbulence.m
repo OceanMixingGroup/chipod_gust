@@ -12,6 +12,8 @@ close all;
    do_plot     =  1; % generate a comparison plot between the different estimates 
    do_mask     =  1; % NaN chi estimates using min dTdz, speed thresholds
 
+   save_fig    = 1; % save .fig files?
+
    % set thresholds for masking
    min_N2 = 1e-9;
    min_dTdz = 1e-3;
@@ -270,7 +272,7 @@ if(do_combine)
                      badMotion = make_flushing_mask(motion, mask_spd, vel, do_plot);
                      if do_plot
                          print(gcf, [basedir 'pics' filesep 'angles.png'], '-r200', '-painters', '-bestfit')
-                         % savefig(gcf, [basedir 'pics' filesep 'angles.fig'])
+                         if save_fig, savefig(gcf, [basedir 'pics' filesep 'angles.fig']); end
                      end
                  end
              end
@@ -370,7 +372,7 @@ if(do_combine)
                  subplot(224); legend(gca, 'show'); title(fix_underscore(ID(5:end)));
 
                  print(gcf,['../pics/histograms-masking-' ID '.png'],'-dpng','-r200','-painters')
-                 savefig(gcf,['../pics/histograms-masking-' ID '.fig'])
+                 if save_fig, savefig(gcf,['../pics/histograms-masking-' ID '.fig']); end
              end
          end
 
@@ -440,7 +442,7 @@ if(do_combine)
        subplot(222); title(['Final ' num2str(avgwindow/60) ' min mean']);
 
        print(gcf,['../pics/histograms-final.png'],'-dpng','-r200','-painters')
-       savefig(gcf,['../pics/histograms-final.fig'])
+       if save_fig, savefig(gcf,['../pics/histograms-final.fig']); end
 
        figure(hfraw)
        subplot(221); title(['raw 1s estimates']);

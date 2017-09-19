@@ -30,6 +30,8 @@ close all;
    max_Jq = 1e4;
 
    avgwindow = 600; % averaging window in seconds
+   avgvalid = 30; % percent valid values in averaging window for avg to
+                  % be non-NaN
 
    % we always mask using speed & dTdz used to calculate chi.
    % the next two are for *additional* masking using a different
@@ -423,7 +425,7 @@ if(do_combine)
              for f = 1:length(ff)  % run through all fields in chi
                  if ( length(chi.(ff{f})) == length(chi.time) )
                      if strcmpi(ff{f}, 'Kt') | strcmpi(ff{f}, 'Jq'), continue; end
-                     Turb.(ID).(ff{f}) = moving_average( chi.(ff{f}), ww, ww );
+                     Turb.(ID).(ff{f}) = moving_average( chi.(ff{f}), ww, ww , avgvalid);
                  else
                      Turb.(ID).(ff{f}) = chi.(ff{f});
                  end

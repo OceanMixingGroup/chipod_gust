@@ -33,6 +33,10 @@ close all;
    avgvalid = 30; % percent valid values in averaging window for avg to
                   % be non-NaN
 
+   % deglitching parameters
+   deglitch_window = avgwindow; % in seconds
+   deglitch_nstd = 2; % n std. dev. threshold
+
    % we always mask using speed & dTdz used to calculate chi.
    % the next two are for *additional* masking using a different
    % speed (or dTdz) estimate
@@ -404,6 +408,7 @@ if(do_combine)
 
          % convert averaging window from seconds to points
          ww =  round(avgwindow/(diff(chi.time(1:2))*3600*24));
+         dw = round(deglitch_window/(diff(chi.time(1:2))*3600*24));
 
          if isempty(ic_test)
              % deglitch chi and eps before
@@ -412,8 +417,8 @@ if(do_combine)
              % an averaged estimate
              disp('Deglitch... itch... tch... ch')
              tic;
-             chi.chi = deglitch(chi.chi, ww, 2,'b');
-             chi.eps = deglitch(chi.eps, ww, 2, 'b');
+             chi.chi = deglitch(chi.chi, dw, deglitch_nstd, 'b');
+             chi.eps = deglitch(chi.eps, dw, deglitch_nstd, 'b');
              toc;
 
              % get list of all fields to average

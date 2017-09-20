@@ -176,6 +176,23 @@ if(do_combine)
              load ../proc/T_m.mat
              Smean = interp1(T1.time, (T1.S + T2.S)/2, chi.time);
              chi.S = Smean;
+
+             dz = abs(T1.z - T2.z);
+             % SBE-37 accuracy is 2e-3 C & 3e-3 psu
+             sbe_dTdz = 2*2e-3/dz;
+             sbe_dSdz = 2*3e-4/dz;
+             sbe_N2 = 9.81 * (1.7e-4 * sbe_dTdz + 7.6e-4 * sbe_dSdz);
+
+             if min_dTdz < sbe_dTdz & ID(6) == 'm'
+                 disp(['WARNING: min_dTdz < minimum resolvable based on ' ...
+                       'SBE-37 accuracy specifications i.e. ' ...
+                       num2str(sbe_dTdz, '%.1e')]);
+             end
+             if min_N2 < sbe_N2 & ID(6) == 'm'
+                 disp(['WARNING: min_N2 < minimum resolvable based on ' ...
+                       'SBE-37 accuracy specifications i.e. ' ...
+                       num2str(sbe_N2, '%.1e')]);
+             end
          catch ME
              Smean = 35*ones(size(chi.time));
          end

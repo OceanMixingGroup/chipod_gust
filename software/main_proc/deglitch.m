@@ -22,6 +22,8 @@ len=length(x);
 xd=nan*ones(1,len);
 nt=floor(len/np);
 
+num_nan = sum(isnan(x));
+
 try
     xd = x(1:np*nt);
 
@@ -90,3 +92,9 @@ end
 xs(id)=NaN;
 xd(np*nt+1:len)=xs;
 if size(xd,1)~=size(x,1); xd=xd'; end
+
+num_newnan = sum(isnan(xd));
+disp(['deglitch removed ' num2str(num_newnan-num_nan) ' points = ' ...
+     num2str((num_newnan-num_nan)/(length(x) - num_nan) * 100, '%.1f') ' % | ' ...
+     'avg(NaNed points) = ' num2str(nanmean(x(isnan(xd))), '%.1e') ' | ' ...
+     'median(NaNed points) = ' num2str(nanmedian(x(isnan(xd))), '%.1e') ])

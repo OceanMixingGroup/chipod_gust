@@ -16,6 +16,10 @@ time_range = [datenum(2000, 1, 1, 0, 0, 0) ...
 
 dtind = 600; % every 10 minutes, assuming 1 second estimates
 
+% parameters for spectra of T1, T2
+nfft = 30*600; % length of segment (in seconds)
+nbandsmooth = 1; % number of frequency bands to average over
+
 %_____________________include path of processing flies______________________
 addpath(genpath('./chipod_gust/software/'));% include  path to preocessing routines
 
@@ -193,6 +197,33 @@ if do_plot
         legend('x', 'y', 'z');
         xlabel('Displacement = sqrt(2) x std(integrated accel_{x,y,z}) over 1 minute')
         print(gcf,[basedir 'pics' filesep 'disp.png' ],'-dpng','-r200','-painters')
+
+        %% spectra of T1 and T2
+        fs = 1/(diff(T.time(1:2))*86400);
+
+        trange = [find_approx(T.time, time_range(1)):find_approx(T.time, time_range(2))];
+
+        tic; disp('Calculating PSD')
+        [p1,f1] = fast_psd(T.T1(trange), nfft, fs);
+        [p2,f2] = fast_psd(T.T2(trange), nfft, fs);
+
+        % frequency band smoothing
+        f = moving_average(f1, nbandsmooth, nbandsmooth);
+        p1a = moving_average(p1, nbandsmooth, nbandsmooth);
+        p2a = moving_average(p2, nbandsmooth, nbandsmooth);
+        toc;
+
+        tscale = 1; %in seconds
+        CreateFigure;
+        loglog(1./f/tscale, p1a); hold on;
+        loglog(1./f/tscale, p2a);
+        legend('T1', 'T2');
+        set(gca, 'XDir', 'reverse')
+        xlabel('Period (s)')
+        ylabel('PSD');
+        title([unit ' | nfft = ' num2str(nfft/60) 's | nbandsmooth = ' num2str(nbandsmooth)])
+
+        print(gcf,[basedir 'pics' filesep 'temp-spectra.png' ],'-dpng','-r200','-painters')
 
         %% histograms comparing chipod body motion to background flow
         CreateFigure;

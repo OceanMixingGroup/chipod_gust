@@ -193,4 +193,56 @@ if do_plot
         legend('x', 'y', 'z');
         xlabel('Displacement = sqrt(2) x std(integrated accel_{x,y,z}) over 1 minute')
         print(gcf,[basedir 'pics' filesep 'disp.png' ],'-dpng','-r200','-painters')
+
+        %% histograms comparing chipod body motion to background flow
+        CreateFigure;
+
+        dt = diff(T.time(1:2))*86400;
+        trange = [find_approx(T.time, time_range(1)):find_approx(T.time, time_range(2))];
+
+        histogram(abs(T.a_vel_x(trange)), 'normalization' ,'pdf', ...
+                  'displaystyle', 'stairs', 'linewidth', 1.5, ...
+                  'DisplayName', '|v_x|');
+        hold on;
+        histogram(hypot(T.a_vel_x(trange), T.a_vel_y(trange)), ...
+                  'normalization' ,'pdf', 'displaystyle', 'stairs', ...
+                  'linewidth', 1.5, 'displayname', '|v_x + v_y|');
+        histogram(abs(T.a_vel_z(trange)), 'normalization' ,'pdf', ...
+                  'displaystyle', 'stairs', 'linewidth', 1.5, ...
+                  'displayname', '|v_z|');
+
+        try
+            load ../input/vel_m.mat
+
+            trange2 = [find_approx(vel_m.time, time_range(1)):find_approx(vel_m.time, time_range(2))];
+            histogram(vel_m.spd(trange2), 'normalization' ,'pdf', ...
+                      'displaystyle', 'stairs', 'linewidth', ...
+                      1.5, 'displayname', 'adcp');
+        catch ME
+            disp('could not load vel_m.mat');
+            disp('skipping');
+        end
+
+        try
+            load ../input/vel_p.mat
+
+            trange2 = [find_approx(vel_p.time, time_range(1)):find_approx(vel_p.time, time_range(2))];
+            histogram(vel_p.spd(trange2), 'normalization' ,'pdf', ...
+                      'displaystyle', 'stairs', 'linewidth', ...
+                      1.5, 'displayname', 'pitot');
+        catch ME
+            disp('could not load vel_p.mat');
+            disp('skipping');
+        end
+
+        ylim([0 10]);
+        xlim([0 1.5]);
+        xlabel('m/s')
+        ylabel('PDF')
+        dt2 = diff(vel_m.time(1:2))*86400/60;
+        title([num2str(round(dt)) 's avg for v_* | ' ...
+               num2str(round(dt2)) 'minutes \Deltat for background'])
+        legend('-dynamiclegend');
+
+        print(gcf,['../pics/velocity-histograms-' ID(5:end) '.png'],'-dpng','-r200','-painters')
 end

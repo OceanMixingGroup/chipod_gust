@@ -301,50 +301,6 @@ if(do_combine)
                  end
              end
 
-             % histograms for speed-based masking
-             if do_plot & exist('../proc/temp.mat', 'file')
-                 load ../proc/temp.mat
-                 load ../input/vel_m.mat
-                 CreateFigure;
-
-                 dt = diff(T.time(1:2))*86400;
-                 trange = [find_approx(T.time, time_range(1)):find_approx(T.time, time_range(2))];
-                 subplot(211)
-                 histogram(abs(T.a_vel_x(trange)), 'normalization' ,'pdf', ...
-                           'displaystyle', 'stairs', 'linewidth', 1.5);
-                 hold on;
-                 histogram(hypot(T.a_vel_x(trange), T.a_vel_y(trange)), ...
-                           'normalization' ,'pdf', 'displaystyle', 'stairs', 'linewidth', 1.5);
-                 histogram(abs(T.a_vel_z(trange)), 'normalization' ,'pdf', ...
-                           'displaystyle', 'stairs', 'linewidth', 1.5);
-
-                 trange2 = [find_approx(vel_m.time, time_range(1)):find_approx(vel_m.time, time_range(2))];
-                 histogram(vel_m.spd(trange2), 'normalization' ,'pdf', ...
-                           'displaystyle', 'stairs', 'linewidth', 1.5);
-                 plot([1 1]*min_spd, ylim, 'k--');
-                 xlim([-0.25 1]*0.7*max(vel_m.spd))
-                 set(gca, 'XTick', sort([min_spd get(gca, 'XTick')]));
-                 xlabel('m/s')
-                 ylabel('PDF')
-                 legend('|v_x|', '|v_x + v_y|', '|v_z|', 'background flow', 'min. spd criterion');
-                 dt2 = diff(vel_m.time(1:2))*86400/60;
-                 title([fix_underscore(ID(5:end)) ' | ' num2str(round(dt)) 's avg for v_* | ' ...
-                        num2str(round(dt2)) 'minutes \Deltat for background'])
-
-                 subplot(212)
-                 histogram(log10(chi.eps), 'normalization', 'pdf', 'displaystyle', 'stairs', 'linewidth', 1.5);
-                 hold on;
-                 histogram(log10(chi.eps(spdmask < min_spd)), ...
-                           'normalization', 'pdf', 'displaystyle', 'stairs', 'linewidth', 1.5);
-                 ylabel('PDF')
-                 xlabel('log_{10} \epsilon')
-                 xlim([-14 5])
-                 legend('raw', ['background flow < ' num2str(min_spd) 'm/s']);
-
-                 print(gcf,['../pics/velocity-masking-' ID(5:end) '.png'],'-dpng','-r200','-painters')
-                 savefig(gcf,['../pics/velocity-masking-' ID(5:end) '.fig'])
-             end
-
              if mask_flushing
                  chi = ApplyMask(chi, badMotion, '=', 1, 'volume not being flushed');
                  if do_plot, Histograms(chi, hfig, normstr, 'volume flushed'); end

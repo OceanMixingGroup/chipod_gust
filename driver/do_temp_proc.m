@@ -275,5 +275,5 @@ if do_plot
                num2str(round(dt2)) 'minutes \Deltat for background'])
         legend('-dynamiclegend');
 
-        print(gcf,['../pics/velocity-histograms-' ID(5:end) '.png'],'-dpng','-r200','-painters')
+        print(gcf,['../pics/velocity-histogram.png'],'-dpng','-r200','-painters')
 end

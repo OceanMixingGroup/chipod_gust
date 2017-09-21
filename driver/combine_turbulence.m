@@ -7,6 +7,9 @@
 clear all;
 close all;
 
+%_____________________include path of processing flies______________________
+addpath(genpath('./chipod_gust/software/'));% include  path to preocessing routines
+
 %_____________________set flags______________________
    do_combine  =  1; % do actually the averaging calculation (can take a couple o minutes)
    do_plot     =  1; % generate a comparison plot between the different estimates 
@@ -79,12 +82,6 @@ close all;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%% DO NOT CHANGE BELOW %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-
-
-
-%_____________________include path of processing flies______________________
-addpath(genpath('./chipod_gust/software/'));% include  path to preocessing routines
 
 
 %_____________________set directories______________________    

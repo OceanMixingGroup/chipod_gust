@@ -362,8 +362,6 @@ if(do_combine)
              % remove values greater than thresholds
              [chi, chi.stats.max_chi_percentage] = ApplyMask(chi, chi.chi, '>', max_chi, 'max_chi');
              [chi, chi.stats.max_eps_percentage] = ApplyMask(chi, chi.eps, '>', max_eps, 'max_eps');
-             [chi, chi.stats.max_Kt_percentage] = ApplyMask(chi, chi.Kt, '>', max_Kt, 'max_Kt');
-             [chi, chi.stats.max_Jq_percentage] = ApplyMask(chi, chi.Jq, '>', max_Jq, 'max_Jq');
 
              if do_plot
                  figure(hfig)
@@ -408,21 +406,24 @@ if(do_combine)
                  end
              end
              toc;
-
-             % reapply dTdz filter
-             % (because we divide by this dTdz for Kt, Jq)
-             Turb.(ID) = ApplyMask(Turb.(ID), abs(Turb.(ID).dTdz), '<', min_dTdz, 'avg dTdz');
-
-             % recalculate using averaged quantities
-             % if we average over a time period greater than
-             % sampling period of dTdz, this estimate will differ!
-             Turb.(ID).Kt = 0.5 * Turb.(ID).chi ./ Turb.(ID).dTdz.^2 + ...
-                 sw_tdif(interp1(chi.time, Smean, Turb.(ID).time), ...
-                         Turb.(ID).T, ChipodDepth);
-             Turb.(ID).Jq = -1025 .* 4200 .* Turb.(ID).Kt .* Turb.(ID).dTdz;
          else
              Turb.(ID) = chi;
          end
+
+         % reapply dTdz filter
+         % (because we divide by this dTdz for Kt, Jq)
+         Turb.(ID) = ApplyMask(Turb.(ID), abs(Turb.(ID).dTdz), '<', min_dTdz, 'avg dTdz');
+
+         % recalculate using averaged quantities
+         % if we average over a time period greater than
+         % sampling period of dTdz, this estimate will differ!
+         Turb.(ID).Kt = 0.5 * Turb.(ID).chi ./ Turb.(ID).dTdz.^2 + ...
+             sw_tdif(interp1(chi.time, Smean, Turb.(ID).time), ...
+                     Turb.(ID).T, ChipodDepth);
+         Turb.(ID).Jq = -1025 .* 4200 .* Turb.(ID).Kt .* Turb.(ID).dTdz;
+
+         [Turb.(ID), Turb.(ID).stats.max_Kt_percentage] = ApplyMask(Turb.(ID), Turb.(ID).Kt, '>', max_Kt, 'max_Kt');
+         [Turb.(ID), Turb.(ID).stats.max_Jq_percentage] = ApplyMask(Turb.(ID), Turb.(ID).Jq, '>', max_Jq, 'max_Jq');
 
          if do_plot
              if ~exist('hfig2', 'var'), hfig2 = CreateFigure; end

@@ -51,7 +51,9 @@ addpath(genpath('./chipod_gust/software/'));% include  path to preocessing routi
 
    ChipodDepth = 30;
 
-   normstr = 'count'; % normalization for histograms
+   % normalization for *masking* histograms
+   % final processed histograms are always pdf
+   normstr = 'count';
 
    % if you want to restrict the time range that should be combined
    % use the following
@@ -424,7 +426,7 @@ if(do_combine)
 
          if do_plot
              if ~exist('hfig2', 'var'), hfig2 = CreateFigure; end
-             Histograms(Turb.(ID), hfig2, 'count', fix_underscore(ID(5:end)));
+             Histograms(Turb.(ID), hfig2, 'pdf', fix_underscore(ID(5:end)));
          end
          
          % include statistics

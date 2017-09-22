@@ -46,8 +46,8 @@ function myhist(var, normstr, ID)
 
     ms = 8; % markersize
 
-    str = [ID ', \mu=' num2str(avg, '%.1e')];
-    str = [str ', mdn=' num2str(med, '%.1e')];
+    str = sprintf('%s\n%s', ID, ...
+                  ['\mu=' num2str(avg, '%.1e') '|mdn=' num2str(med, '%.1e')]);
 
     color = choose_color(ID,'color');
     lw = choose_color(ID,'width');

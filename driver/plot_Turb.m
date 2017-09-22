@@ -215,7 +215,7 @@ for f = 1:length(ff)
                 'color', choose_color(ff{f},'color'), ...
                 'LineWidth', choose_color(ff{f},'width'), ...
                 'LineStyle', choose_color(ff{f},'style'));
-        ffstr{nleg} = fix_underscore(ff{f});
+        ffstr{nleg} = fix_underscore(ff{f}(5:end));
         nleg = nleg+1;
     end
 end

@@ -1,9 +1,9 @@
 function Histograms(chi, hfig, normstr, ID)
 
     nbins = 300;
-    chibins = linspace(-10, -3, nbins);
+    chibins = linspace(-12, -3, nbins);
     epsbins = linspace(-12, -2, nbins);
-    ktbins  = linspace(-8, 0, nbins);
+    ktbins  = linspace(-8, 1, nbins);
     jqbins  = linspace(-3, 4, nbins/2);
 
     figure(hfig)
@@ -57,11 +57,16 @@ function myhist(var, bins, normstr, ID)
     color = choose_color(ID,'color');
     lw = choose_color(ID,'width');
 
-    hh = histogram(log10(var), 'BinEdges', bins, 'normalization', normstr, ...
-                   'displayname', str, 'displaystyle', 'stairs', ...
-                   'LineWidth', lw, 'EdgeColor', color);
+    if strcmpi(normstr, 'count')
+        hh = histogram(log10(var), 'BinEdges', bins, 'normalization', normstr, ...
+                       'displayname', str, 'displaystyle', 'stairs', ...
+                       'LineWidth', lw, 'EdgeColor', color);
+    end
 
     if strcmpi(normstr, 'pdf')
+        hh = histogram(log10(var), 'normalization', normstr, ...
+                       'displayname', str, 'displaystyle', 'stairs', ...
+                       'LineWidth', lw, 'EdgeColor', color);
         ylim([0 max([0.5, ylim])])
     end
     hold on;

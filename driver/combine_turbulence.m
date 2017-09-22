@@ -409,7 +409,7 @@ if(do_combine)
 
              % reapply dTdz filter
              % (because we divide by this dTdz for Kt, Jq)
-             Turb.(ID) = ApplyMask(Turb.(ID), abs(Turb.(ID).dTdz), '<', min_dTdz, 'avg dTdz')
+             Turb.(ID) = ApplyMask(Turb.(ID), abs(Turb.(ID).dTdz), '<', min_dTdz, 'avg dTdz');
 
              % recalculate using averaged quantities
              % if we average over a time period greater than

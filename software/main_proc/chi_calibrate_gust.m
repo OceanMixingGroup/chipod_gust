@@ -41,6 +41,14 @@ function [data] = chi_calibrate_gust(rfid, head)
          chi.AX=g.*calibrate_polynomial(rdat.AX,head.coef.AX);
          chi.AY=g.*calibrate_polynomial(rdat.AY,head.coef.AY);
          chi.AZ=g.*calibrate_polynomial(rdat.AZ,head.coef.AZ);
+
+         % sometimes for gooseneck Ax and Az are switched
+         if nanmedian( abs(chi.AX) ) > nanmedian( abs(chi.AZ) ) % find out which is dominated by gravity
+            tmpZ = chi.AX;
+            chi.AX = chi.AZ;
+            chi.AZ = tmpZ;
+         end
+
           chi.AX=fillgap(chi.AX);
           chi.AY=fillgap(chi.AY);
           chi.AZ=fillgap(chi.AZ);

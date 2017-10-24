@@ -1,4 +1,4 @@
-function [spd, Pdym, Vcal] = pitot_calibrate(Vraw, T, P, V0, T0, P0, Vs, Ts, Ps)
+function [spd, Pdym, Vcal] = pitot_calibrate(Vraw, T, P, W, T0, P0, Vs, Ts, Ps)
 %% [spd, Pdym, Vcal] = pitot_calibrate(Vraw, T, P, W)
 %   Converts raw pitot voltages into usful data
 %
@@ -24,14 +24,14 @@ function [spd, Pdym, Vcal] = pitot_calibrate(Vraw, T, P, V0, T0, P0, Vs, Ts, Ps)
 %%
 
 if nargin < 5
-    T0 = V0.T0;
-    P0 = V0.P0;
-    Vs = 1/V0.Pd(2);
-    Ts = V0.T(2);
-    Ps = V0.Ps(2);
-    v0 = V0.V0;
-    clear V0;
-    V0 = v0;
+    T0 = W.T0;
+    P0 = W.P0;
+    Vs = 1/W.Pd(2);
+    Ts = W.T(2);
+    Ps = W.Ps(2);
+    V0 = W.V0;
+else
+    V0 = W;
 end
     
 
@@ -58,5 +58,3 @@ SP = Ps; % slope for the static pressure
 Vcal = Vraw - (T-T0)*ST - (P-P0)*SP - V0;
 Pdym = Vcal*Sp;
 spd    = sign(Pdym).*sqrt(2/1025*abs(Pdym)); 
-% remove negative values
-%spd(Pdym<0) = 0; 

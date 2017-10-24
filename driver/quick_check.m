@@ -37,7 +37,7 @@ addpath(genpath('./chipod_gust/software/'));% include  path to preocessing routi
       load(hfid);
       if isfield(W, 'V0')
          [fig, P] = quick_look_pitot(data, W);
-          print(gcf,['../pics/quick__pitot_' rfid '.png'],'-dpng','-r100','-painters')
+          print(gcf,['../pics/quick_pitot_' rfid '.png'],'-dpng','-r100','-painters')
       else
        disp([' V0 does not exist yet. First Run calibrate_pitot']);
       end

@@ -1,7 +1,7 @@
-function [eps, varargout] = chi_cal_pitot_eps_hf(data, W)
-%% [eps, [data, M]] = chi_cal_pitot_eps_hf(data, W) 
+function [eps, varargout] = chi_cal_pitot_eps(data, W)
+%% [eps, [data, M]] = chi_cal_pitot_eps(data, W) 
 %     
-%     This function calculates dissipation rates based on Pitot speeds for heigh frequencies > than waves
+%     This function calculates dissipation rates based on Pitot speeds for low frequencies < than waves
 %
 %     INPUT
 %        data     :  calibrated chipod/ gusT data
@@ -31,19 +31,8 @@ dt = diff(data.time(1:2))*3600*24;
 if isfield(data, 'T1')
    data.T = data.T1;
 end
-
-
-
-
 %_____________________calibrate speed______________________
-   cal.V0 = W.V0;
-   cal.T0 = W.T0;
-   cal.P0 = W.P0;
-   cal.Vs = 1/W.Pd(2);
-   cal.Ts = W.T(2);
-   cal.Ps = W.Ps(2);
-   [data.spd, data.Pdym, data.V_cal] = pitot_calibrate(data.W, data.T, data.P,...
-            cal.V0, cal.T0, cal.P0, cal.Vs, cal.Ts, cal.Ps);
+   [data.spd, data.Pdym, data.V_cal] = pitot_calibrate(data.W, data.T, data.P, W);
 
    % get directional information for U
    data.U  = pitot_add_direction( data.time, data.spd, data.time_cmp, data.cmp);

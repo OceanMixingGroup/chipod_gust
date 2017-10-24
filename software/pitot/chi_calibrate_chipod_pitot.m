@@ -102,14 +102,7 @@ end
          end
        end
 
-         chi.cal.V0 = head.W.V0;
-         chi.cal.T0 = head.W.T0;
-         chi.cal.P0 = head.W.P0;
-         chi.cal.Vs = 1/head.W.Pd(2);
-         chi.cal.Ts = head.W.T(2);
-         chi.cal.Ps = head.W.Ps(2);
-         [chi.spd, chi.Pdym, chi.V_cal] = pitot_calibrate(chi.W, chi.T1, chi.P,...
-                  chi.cal.V0, chi.cal.T0, chi.cal.P0, chi.cal.Vs, chi.cal.Ts, chi.cal.Ps);
+         [chi.spd, chi.Pdym, chi.V_cal] = pitot_calibrate(chi.W, chi.T1, chi.P, head.W);
 
          chi.U  = pitot_add_direction( chi.time, chi.spd, chi.time_cmp, chi.cmp);
          chi.u  = real(chi.U);

@@ -114,8 +114,8 @@ function [] = chi_main_proc(basedir, rfid, pflag, varargin)
                   end
 
                   vel_p.time = data.time;
-                  [vel_p.spd, ~, ~] = pitot_calibrate( data.W, data.T, data.P,...
-                           W.V0, W.T0, W.P0, 1/W.Pd(2), W.T(2), W.Ps(2) );
+                  [vel_p.spd, ~, ~] = pitot_calibrate( data.W, data.T, data.P, W);
+                  vel_p.spd(vel_p.spd<0) = 0;
                else
                   disp(['W.V0, W.T0 and W.P0 do not exit']);
                   disp(['You need to calibrate the Pitot tube first!']);

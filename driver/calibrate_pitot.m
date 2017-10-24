@@ -137,7 +137,11 @@ if do_v0_self
 
    % calibrate voltage into speeds
    % temperature calibration done earlier so set that to 0
-   [P.spd, ~, ~] = pitot_calibrate(P.W, P.T, 0, W.V0, W.T0, 0, 1/W.Pd(2), 0, 0);
+   W1 = W;
+      W1.P0 = 0; % switch off temp and press calibration
+      W1.T = [0 0 0 0 0];
+      W1.Ps = [0 0 0 0 0];
+   [P.spd, ~, ~] = pitot_calibrate(P.W, P.T, 0, W1);
 
    disp(['Time instants with calibrated Pd < 0 = ' ...
         num2str(sum(P.spd(iiP) == 0)/length(P.spd(iiP))*100) '%'])
@@ -210,7 +214,11 @@ if do_v0_adcp
        [W.V0] = fit_pitot_v0( vel_m.time, vel_m.spd, P.time(iiPcal), P.W(iiPcal), 1/W.Pd(2), do_plot);
        if do_plot, print(gcf, '../pics/pitot-adcp-fit-voltages.png', '-dpng', '-r200', '-painters'); end
    % calibrate voltage into speeds
-   [P.spd, ~, ~] = pitot_calibrate(P.W, P.T, 0, W.V0, W.T0, 0, 1/W.Pd(2), 0, 0);
+   W1 = W;
+      W1.P0 = 0; % switch off temp and press calibration
+      W1.T = [0 0 0 0 0];
+      W1.Ps = [0 0 0 0 0];
+   [P.spd, ~, ~] = pitot_calibrate(P.W, P.T, 0, W1);
 
    % add directional information from the compass
    P.U = pitot_add_direction(P.time, P.spd, P.time, P.cmp);

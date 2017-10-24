@@ -31,5 +31,8 @@ function [U] = pitot_add_direction(time_spd, spd, time_cmp, cmp)
 
 %_____________________generate compex velocity vector______________________
 
+   % remove negative speeds
+   spd(spd<0) = nan;
+
    U = spd .* exp( 1i * ( -(cmp1/180*pi) - pi/2 ));
 

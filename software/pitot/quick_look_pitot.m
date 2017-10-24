@@ -113,7 +113,8 @@ end
          plot(ax(a), data.time, data.a_vel_z, 'color', [col(pj,:) .5], 'Linewidth', 1);
          p(pj) = plot(ax(a), data.time, movmean(data.a_vel_z, 60000), 'color', [col(pj,:) .5], 'Linewidth', 2);
             xlim(ax(a), xl);
-            t = text_corner(ax(a), ['vel_acc [m/s]'], 1);
+            ylim(ax(a), [-2 2]);
+            t = text_corner(ax(a), ['vel_{acc} [m/s]'], 1);
             legend(p, 'vel_x', 'vel_y', 'vel_z');
          
          
@@ -123,6 +124,7 @@ end
             xlim(ax(a), xl);
             t = text_corner(ax(a), ['\epsilon [m2/s3]'], 1);
             set(ax(a), 'Yscale', 'log');
+            ylim(ax(a), [1e-10 1e-2]);
 
       a=6;
          pcolor(ax(a), P.time_eps, P.f, log10(P.eps_f))
@@ -133,15 +135,27 @@ end
 					axpos = get(ax(a), 'Position');
 					cb.Position =  [axpos(1)+axpos(3)+.01 axpos(2) .02 axpos(4) ];
 				set(ax(a), 'Yscale', 'log');
+               px = xl'; py = [1/50 1/20];
+               patch([px px(2) px(1)], [py(1) py(1) py(2) py(2)], [.3 .3 .3], ...
+                     'facealpha', .3, 'edgecolor', [.5 0 0], 'Linewidth', 1, 'parent', ax(a));
             t = text_corner(ax(a), ['\epsilon [m2/s3]'], 1);
             t.BackgroundColor = [1 1 1 .7];
             ylabel(ax(a), 'f [Hz]')
+            xlim(ax(a), xl);
             
+            
+            abc='abcdefghijklmnopqrst';
+            for a = 1:(size(ax,1)*size(ax,2))
+               tabc = text_corner(ax(a), abc(a), 7);
+               tabc.BackgroundColor = [1 1 1 .5];
+               set(ax(a), 'box', 'on', 'TickDir', 'out');
+            end
             
 
             datetick(ax(a), 'keeplimits');
             linkaxes(ax, 'x');
             
+
                
             
 				

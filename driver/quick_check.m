@@ -8,8 +8,7 @@ clear all;
 close all;
 
 %_____________________flags______________________
-ifid               = 2;  % which raw files you would like to look at
-
+ifid             = 1;  % which raw files you would like to look at
 
 %_____________________include path of processing flies______________________
 addpath(genpath('./chipod_gust/software/'));% include  path to preocessing routines
@@ -31,4 +30,18 @@ addpath(genpath('./chipod_gust/software/'));% include  path to preocessing routi
    %print(gcf,['../pics/quick_' rfid '.pdf'],'-dpdf','-painters')
    print(gcf,['../pics/quick_' rfid '.png'],'-dpng','-r100','-painters')
    
-   
+
+%_____________________calibrate pitot including epsilon______________________
+   hfid = [basedir filesep 'calib/header_p.mat'];
+   if exist(hfid, 'file');
+      load(hfid);
+      if isfield(W, 'V0')
+         [fig, P] = quick_look_pitot(data, W);
+          print(gcf,['../pics/quick__pitot_' rfid '.png'],'-dpng','-r100','-painters')
+      else
+       disp([' V0 does not exist yet. First Run calibrate_pitot']);
+      end
+   else
+      disp([fid ' does not exit']);
+   end
+

@@ -204,20 +204,30 @@ if do_plot
         trange = [find_approx(T.time, time_range(1)):find_approx(T.time, time_range(2))];
 
         tic; disp('Calculating PSD')
-        [p1,f1] = fast_psd(T.T1(trange), nfft, fs);
-        [p2,f2] = fast_psd(T.T2(trange), nfft, fs);
+        if isfield(T, 'T1')
+           [p1,f1] = fast_psd(T.T1(trange), nfft, fs);
+           [p2,f2] = fast_psd(T.T2(trange), nfft, fs);
 
-        % frequency band smoothing
-        f = moving_average(f1, nbandsmooth, nbandsmooth);
-        p1a = moving_average(p1, nbandsmooth, nbandsmooth);
-        p2a = moving_average(p2, nbandsmooth, nbandsmooth);
+           % frequency band smoothing
+           f = moving_average(f1, nbandsmooth, nbandsmooth);
+           p1a = moving_average(p1, nbandsmooth, nbandsmooth);
+           p2a = moving_average(p2, nbandsmooth, nbandsmooth);
+        else
+           [p1,f1] = fast_psd(T.T(trange), nfft, fs);
+           f = moving_average(f1, nbandsmooth, nbandsmooth);
+           p1a = moving_average(p1, nbandsmooth, nbandsmooth);
+        end
         toc;
 
         tscale = 1; %in seconds
         CreateFigure;
         loglog(1./f/tscale, p1a); hold on;
-        loglog(1./f/tscale, p2a);
-        legend('T1', 'T2');
+        if isfield(T, 'T1')
+           loglog(1./f/tscale, p2a);
+           legend('T1', 'T2');
+        else
+           legend('T');
+        end
         set(gca, 'XDir', 'reverse')
         xlabel('Period (s)')
         ylabel('PSD');

@@ -49,7 +49,7 @@ addpath(genpath('./chipod_gust/software/'));% include  path to preocessing routi
    mask_flushing = 0; % mask so that chipod is always sensing fresh fluid
                       % beta version! turned off by default
 
-   ChipodDepth = 30;
+   ChipodDepth = 0;
 
    % normalization for *masking* histograms
    % final processed histograms are always pdf
@@ -59,7 +59,7 @@ addpath(genpath('./chipod_gust/software/'));% include  path to preocessing routi
    % use the following
    % This restricts time range for BOTH sensors on chipods
    time_range(1)  = datenum(2000, 1, 1, 0, 0, 0);
-   time_range(2)  = datenum(2030, 1, 1, 0, 0, 0);
+   time_range(2)  = datenum(2060, 1, 1, 0, 0, 0);
 
    % if one sensor dies earlier, specify that time here.
    T1death = datenum(2060, 1, 1, 0, 0, 0); % chipod T1 or gustT T sensor
@@ -245,10 +245,10 @@ if(do_combine)
 
          if do_plot
              hfig = CreateFigure;
-             Histograms(chi, hfig, normstr, 'raw');
+             Histograms(chi, hfig, normstr, fix_underscore(ID(5:end)), 'raw');
 
              if ~exist('hfraw', 'var'), hfraw = CreateFigure; end
-             Histograms(chi, hfraw, 'pdf', fix_underscore(ID(5:end)));
+             Histograms(chi, hfraw, 'pdf', fix_underscore(ID(5:end)), fix_underscore(ID(5:end)));
 
              if ~exist('hfstrat', 'var')
                  hfstrat = CreateFigure;
@@ -319,19 +319,19 @@ if(do_combine)
 
              if mask_flushing
                  chi = ApplyMask(chi, badMotion, '=', 1, 'volume not being flushed');
-                 if do_plot, Histograms(chi, hfig, normstr, 'volume flushed'); end
+                 if do_plot, Histograms(chi, hfig, normstr, fix_underscore(ID(5:end)), 'volume flushed'); end
              end
 
              [chi, percentage] = ApplyMask(chi, abs(chi.dTdz), '<', min_dTdz, 'Tz');
              chi.stats.dTdz_mask_percentage = percentage;
              perlabel = [' -' num2str(percentage, '%.1f') '%'];
-             if do_plot, Histograms(chi, hfig, normstr, ['|Tz| > ' num2str(min_dTdz, '%.1e') perlabel]); end
+             if do_plot, Histograms(chi, hfig, normstr, fix_underscore(ID(5:end)), ['|Tz| > ' num2str(min_dTdz, '%.1e') perlabel]); end
 
              [chi, percentage] = ApplyMask(chi, chi.N2, '<', min_N2, 'N2');
              chi.stats.N2_mask_percentage = percentage;
              if percentage > 0.5
                  perlabel = [' -' num2str(percentage, '%.1f') '%'];
-                 if do_plot, Histograms(chi, hfig, normstr, ['N2' perlabel]); end
+                 if do_plot, Histograms(chi, hfig, normstr, fix_underscore(ID(5:end)), ['N2' perlabel]); end
              end
 
              [chi, percentage] = ApplyMask(chi, chi.spd, '<', min_inst_spd, 'inst speed');
@@ -356,7 +356,7 @@ if(do_combine)
                                                ['Additional Tz_' additional_mask_dTdz]);
                  chi.stats.additional_dTdz_mask_percentage = percentage;
                  perlabel = [' -' num2str(percentage, '%.1f') '%'];
-                 if do_plot, Histograms(chi, hfig, normstr, ['Additional Tz_' additional_mask_dTdz perlabel]); end
+                 if do_plot, Histograms(chi, hfig, normstr, fix_underscore(ID(5:end)), ['Additional Tz_' additional_mask_dTdz perlabel]); end
              end
 
              % remove values greater than thresholds
@@ -427,7 +427,7 @@ if(do_combine)
 
          if do_plot
              if ~exist('hfig2', 'var'), hfig2 = CreateFigure; end
-             Histograms(Turb.(ID), hfig2, 'pdf', fix_underscore(ID(5:end)));
+             Histograms(Turb.(ID), hfig2, 'pdf', fix_underscore(ID(5:end)), fix_underscore(ID(5:end)));
          end
          
          % include statistics

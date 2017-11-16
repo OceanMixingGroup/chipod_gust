@@ -21,7 +21,6 @@ function [out] = choose_color(name,outstr)
 % outstr = 'style'    to return linestyle ('-', ':', '--')
 % outstr = 'width'    to return linewidth
 
-
 % define possible colors
 cols =      [0         0         0;...          % black             pi11
              0.9333    0.1098    0.1412;...     % red               mi11
@@ -51,55 +50,55 @@ else
 end
 
 % find the color that relates to each input
-if strcmp(name(5:end),'pi11')
+if strcmp(name,'pi11')
     color = cols(1,:);
-elseif strcmp(name(5:end),'mi11')
+elseif strcmp(name,'mi11')
     color = cols(2,:);
-elseif strcmp(name(5:end),'mm1')
+elseif strcmp(name,'mm1')
     color = cols(3,:);
-elseif strcmp(name(5:end),'pi11_ic')
+elseif strcmp(name,'pi11_ic')
     color = cols(4,:);
-elseif strcmp(name(5:end),'mi22')
+elseif strcmp(name,'mi22')
     color = cols(5,:);
-elseif strcmp(name(5:end),'mm2')
+elseif strcmp(name,'mm2')
     color = cols(6,:);
-elseif strcmp(name(5:end),'pm1')
+elseif strcmp(name,'pm1')
     color = cols(7,:);
-elseif strcmp(name(5:end),'pm2')
+elseif strcmp(name,'pm2')
     color = cols(8,:);
-elseif strcmp(name(5:end),'pi22')
+elseif strcmp(name,'pi22')
     color = cols(9,:);
-elseif strcmp(name(5:end),'mi22_ic')
+elseif strcmp(name,'mi22_ic')
     color = cols(10,:);
-elseif strcmp(name(5:end),'mi11_ic')
+elseif strcmp(name,'mi11_ic')
     color = cols(11,:);
-elseif strcmp(name(5:end),'mm2_ic')
+elseif strcmp(name,'mm2_ic')
     color = cols(12,:);
-elseif strcmp(name(5:end),'mm1_ic')
+elseif strcmp(name,'mm1_ic')
     color = cols(13,:);
-elseif strcmp(name(5:end),'pi22_ic')
+elseif strcmp(name,'pi22_ic')
     color = cols(14,:);
-elseif strcmp(name(5:end),'pm1_ic')
+elseif strcmp(name,'pm1_ic')
     color = cols(15,:);
-elseif strcmp(name(5:end),'pm2_ic')
+elseif strcmp(name,'pm2_ic')
     color = cols(16,:);
 elseif ~isempty(strfind(name, '12'))
     disp('repeating colors for mi112, mi212, pi112 or pi212')
-    if strcmp(name(5:end),'mi112')
+    if strcmp(name,'mi112')
         color = cols(2,:);
-    elseif strcmp(name(5:end),'mi112_ic')
+    elseif strcmp(name,'mi112_ic')
         color = cols(11,:);
-    elseif strcmp(name(5:end),'mi212')
+    elseif strcmp(name,'mi212')
         color = cols(5,:);
-    elseif strcmp(name(5:end),'mi212_ic')
+    elseif strcmp(name,'mi212_ic')
         color = cols(10,:);
-    elseif strcmp(name(5:end),'pi112')
+    elseif strcmp(name,'pi112')
         color = cols(1,:);
-    elseif strcmp(name(5:end),'pi112_ic')
+    elseif strcmp(name,'pi112_ic')
         color = cols(4,:);
-    elseif strcmp(name(5:end),'pi212')
+    elseif strcmp(name,'pi212')
         color = cols(9,:);
-    elseif strcmp(name(5:end),'pi212_ic')
+    elseif strcmp(name,'pi212_ic')
         color = cols(15,:);
     end
 end

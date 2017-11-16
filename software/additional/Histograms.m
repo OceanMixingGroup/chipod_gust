@@ -1,4 +1,4 @@
-function Histograms(chi, hfig, normstr, ID)
+function Histograms(chi, hfig, normstr, ID, legendtext)
 
     nbins = 300;
     chibins = linspace(-12, -3, nbins);
@@ -13,7 +13,7 @@ function Histograms(chi, hfig, normstr, ID)
 
     hax(1) = subplot(221);
     set(gca, 'color', 'none')
-    myhist(chi.chi, chibins, normstr, ID)
+    myhist(chi.chi, chibins, normstr, ID, legendtext)
     hold on;
     xlabel('log_{10} \chi')
     xlim([-12, -4])
@@ -21,7 +21,7 @@ function Histograms(chi, hfig, normstr, ID)
 
     hax(2) = subplot(222);
     set(gca, 'color', 'none')
-    myhist(chi.eps, epsbins, normstr, ID)
+    myhist(chi.eps, epsbins, normstr, ID, legendtext)
     xlim([-12, -2])
     xlabel('log_{10} \epsilon')
     ylabel(normstr)
@@ -29,7 +29,7 @@ function Histograms(chi, hfig, normstr, ID)
 
     hax(3) = subplot(223);
     set(gca, 'color', 'none')
-    myhist(chi.Kt, ktbins, normstr, ID)
+    myhist(chi.Kt, ktbins, normstr, ID, legendtext)
     xlim([-8, 2])
     hold on;
     xlabel('log_{10} K_T')
@@ -37,25 +37,33 @@ function Histograms(chi, hfig, normstr, ID)
 
     hax(4) = subplot(224);
     set(gca, 'color', 'none')
-    myhist(abs(chi.Jq), jqbins, normstr, ID)
+    myhist(abs(chi.Jq), jqbins, normstr, ID, legendtext)
     xlim([-5, 4.5])
     hold on;
     xlabel('log_{10} |J_q|')
     ylabel(normstr)
 end
 
-function myhist(var, bins, normstr, ID)
+function myhist(var, bins, normstr, ID, legendtext)
 
     avg = nanmean(var);
     med = nanmedian(var);
 
     ms = 8; % markersize
 
-    str = sprintf('%s\n%s', ID, ...
+    str = sprintf('%s\n%s', legendtext, ...
                   ['\mu=' num2str(avg, '%.1e') '|mdn=' num2str(med, '%.1e')]);
 
-    color = choose_color(ID,'color');
-    lw = choose_color(ID,'width');
+    if strcmp(legendtext,'raw')   
+        color = [0 0 0];
+        lw = 2;
+    elseif strcmp(legendtext(2:3),'Tz')   
+        color = [1 0 0];
+        lw = 2;
+    else
+        color = choose_color(ID,'color');
+        lw = choose_color(ID,'width');
+    end
 
     if strcmpi(normstr, 'count')
         hh = histogram(log10(var), 'BinEdges', bins, 'normalization', normstr, ...

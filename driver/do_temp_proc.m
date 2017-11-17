@@ -252,6 +252,8 @@ if do_plot
                   'displaystyle', 'stairs', 'linewidth', 1.5, ...
                   'displayname', '|v_z|');
 
+        titlestr = [num2str(round(dt)) 's avg for v_*'];
+
         try
             load ../input/vel_m.mat
 
@@ -259,6 +261,9 @@ if do_plot
             histogram(vel_m.spd(trange2), 'normalization' ,'pdf', ...
                       'displaystyle', 'stairs', 'linewidth', ...
                       1.5, 'displayname', 'adcp');
+            dt2 = diff(vel_m.time(1:2))*86400/60;
+            titlestr = [titlestr ' | ' ...
+                        num2str(round(dt2)) 'minutes \Deltat for background'];
         catch ME
             disp('could not load vel_m.mat');
             disp('skipping');
@@ -280,9 +285,7 @@ if do_plot
         xlim([0 1.5]);
         xlabel('m/s')
         ylabel('PDF')
-        dt2 = diff(vel_m.time(1:2))*86400/60;
-        title([num2str(round(dt)) 's avg for v_* | ' ...
-               num2str(round(dt2)) 'minutes \Deltat for background'])
+        title(titlestr)
         legend('-dynamiclegend');
 
         print(gcf,['../pics/velocity-histogram.png'],'-dpng','-r200','-painters')

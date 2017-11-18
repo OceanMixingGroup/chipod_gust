@@ -1,5 +1,5 @@
 function []  = chi_merge_and_avg(basedir, ddir, aw)
-%% []  = chi_merge_and_avg(basedir, dir, aw, [mask])
+%% []  = chi_merge_and_avg(basedir, dir, aw)
 %     
 %     This function averages all idividual files in dir
 %     in to a single file called 
@@ -9,7 +9,6 @@ function []  = chi_merge_and_avg(basedir, ddir, aw)
 %        basedir  :  base directory of unit
 %        dir      :  sub directory of proc (e.g. temp, chi ...)
 %        aw       :  average width in sec (if 0 no averaging)
-%        mask     :  flag structure to mask data (default no mask)
 %
 %   created by: 
 %        Johannes Becherer

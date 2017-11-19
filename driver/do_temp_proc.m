@@ -7,9 +7,9 @@
 %        Wed Aug 16 16:01:26 PDT 2017
 
 
-do_parallel = 0;     % use paralelle computing 
-do_raw_proc = 0;     % do the raw data processing 
-do_plot     = 1;     % generate a over view plot 
+do_parallel = 1;     % use paralelle computing 
+do_raw_proc = 1;     % do the raw data processing 
+do_plot     = 0;     % generate a over view plot 
 
 time_range = [datenum(2000, 1, 1, 0, 0, 0) ...
               datenum(2060, 1, 1, 0, 0, 0)];
@@ -33,40 +33,9 @@ addpath(genpath('./chipod_gust/software/'));% include  path to preocessing routi
 
 
 if do_raw_proc
-   %_____________________get list of all raw data______________________
-      [fids, fdate] = chi_find_rawfiles(basedir);
-
-
-   %_____________processing loop through all raw files__________________
-
-   disp('calibrating all base quantities in ./proc/temp.mat ')
-
-      % init parallel pool
-      if(do_parallel)
-         parpool;
-         % parallel for-loop
-         parfor f=1:length(fids)
-            try % take care if script crashes that the parpoo is shut down
-               disp(['calculating file ' num2str(f) ' of ' num2str(length(fids))]);
-               chi_T_proc(basedir, fids{f});
-            catch ME
-               disp(['!!!!!! ' fids{f} ' crashed while processing T structure !!!!!!' ]);
-               disp(ME)
-            end
-         end
-         % close parpool
-         delete(gcp);
-      else
-         for f=1:length(fids)
-            disp(['calculating file ' num2str(f) ' of ' num2str(length(fids))]);
-            chi_T_proc(basedir, fids{f});
-         end
-      end
-
-   %____________________merge individual files______________________
-      % average 1 sec
-      chi_merge_and_avg(basedir, 'temp', 0);
-
+   
+   % generate temp.mat
+   generate_temp( basedir, do_parallel, time_range)
 
    %____________________create motion.mat file______________________
 

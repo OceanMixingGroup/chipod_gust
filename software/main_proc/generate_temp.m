@@ -1,5 +1,5 @@
 function [] = generate_temp( basedir, do_parallel,  timelims)
-%%    [] = generate_temp( basedir,  do_parallel, [timelims])
+%%    [] = generate_temp( basedir,  [do_parallel], [timelims])
 %
 %     This function generates the temp.mat files in ./proc/
 %
@@ -18,7 +18,7 @@ if nargin < 2
 end
 
 if nargin < 3
-   timelims = [];  % not used yet
+   timelims = [datenum(1900,1,1) datenum(2100,0,0)];  % not used yet
 end
 
 
@@ -53,7 +53,7 @@ end
       end
 
    %____________________merge individual files______________________
-      chi_merge_and_avg(basedir, 'temp', 0);
+      chi_merge_and_avg(basedir, 'temp', 0, timelims);
       % average 600 sec
-      chi_merge_and_avg(basedir, 'temp', 600);
+      chi_merge_and_avg(basedir, 'temp', 600, timelims);
 

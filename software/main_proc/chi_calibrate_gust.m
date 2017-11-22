@@ -67,7 +67,9 @@ function [data] = chi_calibrate_gust(rfid, head)
 
    % compass
          chi.cmp      = rdat.compass;
-            chi.cmp              = chi.cmp + head.coef.CMP(1);
+             if isfield(head.coef, 'CMP') % if There is a compass off-set in the header
+                chi.cmp              = chi.cmp + head.coef.CMP(1);
+              end
             chi.cmp(chi.cmp>360) = chi.cmp(chi.cmp>360)-360;
             chi.cmp(chi.cmp<0)   = chi.cmp(chi.cmp<0)+360;
          chi.pitch    = rdat.pitch;

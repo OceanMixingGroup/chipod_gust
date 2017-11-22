@@ -13,7 +13,7 @@ function [fids, fdate] = chi_find_rawfiles(basedir)
    for i = 1:length(d)
       if(~d(i).isdir)
          if(d(i).name([1:3])=='raw') % check if raw-file
-            if(d(i).name([-2:0]+end)== unit([-2:0]+end)) % check if correct unit
+            if ~isempty(strfind(d(i).name, unit)) % check if correct unit
                % read in the file date from file name
                is1 = strfind(d(i).name,'_');  % find under score
                is2 = strfind(d(i).name,'.');  % find dot

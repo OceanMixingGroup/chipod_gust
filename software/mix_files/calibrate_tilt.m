@@ -7,6 +7,12 @@ function out=calibrate_tilt(in,coeff)
 if size(in,2)==2
   in=ch(in);
 end
+
+% if only two calib coefs
+if numel(coeff) == 2
+    coeff = [coeff 0 0 0];
+end
+
 % add a gain step if coeff(5) is non-zero
 if coeff(5), in=in/coeff(5);, end
 

@@ -108,10 +108,10 @@ end
             abc='abcdefghijklmnopqrst';
             for a = 1:(size(ax,1)*size(ax,2))
                text_corner(ax(a), abc(a), 9);
-               set(ax(a), 'Xtick', ceil(tl(1)):round(diff(tl)/5):floor(tl(2)));
+               %set(ax(a), 'Xtick', ceil(tl(1)):round(diff(tl)/5):floor(tl(2)));
             end
             
-            datetick(ax(a), 'keepticks',  'keeplimits');
+            datetick(ax(a),  'keeplimits');
             if diff(tl)<2
                xlabel(ax(a), [datestr(floor(mean(tl)), 'dd mmm yyyy')]);
             elseif diff(tl)<35

@@ -139,7 +139,7 @@ if do_vel_m
     %_______ EXAMPLE________________
     % load('../../../mooring_data/mooring_Pirata14_524.mat') ;
 
-    chi_generate_vel_adcp(moor.time, moor.depth, moor.u, moor.v, ChipodDepth, sdir);
+    generate_vel_adcp(moor.time, moor.depth, moor.u, moor.v, ChipodDepth, sdir);
 end
 
 

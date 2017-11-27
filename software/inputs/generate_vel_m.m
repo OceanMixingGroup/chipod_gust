@@ -1,5 +1,5 @@
-function [vel_m] = chi_generate_vel_adcp(time, z_adcp, u, v, z_chi,  sdir)
-%% [vel_m] = chi_generate_vel_adcp(time, z_adcp, u, v, z_chi, sdir)
+function [vel_m] = generate_vel_adcp(time, z_adcp, u, v, z_chi,  sdir)
+%% [vel_m] = generate_vel_adcp(time, z_adcp, u, v, z_chi, sdir)
 % 
 %        This function generates an input file for chi-processing vel_m.mat
 %        directory sdir
@@ -59,9 +59,20 @@ else     % in cse it is at a differnt depth interpolate
 
    % loop through every time step
    for t = 1:length(time)
+      z_tmp = z_adcp(t,:);
+      [z_sort, ii_sort_z] = sort(z_temp); 
 
-      vel_m.u(t) = interp1(z_adcp(t,:), u(t,:), z_chi(t));
-      vel_m.v(t) = interp1(z_adcp(t,:), v(t,:), z_chi(t));
+      % look if z_chi is out of bound
+      if z_chi(t) < z_sort(1)
+         vel_m.u(t) = u(t, ii_sort_z(1));
+         vel_m.v(t) = v(t, ii_sort_z(1));
+      elseif z_chi(t) > z_sort(end)
+         vel_m.u(t) = u(t, ii_sort_z(end));
+         vel_m.v(t) = v(t, ii_sort_z(end));
+      else % if not out of z bound
+         vel_m.u(t) = interp1(z_tmp, u(t,:), z_chi(t));
+         vel_m.v(t) = interp1(z_tmp, v(t,:), z_chi(t));
+      end
 
    end
 end

@@ -76,7 +76,7 @@ addpath(genpath('./chipod_gust/software/'));% include  path to preocessing routi
       end
 
       if do_raw_data
-          do_raw_pitot;
+         generate_praw( basedir, do_parallel, time_range);
       end
 %_____________________load averaged raw data and do basic calibration______________________
    fid = ['../proc/Praw.mat'];

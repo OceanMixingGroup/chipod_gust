@@ -33,12 +33,12 @@ pdt = diff(p_time(1:2));
 if adt>pdt
    C.time = a_time(aii);
    C.a_U  = a_U(aii);
-   C.p_U  = interp1( p_time(pii), qbutter(p_U(pii), pdt/adt), C.time);
+   C.p_U  = clever_interp( p_time(pii), p_U(pii), C.time);
    
 else
    C.time = p_time(pii);
    C.p_U  = p_U(pii);
-   C.a_U  = interp1( a_time(aii), qbutter(a_U(aii), adt/pdt), C.time);
+   C.a_U  = clever_interp( a_time(aii), a_U(aii), C.time);
 end
 
 %_____________________Plot figure______________________

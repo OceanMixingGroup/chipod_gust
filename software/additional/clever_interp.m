@@ -25,7 +25,9 @@ if size(x,2) == size(y,1)
     y = y'; 
 end
 
-ii = ~(isnan(x) | isnan(y));
-
-y1 = interp1( x(ii), y(ii), x1);
+% make sure no nan and grid vector unique
+    ii = find(~(isnan(x) | isnan(y)));
+    [x_tmp, ii_u, ~] = unique(x(ii));
+    y_tmp = y(ii(ii_u));
+y1 = interp1( x_tmp, y_tmp, x1);
 

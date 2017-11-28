@@ -62,7 +62,11 @@ if do_proc
    chi_merge_and_avg(basedir, 'dTdz', 600);
 
  %_____________________cp result to the input directory______________________
-   ! cp ../proc/dTdz.mat ../input/dTdz_i.mat
+   if exist('../proc/dTdz.mat','file') == 2
+      ! cp ../proc/dTdz.mat ../input/dTdz_i.mat
+   elseif exist('../proc/dTdz_600sec.mat','file') == 2
+      ! cp ../proc/dTdz_600sec.mat ../input/dTdz_i.mat
+   end
 end
 
 %_____________________plotting______________________

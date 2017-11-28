@@ -1,5 +1,5 @@
 function [] = proc_pitot_eps(basedir, rfid, varargin)
-%% [] = proc_pitot_eps(basedir, rfid, [spec_length], [f_range])
+%% [] = proc_pitot_eps(basedir, rfid, [spec_length], [f_range], [save_spec])
 %     This function drives the epsilon processing of the Pitot-tube
 %     for a single raw-files 
 %
@@ -7,6 +7,7 @@ function [] = proc_pitot_eps(basedir, rfid, varargin)
 %        basedir      : unit directory
 %        rfid         : raw-file name 
 %        spec_length  : spectrum length [days]  (default 5min = 1/(24*12)) 
+%        save_spec    : shall I save the actual spectrogram (default 0 NO) 
 %
 %   created by: 
 %        Johannes Becherer
@@ -22,6 +23,11 @@ function [] = proc_pitot_eps(basedir, rfid, varargin)
       Peps.f_range = [.02 .05];
    else
       Peps.f_range = varargin{2};
+   end
+   if nargin < 5
+      save_spec = 0;
+   else
+      save_spec = varargin{3};
    end
 
 
@@ -73,6 +79,11 @@ function [] = proc_pitot_eps(basedir, rfid, varargin)
 %_____________________normalize spectrum by ic-scaling______________________
    [ Peps.eps, Peps.var_eps, eps_f] = icscaling_velocity( Peps.time, spec_f, spec, Peps.time, Peps.vel, Peps.f_range);
 
+%_____________________save spectrogram______________________
+if save_spec
+   Peps.eps_f  =  eps_f;
+   Peps.f      =  spec_f;
+end
 
 %---------------------save data----------------------
    [~,~,~] =  mkdir(savedir);

@@ -29,13 +29,14 @@ addpath(genpath('./chipod_gust/software/'));% include  path to preocessing routi
 if do_raw_proc
 
     low_or_high = 0; % low frequency estimate
-    generate_pitot_eps(basedir, do_parallel,  time_range, low_or_high);
+    save_spec   = 0; % shall the spectrum be saved
+    generate_pitot_eps(basedir, do_parallel,  time_range, low_or_high, save_spec);
 
 end
 
 
 if do_plot
-   load([basedir filesep 'proc' filesep 'pitot_eps.mat'])
+   load([basedir filesep 'proc' filesep 'pitot_eps300sec.mat'])
 
 	 fig = figure('Color',[1 1 1],'visible','on','Paperunits','centimeters',...
 	         'Papersize',[30 20],'PaperPosition',[0 0 30 20])
@@ -44,11 +45,11 @@ if do_plot
             
             a=1;
             plot(ax(a), Peps.time, Peps.eps, 'Linewidth', 1);
-            Peps.eps(abs(Peps.vel_avg)<.05) = nan;
+            Peps.eps(abs(Peps.vel)<.05) = nan;
             plot(ax(a), Peps.time, Peps.eps, 'Linewidth', 1);
-            plot(ax(a), Peps.time, (2e-3*abs(Peps.vel_avg).^2).^1.5/.4, 'Linewidth', 1);
-            plot(ax(a), Peps.time, Peps.eps_hf, 'Linewidth', 1);
-            plot(ax(a), Peps.time, Peps.eps.*abs(Peps.vel_avg),'k', 'Linewidth', 1);
+            plot(ax(a), Peps.time, (2e-3*abs(Peps.vel).^2).^1.5/.4, 'Linewidth', 1);
+           % plot(ax(a), Peps.time, Peps.eps_hf, 'Linewidth', 1);
+            plot(ax(a), Peps.time, Peps.eps.*abs(Peps.vel),'k', 'Linewidth', 1);
 
 
             legend('\epsilon_{pitot}', '\epsilon_{pitot>5cm/s}','\epsilon_{bbl1m}', '\epsilon_{pitotHF}',...

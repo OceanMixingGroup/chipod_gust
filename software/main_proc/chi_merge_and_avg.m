@@ -95,7 +95,7 @@ end
    Favg = fields(avg);
    for i =  1:length(Favg)
       %eval([char(Favg(i)) ' = avg.' char(Favg(i))]);
-      eval([char(Favg(i)) ' =  tlim_data(avg.' char(Favg(i)) ', time_lim);']);
+      eval([char(Favg(i)) ' =  time_lim_fields(avg.' char(Favg(i)) ', time_lim);']);
    end
 
    % save all fields in avg

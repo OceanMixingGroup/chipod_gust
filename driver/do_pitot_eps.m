@@ -27,41 +27,10 @@ addpath(genpath('./chipod_gust/software/'));% include  path to preocessing routi
 
 
 if do_raw_proc
-   %_____________________get list of all raw data______________________
-      [fids, fdate] = chi_find_rawfiles(basedir);
 
+    low_or_high = 0; % low frequency estimate
+    generate_pitot_eps(basedir, do_parallel,  time_range, low_or_high);
 
-   %_____________processing loop through all raw files__________________
-
-   disp('Calculating epsilon based on pitot data ')
-
-      % init parallel pool
-      if(do_parallel)
-         parpool;
-         % parallel for-loop
-         parfor f=1:length(fids)
-            try % take care if script crashes that the parpoo is shut down
-               disp(['calculating file ' num2str(f) ' of ' num2str(length(fids))]);
-               proc_pitot_eps(basedir, fids{f});
-               proc_pitot_eps(basedir, fids{f}, 2/(24*3600), [2.5 5]);
-            catch ME
-               disp(['!!!!!! ' fids{f} ' crashed while processing T structure !!!!!!' ]);
-               disp(ME)
-            end
-         end
-         % close parpool
-         delete(gcp);
-      else
-         for f=1:length(fids)
-            disp(['calculating file ' num2str(f) ' of ' num2str(length(fids))]);
-            proc_pitot_eps(basedir, fids{f});
-            proc_pitot_eps(basedir, fids{f}, 2/(24*3600), [2.5 5]);
-         end
-      end
-
-   %____________________merge individual files______________________
-      chi_merge_and_avg(basedir, 'pitot_eps_600sec', 0);;
-      chi_merge_and_avg(basedir, 'pitot_eps_2sec', 0);
 end
 
 

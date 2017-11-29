@@ -26,6 +26,10 @@ cal_time_range = time_range ;
 fidf    = [basedir '/proc/P_fit.mat'];
 fids    = [basedir '/proc/P_self.mat'];
 fidvelm = [basedir '/input/vel_m.mat'];
+if ~exist(fidvelm)
+   do_v0_adcp = 0;
+   disp('vel_m.mat does not exist there for do_v0_adcp = 0');
+end
 
 %_____________________get header files______________________
    % general headers

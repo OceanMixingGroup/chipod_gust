@@ -65,5 +65,5 @@ disp('averaging Pitot raw  data in ./proc/Praw.mat ')
       end
 
    %____________________merge individual files______________________
-      chi_merge_and_avg(basedir, 'Praw', 0);
+      chi_merge_and_avg(basedir, 'Praw', 0, timelims);
 

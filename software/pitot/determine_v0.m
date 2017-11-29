@@ -61,7 +61,7 @@ end
       end
 
 %_____________________load averaged raw data and do basic calibration______________________
-   fid = ['../proc/Praw.mat'];
+   fid = [basedir '/proc/Praw.mat'];
    if exist(fid, 'file');
       load(fid);
    else
@@ -174,10 +174,10 @@ if do_v0_self
    end
 
    % save header and calibrated data
-   save('../calib/header_p_self.mat', 'W');
-   save('../calib/header_p.mat', 'W');
+   save([basedir '/calib/header_p_self.mat'], 'W');
+   save([basedir '/calib/header_p.mat'], 'W');
 
-   save('../proc/P_self.mat', 'P');
+   save([basedir '/proc/P_self.mat'], 'P');
    P = Porg;
 end
 
@@ -198,7 +198,7 @@ if do_v0_adcp
 
    % determine V0
        [W.V0] = fit_pitot_v0( vel_m.time, vel_m.spd, P.time(iiPcal), P.W(iiPcal), 1/W.Pd(2), do_plot);
-       if do_plot, print(gcf, '../pics/pitot-adcp-fit-voltages.png', '-dpng', '-r200', '-painters'); end
+       if do_plot, print(gcf, [basedir '/pics/pitot-adcp-fit-voltages.png'], '-dpng', '-r200'); end
    % calibrate voltage into speeds
    W1 = W;
       W1.P0 = 0; % switch off temp and press calibration
@@ -216,10 +216,10 @@ if do_v0_adcp
    end
 
    % save header and calibrated data
-   save('../calib/header_p_fit.mat', 'W');
-   save('../calib/header_p.mat', 'W');
+   save([basedir '/calib/header_p_fit.mat'], 'W');
+   save([basedir '/calib/header_p.mat'], 'W');
 
-   save('../proc/P_fit.mat', 'P');
+   save([basedir '/proc/P_fit.mat'], 'P');
 
    % output
    disp(['based on the fitting method V0 is calculated to be']);
@@ -246,18 +246,18 @@ if do_plot
          a_L    = 'V0_{fit}';
          p_L    = 'V0_{self}';
          [fig] =  compare_velocity_timeseries(Pf.P.time, Pf.P.U, a_L, Ps.P.time, Ps.P.U, p_L);
-         print(gcf,'../pics/V0_fit_vs_self.png','-dpng','-r100','-painters')
-         savefig(fig,'../pics/V0_fit_vs_self.fig')
+         print(gcf,[basedir '/pics/V0_fit_vs_self.png'],'-dpng','-r100')
+         savefig(fig,[basedir '/pics/V0_fit_vs_self.fig'])
    end
    if (exist(fidf, 'file') & exist(fidvelm, 'file') )
       load(fidvelm);
       % generate a comparison plot
-      Pf = load('../proc/P_fit.mat');
+      Pf = load([basedir '/proc/P_fit.mat']);
       a_L    = 'ADCP';
       p_L    = 'Pitot V0_{fit}';
       [fig] =  compare_velocity_timeseries(vel_m.time, vel_m.U, a_L, Pf.P.time, Pf.P.U, p_L);
-      print(fig,'../pics/Pitot_vs_ADCP_V0_fit.png','-dpng','-r100','-painters')
-      savefig(fig,'../pics/Pitot_vs_ADCP_V0_fit.fig')
+      print(fig,[basedir '/pics/Pitot_vs_ADCP_V0_fit.png'],'-dpng','-r100')
+      savefig(fig,[basedir '/pics/Pitot_vs_ADCP_V0_fit.fig'])
    end
 end
 
@@ -282,6 +282,6 @@ if do_vel_p > 0
    vel_p.u     = real(P.U);
    vel_p.v     = imag(P.U);
 
-   save('../input/vel_p.mat', 'vel_p');
+   save([basedir '/input/vel_p.mat'], 'vel_p');
    disp('vel_p.mat created!')
 end

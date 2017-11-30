@@ -217,7 +217,9 @@ if do_v0_adcp
 
    % save header and calibrated data
    save([basedir '/calib/header_p_fit.mat'], 'W');
-   save([basedir '/calib/header_p.mat'], 'W');
+   if ~exist([basedir '/calib/header_p_self.mat']) % use only ADCP-fit header if self is not available
+      save([basedir '/calib/header_p.mat'], 'W');
+   end
 
    save([basedir '/proc/P_fit.mat'], 'P');
 
@@ -263,13 +265,13 @@ end
 
 %___________________generating vel_p________________
 if do_vel_p > 0
-   if ( do_vel_p == 1 & exist(fidf, 'file'));
-       load(fidf);
-       vel_p.text = 'vel_p.mat is generated based on the ADCP fitted Pitot signal';
-       disp(vel_p.text);
-   elseif ( do_vel_p == 2 & exist(fids, 'file'));
+   if ( do_vel_p == 2 & exist(fids, 'file'));
        load(fids);
        vel_p.text = 'vel_p.mat is generated in the self contained way';
+       disp(vel_p.text);
+   elseif ( do_vel_p == 1 & exist(fidf, 'file'));
+       load(fidf);
+       vel_p.text = 'vel_p.mat is generated based on the ADCP fitted Pitot signal';
        disp(vel_p.text);
    else
        error(['Pitot velocities have not been calibrated yet!. Run with do_v0_adcp = 1 ' ...

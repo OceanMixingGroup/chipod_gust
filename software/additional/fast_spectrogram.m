@@ -32,7 +32,7 @@ function [spec, f, T] = fast_spectrogram(t, x, SWidth, TSteps)
        if number_of_nan == 0 | number_of_nan > floor(length(ii)*.8) | cnt == 1 
             [spec(:, cnt), f] = fast_psd( x(ii) , NFFTmax, fs);
        else
-           [spec(:, cnt), f1] = gappy_psd( x(ii) , NFFTmax, fs, 1000);
+           [spec(:, cnt), f1] = gappy_psd( x(ii) , NFFTmax, fs, 100);
             if ~isnan(f1)
                 f = f1';
             end

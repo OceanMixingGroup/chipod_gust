@@ -90,7 +90,7 @@ if save_spec % if you want to save the spectrogram for diagnostics
    Spec.eps    =  Peps.eps;
    Spec.U      =  Peps.vel;
    
-   spec_dir     = [basedir filesep 'proc' filesep 'spec_pitot' filesep];
+   spec_dir     = [basedir filesep 'proc' filesep 'spec_pitot'  num2str(spec_length*24*3600) 'sec' filesep];
    [~,~,~] =  mkdir(savedir);
    save([spec_dir  'spec_pitot_' num2str(spec_length*24*3600) 'sec' savestamp], 'Spec');;
 end

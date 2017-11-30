@@ -82,9 +82,17 @@ function [] = proc_pitot_eps(basedir, rfid, varargin)
    [ Peps.eps, Peps.var_eps, eps_f] = icscaling_velocity( Peps.time, spec_f, spec, Peps.time, Peps.vel, Peps.f_range);
 
 %_____________________save spectrogram______________________
-if save_spec
-   Peps.eps_f  =  eps_f;
-   Peps.f      =  spec_f;
+if save_spec % if you want to save the spectrogram for diagnostics
+   Spec.time   =  Peps.time;
+   Spec.eps_f  =  eps_f;
+   Spec.f      =  spec_f;
+   Spec.f_range=  Peps.f_range;
+   Spec.eps    =  Peps.eps;
+   Spec.U      =  Peps.vel;
+   
+   spec_dir     = [basedir filesep 'proc' filesep 'spec_pitot' filesep];
+   [~,~,~] =  mkdir(savedir);
+   save([spec_dir  'spec_pitot_' num2str(spec_length*24*3600) 'sec' savestamp], 'Spec');;
 end
 
 %---------------------save data----------------------

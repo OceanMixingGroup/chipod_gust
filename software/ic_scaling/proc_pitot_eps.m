@@ -67,8 +67,10 @@ function [] = proc_pitot_eps(basedir, rfid, varargin)
   data.U_lowpass   = movmean(  data.U , round(DT/dt), 'omitnan' );
 
    % project in the direction of the mean speed;
-   data.U_projected = abs(data.U).*cos(angle(data.U)-angle(data.U_lowpass)); 
-
+   data.U_projected = abs(data.U).*cos(angle(data.U)-angle(data.U_lowpass));
+   
+   % apply low_pass to wipe out nan smaller than fitting cutoff
+    data.U_projected   = movmean(  data.U_projected , round(1/(24*3600*Peps.f_range(2)*4*dt)), 'omitnan' );
 
 %_____________________calculate spectrogram______________________
    [spec, spec_f, Peps.time] = fast_spectrogram(data.time, data.U_projected, spec_length, DT);

@@ -27,7 +27,11 @@ end
 
 % make sure no nan and grid vector unique
     ii = find(~(isnan(x) | isnan(y)));
-    [x_tmp, ii_u, ~] = unique(x(ii));
-    y_tmp = y(ii(ii_u));
-y1 = interp1( x_tmp, y_tmp, x1);
+    if ~isempty(ii)
+        [x_tmp, ii_u, ~] = unique(x(ii));
+        y_tmp = y(ii(ii_u));
+        y1 = interp1( x_tmp, y_tmp, x1);
+    else
+        y1 = nan(size(x1));
+    end
 

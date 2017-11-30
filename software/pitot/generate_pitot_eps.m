@@ -68,6 +68,12 @@ end
    %____________________merge individual files______________________
    if low_or_high % high frequency estimate
       chi_merge_and_avg(basedir, 'pitot_eps2sec', 0, time_limits);
+      if save_spec
+         chi_merge_and_avg(basedir, 'spec_pitot2sec', 0, time_limits);
+      end
    else
       chi_merge_and_avg(basedir, 'pitot_eps300sec', 0, time_limits);;
+      if save_spec
+         chi_merge_and_avg(basedir, 'spec_pitot300sec', 0, time_limits);
+      end
    end

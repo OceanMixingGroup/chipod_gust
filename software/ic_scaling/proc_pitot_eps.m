@@ -64,7 +64,7 @@ function [] = proc_pitot_eps(basedir, rfid, varargin)
 
   dt = median( diff(data.time));
   DT = spec_length/2;      
-  data.U_lowpass   = movmean(  data.U , round(DT/dt) );
+  data.U_lowpass   = movmean(  data.U , round(DT/dt), 'omitnan' );
 
    % project in the direction of the mean speed;
    data.U_projected = abs(data.U).*cos(angle(data.U)-angle(data.U_lowpass)); 

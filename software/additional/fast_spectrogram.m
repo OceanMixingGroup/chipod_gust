@@ -28,7 +28,15 @@ function [spec, f, T] = fast_spectrogram(t, x, SWidth, TSteps)
    while ii(end)<length(t)
        T(cnt) = mean(t(ii));
        %[f , psd(:,cnt), ~, ~]  = iow_fancypsd(x(ii), NFFTmax, Ffac, Fmin, fs, p, pPlot);
-       [spec(:, cnt), f] = fast_psd( x(ii) , NFFTmax, fs);
+       number_of_nan = sum(isnan(x(ii)));
+       if number_of_nan == 0 | number_of_nan > floor(length(ii)*.8) | cnt == 1 
+            [spec(:, cnt), f] = fast_psd( x(ii) , NFFTmax, fs);
+       else
+           [spec(:, cnt), f1] = gappy_psd( x(ii) , NFFTmax, fs, 5);
+            if ~isnan(f1)
+                f = f1';
+            end
+       end
        ii = [ii] + DT;
        cnt = cnt+1;
    end

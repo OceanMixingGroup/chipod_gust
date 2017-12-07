@@ -1,4 +1,4 @@
-function [] = generate_praw( basedir, do_parallel,  timelims  , is_chipod, avg_window)
+function [] = generate_praw( basedir, do_parallel,  timelims  , ischipod, avg_window)
 %%    [] = generate_praw( basedir,  [do_parallel],  [timelims], [is_chipod], [avg_window])
 %
 %     This function generates the Praw.mat files in ./proc/

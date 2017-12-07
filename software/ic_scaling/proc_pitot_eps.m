@@ -1,4 +1,4 @@
-function [] = proc_pitot_eps(basedir, rfid, varargin)
+    function [] = proc_pitot_eps(basedir, rfid, varargin)
 %% [] = proc_pitot_eps(basedir, rfid, [spec_length], [f_range], [save_spec])
 %     This function drives the epsilon processing of the Pitot-tube
 %     for a single raw-files 
@@ -91,7 +91,7 @@ if save_spec % if you want to save the spectrogram for diagnostics
    Spec.U      =  Peps.vel;
    
    spec_dir     = [basedir filesep 'proc' filesep 'spec_pitot'  num2str(spec_length*24*3600) 'sec' filesep];
-   [~,~,~] =  mkdir(savedir);
+   [~,~,~] =  mkdir(spec_dir);
    save([spec_dir  'spec_pitot_' num2str(spec_length*24*3600) 'sec' savestamp], 'Spec');;
 end
 

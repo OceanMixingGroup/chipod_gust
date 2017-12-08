@@ -208,6 +208,7 @@ if(do_combine)
                  disp(['NaNing out sensor T1 after it died on ' datestr(T1death)])
                  chi.chi(death:end) = NaN;
                  chi.eps(death:end) = NaN;
+                 chi.T(death:end) = NaN;
              end
          end
 
@@ -218,6 +219,7 @@ if(do_combine)
                      disp(['NaNing out sensor T2 after it died on ' datestr(T2death)])
                      chi.chi(death:end) = NaN;
                      chi.eps(death:end) = NaN;
+                     chi.T(death:end) = NaN;
                  end
              end
          end

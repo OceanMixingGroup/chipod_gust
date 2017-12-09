@@ -65,14 +65,34 @@ addpath(genpath('./chipod_gust/software/'));% include  path to preocessing routi
    T1death = datenum(2060, 1, 1, 0, 0, 0); % chipod T1 or gustT T sensor
    T2death = datenum(2060, 1, 1, 0, 0, 0); % T2 sensor
 
-   % which estimates should I process?
-   do = ChooseEstimates(); % get defaults
-   % EXAMPLE: turn off all mm estimates
-   % do = ChooseEstimates(do, 'no_mm');
-   % EXAMPLE: turn off mm1 specifically
-   % do.chi_mm1 = 0;
 
-   % additional time ranges to NaN out as necessary
+
+%_________ which estimates should I process?_______________________
+   pflag = chi_processing_flags;
+      %---------------------gust or chipod----------------------
+      if fids{1}(end-3)=='g' | fids{1}(end-3)=='G' % GusT
+         pflag = pflag.c_gst(1);
+      else                % chipod
+         pflag = pflag.c_gst(0);
+      end
+       pflag = pflag.auto_set(basedir);
+      %---------------------add manual flags----------------------
+       %pflag = pflag.c_T1(0);       % switch off T1 if bad
+       %pflag = pflag.c_T2(0);       % switch off T2 if bad
+
+       %pflag = pflag.c_ic(1);       % switch on ic processing (default off)
+       %pflag = pflag.c_vc(0);       % switch off viscous convective processing (default on)
+       %pflag.master.epsp = 1;       % switch on eps calculation from pitot (default on)
+     
+       %pflag = pflag.c_vel_p(0);    % use pitot velocities 
+       %pflag = pflag.c_vel_m(0);    % use mooring velocities 
+       %pflag = pflag.c_Tzi(0);      % use local (interal) stratification 
+       %pflag = pflag.c_Tzm(0);      % use mooring stratification 
+      pflag = pflag.make_cons();     % make sub-flags consitent with master flags 
+
+
+
+%_____________ additional time ranges to NaN out as necessary________________
    % make an array that looks like
    % nantimes{sensor_number} = [start_time1, end_time1;
    %                            start_time2, end_time2;]
@@ -135,9 +155,9 @@ if(do_combine)
 
       if ~isempty(mat_test) & ~isempty(chi_test)
 
-         ID = d(i).name(1:mat_test-1);
-         if ~do.(ID)
-             disp(['do.' ID ' is disabled!']);
+         ID = d(i).name(5:mat_test-1);
+         if ~pflag.proc.(ID)
+             disp([ ID ' is disabled!']);
              continue;
          end
 

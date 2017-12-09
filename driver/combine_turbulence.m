@@ -409,8 +409,8 @@ if(do_combine)
              % an averaged estimate
              disp('Deglitch... itch... tch... ch')
              tic;
-             chi.chi = deglitch(chi.chi, dw, deglitch_nstd, 'b');
-             chi.eps = deglitch(chi.eps, dw, deglitch_nstd, 'b');
+             chi.chi = 10.^deglitch(log10(chi.chi), dw, deglitch_nstd, 'b');
+             chi.eps = 10.^deglitch(log10(chi.eps), dw, deglitch_nstd, 'b');
              toc;
 
              % get list of all fields to average

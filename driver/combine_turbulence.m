@@ -69,12 +69,16 @@ addpath(genpath('./chipod_gust/software/'));% include  path to preocessing routi
 
 %_________ which estimates should I process?_______________________
    pflag = chi_processing_flags;
+
       %---------------------gust or chipod----------------------
-      if fids{1}(end-3)=='g' | fids{1}(end-3)=='G' % GusT
+      basedir = '../' 
+      load([basedir '/calib/header.mat'])
+      if isfield(head.coef, 'T') % GusT
          pflag = pflag.c_gst(1);
       else                % chipod
          pflag = pflag.c_gst(0);
       end
+
        pflag = pflag.auto_set(basedir);
       %---------------------add manual flags----------------------
        %pflag = pflag.c_T1(0);       % switch off T1 if bad
@@ -180,7 +184,7 @@ if(do_combine)
 
          disp(' ');
          disp(['----------> adding ' ID ]);
-         load([dirname ID '.mat'])
+         load([dirname 'chi_' ID '.mat'])
 
          % find desired time range
          iiTrange = find( chi.time >= time_range(1) & chi.time<= time_range(2) );
@@ -205,12 +209,12 @@ if(do_combine)
              sbe_dSdz = 2*3e-4/dz;
              sbe_N2 = 9.81 * (1.7e-4 * sbe_dTdz + 7.6e-4 * sbe_dSdz);
 
-             if min_dTdz < sbe_dTdz & ID(6) == 'm'
+             if min_dTdz < sbe_dTdz & ID(2) == 'm'
                  disp(['WARNING: min_dTdz < minimum resolvable based on ' ...
                        'SBE-37 accuracy specifications i.e. ' ...
                        num2str(sbe_dTdz, '%.1e')]);
              end
-             if min_N2 < sbe_N2 & ID(6) == 'm'
+             if min_N2 < sbe_N2 & ID(2) == 'm'
                  disp(['WARNING: min_N2 < minimum resolvable based on ' ...
                        'SBE-37 accuracy specifications i.e. ' ...
                        num2str(sbe_N2, '%.1e')]);
@@ -267,28 +271,28 @@ if(do_combine)
 
          if do_plot
              hfig = CreateFigure;
-             Histograms(chi, hfig, normstr, fix_underscore(ID(5:end)), 'raw');
+             Histograms(chi, hfig, normstr, ID, 'raw');
 
              if ~exist('hfraw', 'var'), hfraw = CreateFigure; end
-             Histograms(chi, hfraw, 'pdf', fix_underscore(ID(5:end)), fix_underscore(ID(5:end)));
+             Histograms(chi, hfraw, 'pdf', ID, ID);
 
              if ~exist('hfstrat', 'var')
                  hfstrat = CreateFigure;
                  shown_Tz = '';
              end
 
-             if isempty(strfind(shown_Tz, ID(6)))
+             if isempty(strfind(shown_Tz, ID(2)))
                  StratHist(hfstrat, chi, ID);
                  subplot(222);
                  hplt = plot(avgwindow/60*[1, 1], ylim, 'k--');
                  legend(hplt, 'averaging window')
-                 shown_Tz = [shown_Tz ID(6)];
+                 shown_Tz = [shown_Tz ID(2)];
              end
          end
 
          if do_mask
              % speed mask could change depending on estimate
-             mask_spd = ID(5);
+             mask_spd = ID(1);
 
              if mask_spd == 'm' & ~exist('vel_m', 'var')
                  load ../input/vel_m.mat
@@ -341,19 +345,19 @@ if(do_combine)
 
              if mask_flushing
                  chi = ApplyMask(chi, badMotion, '=', 1, 'volume not being flushed');
-                 if do_plot, Histograms(chi, hfig, normstr, fix_underscore(ID(5:end)), 'volume flushed'); end
+                 if do_plot, Histograms(chi, hfig, normstr, (ID), 'volume flushed'); end
              end
 
              [chi, percentage] = ApplyMask(chi, abs(chi.dTdz), '<', min_dTdz, 'Tz');
              chi.stats.dTdz_mask_percentage = percentage;
              perlabel = [' -' num2str(percentage, '%.1f') '%'];
-             if do_plot, Histograms(chi, hfig, normstr, fix_underscore(ID(5:end)), ['|Tz| > ' num2str(min_dTdz, '%.1e') perlabel]); end
+             if do_plot, Histograms(chi, hfig, normstr, (ID), ['|Tz| > ' num2str(min_dTdz, '%.1e') perlabel]); end
 
              [chi, percentage] = ApplyMask(chi, chi.N2, '<', min_N2, 'N2');
              chi.stats.N2_mask_percentage = percentage;
              if percentage > 0.5
                  perlabel = [' -' num2str(percentage, '%.1f') '%'];
-                 if do_plot, Histograms(chi, hfig, normstr, fix_underscore(ID(5:end)), ['N2' perlabel]); end
+                 if do_plot, Histograms(chi, hfig, normstr,(ID), ['N2' perlabel]); end
              end
 
              [chi, percentage] = ApplyMask(chi, chi.spd, '<', min_inst_spd, 'inst speed');
@@ -370,7 +374,7 @@ if(do_combine)
              if ~isempty(Tz)
                  if additional_mask_dTdz == 'i'
                      % choose appropriate internal stratification for sensor
-                     Tz.Tz = Tz.(['Tz' ID(7)']);
+                     Tz.Tz = Tz.(['Tz' ID(3)']);
                  end
 
                  Tzmask = interp1(Tz.time, Tz.Tz, chi.time);
@@ -378,7 +382,7 @@ if(do_combine)
                                                ['Additional Tz_' additional_mask_dTdz]);
                  chi.stats.additional_dTdz_mask_percentage = percentage;
                  perlabel = [' -' num2str(percentage, '%.1f') '%'];
-                 if do_plot, Histograms(chi, hfig, normstr, fix_underscore(ID(5:end)), ['Additional Tz_' additional_mask_dTdz perlabel]); end
+                 if do_plot, Histograms(chi, hfig, normstr, (ID), ['Additional Tz_' additional_mask_dTdz perlabel]); end
              end
 
              % remove values greater than thresholds
@@ -388,10 +392,10 @@ if(do_combine)
              if do_plot
                  figure(hfig)
                  set(hfig, 'DefaultLegendBox', 'off');
-                 subplot(221); legend(gca, 'show'); title(fix_underscore(ID(5:end)));
-                 subplot(222); legend(gca, 'show'); title(fix_underscore(ID(5:end)));
-                 subplot(223); legend(gca, 'show'); title(fix_underscore(ID(5:end)));
-                 subplot(224); legend(gca, 'show'); title(fix_underscore(ID(5:end)));
+                 subplot(221); legend(gca, 'show'); title((ID));
+                 subplot(222); legend(gca, 'show'); title((ID));
+                 subplot(223); legend(gca, 'show'); title((ID));
+                 subplot(224); legend(gca, 'show'); title((ID));
 
                  print(gcf,['../pics/histograms-masking-' ID '.png'],'-dpng','-r200','-painters')
                  if save_fig, savefig(gcf,['../pics/histograms-masking-' ID '.fig']); end
@@ -449,7 +453,7 @@ if(do_combine)
 
          if do_plot
              if ~exist('hfig2', 'var'), hfig2 = CreateFigure; end
-             Histograms(Turb.(ID), hfig2, 'pdf', fix_underscore(ID(5:end)), fix_underscore(ID(5:end)));
+             Histograms(Turb.(ID), hfig2, 'pdf', (ID), (ID));
          end
          
          % include statistics

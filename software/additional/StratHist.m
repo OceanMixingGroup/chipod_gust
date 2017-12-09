@@ -1,7 +1,7 @@
 function [] = StratHist(hfig, chi, ID)
 
-    if ID(6) == 'm', legstr = 'mooring'; end
-    if ID(6) == 'i', legstr = 'internal'; end
+    if ID(2) == 'm', legstr = 'mooring'; end
+    if ID(2) == 'i', legstr = 'internal'; end
 
     set(hfig, 'DefaultLegendBox', 'off')
 

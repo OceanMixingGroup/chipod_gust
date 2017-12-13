@@ -1,0 +1,88 @@
+\chapter{\texttt{combine\_turbulence}}
+
+This is the final step.
+
+\section{Masking criteria/thresholds}
+\label{sec:orgccff08d}
+\subsection{Background stratification: \texttt{min\_dTdz, min\_N2, additional\_mask\_dTdz}}
+
+Minimum $dT/dz$, $N^2$ required for valid computation of $\chi, K_T, J_q^t$
+
+The Seabird SBE-37 datasheet says (\url{http://www.seabird.com/sbe37si-microcat-ctd})
+\begin{itemize}
+\item T is accurate to \SI{2e-3}{\celsius}
+\item conductivity is accurate to \SI{3e-3}{psu} (approx!)
+\end{itemize}
+
+i.e.,
+\begin{itemize}
+\item dT/dz is accurate to (2x2e-3)/dz
+\item dS/dz is accurate to (2x3e-3)/dz
+\end{itemize}
+
+\subsection{Sensor deaths: \texttt{T1death, T2death; nantimes\{1,2,3\}}}
+
+\subsection{Averaging: \texttt{avgwindow, avgvalid}}
+
+\subsection{Orientation / sensed-volume-flushing}
+\subsection{Background flow speed: \texttt{min\_inst\_spd, min\_spd, additional\_mask\_spd}}
+
+\subsection{Maximum thresholds on $\epsilon, \chi, K_T, J_q^t$}
+
+\subsection{Deglitching: \texttt{deglitch\_window, deglitch\_nstd
+}}
+
+\section{Useful Functions}
+\subsection{ChooseEstimates}
+\subsection{chiold (variable)}
+combine\_turbulence saves the \emph{unmasked} chi structure as chiold after calculating Kt, Jqt but before doing any processing. Useful in checking masking.
+
+\subsection{TestMask}
+Lets you quickly iterate through various thresholds for a particular criterion.
+
+Throws up a figure with histograms of counts to compare.
+
+Example usage:
+\begin{lstlisting}
+TestMask(chi, abs(chi.dTdz), '<', [1e-4, 3e-4, 1e-3], 'Tz');\\
+\end{lstlisting}
+
+This will iterate and mask using chi.dTdz < 1e-4, then chi.dTdz < 3e-4 and finally chi.dTdz < 1e-3. Each iteration is \textbf{independent} of the previous one.
+
+\subsection{DebugPlots}
+Usually, you want to see the effect of different masking thresholds in a small subset of the time series of χ, ε etc.
+
+Example usage:
+\begin{lstlisting}
+chi = chiold; \% reset to unmasked structure\\
+\% apply 3 different thresholds\\
+chi1 = ApplyMask(chi, abs(chi.dTdz), '<', 1e-4, 'T\(_{\text{z}}\) < 1e-4');\\
+chi2 = ApplyMask(chi, abs(chi.dTdz), '<', 1e-3, 'T\(_{\text{z}}\) < 1e-3');\\
+chi3 = ApplyMask(chi, abs(chi.dTdz), '<', 2e-3, 'T\(_{\text{z}}\) < 2e-3');\\
+\vspace*{1em}
+t0 = datetime(2016, 12, 10);\\
+t1 = datenum(2016, 12, 12);\\
+tavg = 600;\\
+\vspace*{1em}
+hf = figure;\\
+\% plot 10 minute averages (tavg) of quantities in structure chi\\
+\% between [t0, t1] and label them as 'raw' in figure window hf\\
+DebugPlots(hf, t0, t1, chi, 'raw', tavg);\\
+\vspace*{1em}
+\% compare different masking; label appropriately\\
+DebugPlots(hf, t0, t1, chi1, '1e-4', tavg);\\
+DebugPlots(hf, t0, t1, chi2, '1e-3', tavg);\\
+DebugPlots(hf, t0, t1, chi3, '2e-3', tavg);\\
+\end{lstlisting}
+
+\subsection{DebugRawData}
+The idea is to connect Turb.() to the raw-ish data.
+
+Requires structure T from temp.mat.
+
+\subsection{Histograms2D}
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "docs"
+%%% End:

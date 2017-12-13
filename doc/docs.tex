@@ -1,5 +1,6 @@
 \documentclass[12pt]{report}
-\usepackage{bookman}
+
+\usepackage{palatino}
 \usepackage{geometry}                % See geometry.pdf to learn the layout options. There are lots.
 \geometry{letterpaper}                   % ... or a4paper or a5paper or ...
 \usepackage[parfill]{parskip}    % Activate to begin paragraphs with an empty line rather than an indent
@@ -10,6 +11,7 @@
 \usepackage{float}
 \usepackage{gensymb}
 \usepackage{amsmath}
+\usepackage{siunitx}
 \DeclareGraphicsRule{.tif}{png}{.png}{`convert #1 `dirname #1`/`basename #1 .tif`.png}
 
 \usepackage{fancyhdr}
@@ -30,6 +32,13 @@
 \setlength{\parsep}{72pt}
 \setlength{\parindent}{0pt}
 \usepackage{hyperref}
+\usepackage{natbib}
+\usepackage{pdflscape}
+\usepackage{rotating}
+\usepackage{listings}
+\lstset{
+  basicstyle=\footnotesize\ttfamily,
+  language=matlab}
 
 %\lhead[]{}      % Note the brackets!
 %\rhead[]{}
@@ -48,15 +57,42 @@
 \usepackage{sidecap}
 \usepackage{float}
 
+% The following makes ODEs and PDEs easier to write.
+% For an example, see the second problem below. - Vallis Solution template
+\newcommand{\dd}[3][]{{\frac{\dr^{#1} #2}{\dr #3^{#1}}}}
+\newcommand{\pp}[3][]{{\frac{\partial^{#1} #2}{\partial #3^{#1}}}}
+\newcommand{\DD}[1]{{\frac{\D#1}{\D t}}}
+% example: \pp[2]y x
 
-\title{$\chi$pod and gusT processing package}
+\newcommand\ppx{\pp{}{x}}
+\newcommand\ppy{\pp{}{y}}
+\newcommand\ppt{\pp{}{t}}
+
+
+\title{The $\chi$pod and gusT processing package}
 \author{Johannes Becherer, Sally Warner, Deepak Cherian}
 \date{Last updated: December 11, 2017}
 
-\begin{document}
-\pagestyle{fancy}
-\maketitle
+% Definition of \maketitle
+\makeatletter
+\def\makenewtitle{{
+\thispagestyle{plain}
+\centering
+\includegraphics[width=0.4\textwidth]{figs/omg_logo.png} \\[23ex]
+\vspace*{\fill}
+{\Huge \@title }\\[4ex]
+{\large  \@author}\\[4ex]
+\@date\\
+\vspace*{\fill}}}
 
+\makeatother
+
+
+\begin{document}
+
+\pagestyle{fancy}
+
+\makenewtitle
 \tableofcontents
 
 \part{Calibration}
@@ -69,8 +105,11 @@
 \input{combine_turbulence}
 
 
+\appendix
 \part{Appendix}
 \input{matlabserver}
 \input{references}
 \input{git}
+\input{sensors}
+
 \end{document}

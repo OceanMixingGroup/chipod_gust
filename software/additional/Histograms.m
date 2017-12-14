@@ -1,5 +1,10 @@
 function Histograms(chi, hfig, normstr, ID, legendtext)
 
+    if ~exist('normstr', 'var'), normstr = 'pdf'; end
+    if ~exist('ID', 'var'), ID = ''; end
+    if ~exist('legendtext', 'var'), legendtext = ''; end
+    if ~exist('hfig', 'var') | isempty(hfig), hfig = figure; end
+
     nbins = 300;
     chibins = linspace(-12, -1, nbins);
     epsbins = linspace(-12, 1, nbins);

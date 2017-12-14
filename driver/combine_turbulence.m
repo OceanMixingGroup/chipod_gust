@@ -37,8 +37,8 @@ addpath(genpath('./chipod_gust/software/'));% include  path to preocessing routi
                   % be non-NaN
 
    % deglitching parameters
-   deglitch_window = avgwindow; % in seconds
-   deglitch_nstd = 2; % n std. dev. threshold
+   deglitch_window = 180; % in seconds
+   deglitch_nstd = 3; % n std. dev. threshold
 
    % we always mask using speed & dTdz used to calculate chi.
    % the next two are for *additional* masking using a different

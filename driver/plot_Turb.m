@@ -20,13 +20,32 @@ runname = NaN;
 % There are up to 24 processing modes, which would you like to plot?
 % Note: if any of these have not been processed, they will not plot
 % automatically.
-if ~exist('do', 'var')
-    do = ChooseEstimates();
-end
+%_________ which estimates should I process?_______________________
+   pflag = chi_processing_flags;
 
-% filter out estimates here:
-% EXAMPLE 1: do = ChooseEstimates(do, 'no_ic')
-% EXAMPLE 2: do = ChooseEstimates([], 'none'); do.chi_pm1 = 1; % only pm1
+      %---------------------gust or chipod----------------------
+      basedir = '../' 
+      load([basedir '/calib/header.mat'])
+      if isfield(head.coef, 'T') % GusT
+         pflag = pflag.c_gst(1);
+      else                % chipod
+         pflag = pflag.c_gst(0);
+      end
+
+       pflag = pflag.auto_set(basedir);
+      %---------------------add manual flags----------------------
+       %pflag = pflag.c_T1(0);       % switch off T1 if bad
+       %pflag = pflag.c_T2(0);       % switch off T2 if bad
+
+       %pflag = pflag.c_ic(1);       % switch on ic processing (default off)
+       %pflag = pflag.c_vc(0);       % switch off viscous convective processing (default on)
+       %pflag.master.epsp = 1;       % switch on eps calculation from pitot (default on)
+     
+       %pflag = pflag.c_vel_p(0);    % use pitot velocities 
+       %pflag = pflag.c_vel_m(0);    % use mooring velocities 
+       %pflag = pflag.c_Tzi(0);      % use local (interal) stratification 
+       %pflag = pflag.c_Tzm(0);      % use mooring stratification 
+      pflag = pflag.make_cons();     % make sub-flags consitent with master flags 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%% DO NOT CHANGE BELOW %%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -84,11 +103,11 @@ for a = 1:4
     % plot
     for f = 1:length(ff)
         if ~isstruct(Turb.(ff{f})), continue; end
-        if do.(ff{f}) == 1
+          if pflag.proc.(ff{f}) == 1
             pj = f; p(pj) = plot(ax(a), Turb.(ff{f}).time, Turb.(ff{f}).(var),...
-                'color', choose_color(ff{f}(5:end),'color'), ...
-                'LineWidth', choose_color(ff{f}(5:end),'width'), ...
-                'LineStyle', choose_color(ff{f}(5:end),'style'));
+                'color', choose_color(ff{f},'color'), ...
+                'LineWidth', choose_color(ff{f},'width'), ...
+                'LineStyle', choose_color(ff{f},'style'));
         end
     end
     t = text_corner(ax(a), labelstr, 1);
@@ -135,26 +154,26 @@ yl = log10(get(ax(a), 'Ylim'));
 bins = yl(1):diff(yl)/100:yl(2);
 for f = 1:length(ff)
     if ~isstruct(Turb.(ff{f})) == 1, continue; end
-    if do.(ff{f}) == 1
+      if pflag.proc.(ff{f}) == 1
         [Nchi,~] = histcounts( log10(Turb.(ff{f}).chi) , bins);
         pj = f; p(pj) = plot(axh(a), Nchi , bins(1:end-1)+diff(bins(1:2)*.5),...
-                'color', choose_color(ff{f}(5:end),'color'), ...
-                'LineWidth', choose_color(ff{f}(5:end),'width'), ...
-                'LineStyle', choose_color(ff{f}(5:end),'style'));
+                'color', choose_color(ff{f},'color'), ...
+                'LineWidth', choose_color(ff{f},'width'), ...
+                'LineStyle', choose_color(ff{f},'style'));
     end
 end
 xlims = get(axh(a),'XLim');
 for f = 1:length(ff)
     if ~isstruct(Turb.(ff{f})) == 1, continue; end
-    if do.(ff{f}) == 1 & isfield(Turb.(ff{f}), 'stats')
+       if pflag.proc.(ff{f}) == 1 & isfield(Turb.(ff{f}), 'stats')
         plot(axh(a), xlims(2)*0.9 ,log10( Turb.(ff{f}).stats.chimean),'<',...
-                'color', choose_color(ff{f}(5:end),'color'), ...
-                'LineWidth', choose_color(ff{f}(5:end),'width'), ...
-                'LineStyle', choose_color(ff{f}(5:end),'style'),'markersize',ms);
+                'color', choose_color(ff{f},'color'), ...
+                'LineWidth', choose_color(ff{f},'width'), ...
+                'LineStyle', choose_color(ff{f},'style'),'markersize',ms);
         plot(axh(a), xlims(2)*0.95 ,log10( Turb.(ff{f}).stats.chimedian),'+',...
-                'color', choose_color(ff{f}(5:end),'color'), ...
-                'LineWidth', choose_color(ff{f}(5:end),'width'), ...
-                'LineStyle', choose_color(ff{f}(5:end),'style'),'markersize',ms);
+                'color', choose_color(ff{f},'color'), ...
+                'LineWidth', choose_color(ff{f},'width'), ...
+                'LineStyle', choose_color(ff{f},'style'),'markersize',ms);
     end
 end
 ylim(axh(a), yl);
@@ -172,26 +191,26 @@ yl = log10(get(ax(a), 'Ylim'));
 bins = yl(1):diff(yl)/100:yl(2);
 for f = 1:length(ff)
     if ~isstruct(Turb.(ff{f})) == 1, continue; end
-    if do.(ff{f}) == 1
+       if pflag.proc.(ff{f}) == 1
         [Nchi,~] = histcounts( log10(Turb.(ff{f}).eps) , bins);
         pj = f; p(pj) = plot(axh(a), Nchi , bins(1:end-1)+diff(bins(1:2)*.5),...
-                'color', choose_color(ff{f}(5:end),'color'), ...
-                'LineWidth', choose_color(ff{f}(5:end),'width'), ...
-                'LineStyle', choose_color(ff{f}(5:end),'style'));
+                'color', choose_color(ff{f},'color'), ...
+                'LineWidth', choose_color(ff{f},'width'), ...
+                'LineStyle', choose_color(ff{f},'style'));
     end
 end
 xlims = get(axh(a),'XLim');
 for f = 1:length(ff)
     if ~isstruct(Turb.(ff{f})) == 1, continue; end
-    if do.(ff{f}) == 1  & isfield(Turb.(ff{f}), 'stats')
+       if pflag.proc.(ff{f}) == 1  & isfield(Turb.(ff{f}), 'stats')
         plot(axh(a), xlims(2)*0.9 , log10(Turb.(ff{f}).stats.epsmean),'<',...
-                'color', choose_color(ff{f}(5:end),'color'), ...
-                'LineWidth', choose_color(ff{f}(5:end),'width'), ...
-                'LineStyle', choose_color(ff{f}(5:end),'style'),'markersize',ms);
+                'color', choose_color(ff{f},'color'), ...
+                'LineWidth', choose_color(ff{f},'width'), ...
+                'LineStyle', choose_color(ff{f},'style'),'markersize',ms);
         plot(axh(a), xlims(2)*0.95 , log10(Turb.(ff{f}).stats.epsmedian),'+',...
-                'color', choose_color(ff{f}(5:end),'color'), ...
-                'LineWidth', choose_color(ff{f}(5:end),'width'), ...
-                'LineStyle', choose_color(ff{f}(5:end),'style'),'markersize',ms);
+                'color', choose_color(ff{f},'color'), ...
+                'LineWidth', choose_color(ff{f},'width'), ...
+                'LineStyle', choose_color(ff{f},'style'),'markersize',ms);
     end
 end
 ylim(axh(a), yl);
@@ -210,12 +229,12 @@ clear nleg p ffstr
 nleg = 1;
 for f = 1:length(ff)
     if ~isstruct(Turb.(ff{f})) == 1, continue; end
-    if do.(ff{f}) == 1
+      if pflag.proc.(ff{f}) == 1
         pj = nleg; p(pj) = plot(axl, [0 1] ,[0 1],...
-                'color', choose_color(ff{f}(5:end),'color'), ...
-                'LineWidth', choose_color(ff{f}(5:end),'width'), ...
-                'LineStyle', choose_color(ff{f}(5:end),'style'));
-        ffstr{nleg} = fix_underscore(ff{f}(5:end));
+                'color', choose_color(ff{f},'color'), ...
+                'LineWidth', choose_color(ff{f},'width'), ...
+                'LineStyle', choose_color(ff{f},'style'));
+        ffstr{nleg} = fix_underscore(ff{f});
         nleg = nleg+1;
     end
 end

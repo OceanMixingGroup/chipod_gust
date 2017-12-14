@@ -50,11 +50,11 @@ else
 end
 
 % find the color that relates to each input
-if strcmp(name,'pi11')
+if strcmp(name,'pi11') || strcmp(name,'pig')
     color = cols(1,:);
-elseif strcmp(name,'mi11')
+elseif strcmp(name,'mi11') || strcmp(name,'mig')
     color = cols(2,:);
-elseif strcmp(name,'mm1')
+elseif strcmp(name,'mm1') || strcmp(name,'mmg')
     color = cols(3,:);
 elseif strcmp(name,'pi11_ic')
     color = cols(4,:);
@@ -62,7 +62,7 @@ elseif strcmp(name,'mi22')
     color = cols(5,:);
 elseif strcmp(name,'mm2')
     color = cols(6,:);
-elseif strcmp(name,'pm1')
+elseif strcmp(name,'pm1') || strcmp(name,'pmg')
     color = cols(7,:);
 elseif strcmp(name,'pm2')
     color = cols(8,:);
@@ -70,15 +70,15 @@ elseif strcmp(name,'pi22')
     color = cols(9,:);
 elseif strcmp(name,'mi22_ic')
     color = cols(10,:);
-elseif strcmp(name,'mi11_ic')
+elseif strcmp(name,'mi11_ic') || strcmp(name,'mig_ic')
     color = cols(11,:);
 elseif strcmp(name,'mm2_ic')
     color = cols(12,:);
-elseif strcmp(name,'mm1_ic')
+elseif strcmp(name,'mm1_ic') || strcmp(name,'mmg_ic')
     color = cols(13,:);
 elseif strcmp(name,'pi22_ic')
     color = cols(14,:);
-elseif strcmp(name,'pm1_ic')
+elseif strcmp(name,'pm1_ic')|| strcmp(name,'pmg_ic')
     color = cols(15,:);
 elseif strcmp(name,'pm2_ic')
     color = cols(16,:);

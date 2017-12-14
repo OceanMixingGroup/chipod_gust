@@ -535,7 +535,12 @@ end
 if do_plot    
     % moved this plotting function to a separate function so it can be run
     % independently if needed.
-    plot_Turb  
+    [fig] = plot_Turb(basedir, pflag);
+      print(fig,[basedir '/pics/Compare_Turb.png'],'-dpng','-r200')
+      if save_fig
+         disp('saving Compare_Turb.fig')
+         savefig(fig,[basedir '/pics/Compare_Turb.fig'])
+      end
 end
 
 

@@ -1,21 +1,21 @@
+function [fig] = plot_Turb(basedir, pflag, runname)
 % plot_Turb.m
 %
 % load Turb.m and plot all of the variables that have been processed
 
 %%%%%%%%%%%%%%%%%%% DEFINE PARAMETERS %%%%%%%%%%%%%%%%%%%
 
-% SAVE FIG
-% The fig file can be very large and take a huge amount of time to save.
-% Only turn on with smaller datasets
-do_save_fig = 0;
 
 % RUNNAME
 % Name of folder in which Turb.mat is saved (folder within ../proc/)
 % For example, if Turb.mat is in ../proc/Turb_min_dTdz_1e-3_60sec/Turb.mat,
 % then runname = 'Turb_min_dTdz_1e-3_60sec'
 % If Turb.mat is saved in ../proc/, leave runname = NaN;
-runname = NaN;
+if nargin < 3 
+   runname = NaN;
+end
 
+if nargin <2
 % PROCESSING MODES TO PLOT
 % There are up to 24 processing modes, which would you like to plot?
 % Note: if any of these have not been processed, they will not plot
@@ -46,16 +46,13 @@ runname = NaN;
        %pflag = pflag.c_Tzi(0);      % use local (interal) stratification 
        %pflag = pflag.c_Tzm(0);      % use mooring stratification 
       pflag = pflag.make_cons();     % make sub-flags consitent with master flags 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%% DO NOT CHANGE BELOW %%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+end
 
-% set directories 
-	addpath(genpath('./chipod_gust/software/'));% include  path to preocessing routines
+% set basedir 
+if nargin <1
     here    =   pwd;                % mfiles folder
     basedir =   here(1:(end-6));    % substract the mfile folder
-    savedir =   [basedir 'proc/'];  % directory directory to save data
-    unit    = chi_get_unit_name(basedir); % get unit name
+end
 
 % load in Turb.mat
 tic
@@ -242,16 +239,6 @@ legend(p, ffstr);
 set(axl, 'visible', 'off')
 ylim(axl,[-1 -.5])
 
-
-%%%%%%%%%%%%%%%%% save %%%%%%%%%%%%%%%%%
-
-print(gcf,'../pics/Compare_Turb.png','-dpng','-r200','-painters')
-if do_save_fig == 1
-    disp('saving ../pics/Compare_Turb.fig')
-    tic
-    savefig(gcf,'../pics/Compare_Turb.fig')
-    toc
-end
 
 
 

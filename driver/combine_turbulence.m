@@ -269,6 +269,9 @@ if(do_combine)
          chi.Kt = 0.5 * chi.chi ./ chi.dTdz.^2;
          chi.Jq = -1025 .* 4200 .* chi.Kt .* chi.dTdz;
 
+         % save unmasked chi structure for later use
+         chiold = chi;
+
          if do_plot
              hfig = CreateFigure;
              Histograms(chi, hfig, normstr, ID, 'raw');

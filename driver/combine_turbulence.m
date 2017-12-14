@@ -224,8 +224,6 @@ if(do_combine)
          catch ME
              Smean = 35*ones(size(chi.time));
          end
-         rho = sw_pden(Smean, chi.T, ChipodDepth, 0);
-         cp = sw_cp(Smean, chi.T, ChipodDepth);
 
          %___________________NaN out after sensor death______________________
          if sensor == 1 % sensor T1 or gusT T
@@ -269,7 +267,7 @@ if(do_combine)
          end
 
          chi.Kt = 0.5 * chi.chi ./ chi.dTdz.^2;
-         chi.Jq = -rho .* cp .* chi.Kt .* chi.dTdz;
+         chi.Jq = -1025 .* 4200 .* chi.Kt .* chi.dTdz;
 
          if do_plot
              hfig = CreateFigure;

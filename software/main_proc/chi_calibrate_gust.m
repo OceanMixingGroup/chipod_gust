@@ -45,7 +45,7 @@ function [data] = chi_calibrate_gust(rfid, head)
          % sometimes for gooseneck Ax and Az are switched
          if nanmedian( abs(chi.AX) ) > nanmedian( abs(chi.AZ) ) % find out which is dominated by gravity
             tmpZ = chi.AX;
-            chi.AX = chi.AZ;
+            chi.AX = -chi.AZ;
             chi.AZ = tmpZ;
          end
 

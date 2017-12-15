@@ -69,11 +69,11 @@ ff = fields(Turb);
 ff = {ff{1:end-1}}'; % remove readme structure
 
 fig = CreateFigure;
-[ax, ~] = create_axes(fig, 4, 1, 0);
+[ax, ~] = create_axes(fig, 5, 1, 0);
       
  
 %%%%%%%%%%%%%%%%% plot time series %%%%%%%%%%%%%%%%%
-for a = 1:4
+for a = 1:5
     % define parameters for each subplot
     if a == 1
         var = 'chi';
@@ -86,11 +86,16 @@ for a = 1:4
         yl = [1e-10 1e-4];
         yscale = 'log';
     elseif a == 3
+        var = 'Kt';
+        labelstr = 'K_t [m^2/s]';
+        yl = [1e-7 1e0];
+        yscale = 'log';
+    elseif a == 4
         var = 'dTdz';
         labelstr = 'dTdz [C/m]';
         yl = [-1e-1, 0.3]; 
         yscale = 'linear';
-    elseif a == 4
+    elseif a == 5
         var = 'spd';
         labelstr = '|u| [m/s]';
         yl = [0 2];
@@ -114,19 +119,19 @@ for a = 1:4
     datetick(ax(a), 'keeplimits');
     
     % add some extras
-    if a == 1 | a == 2
+    if a <4
         set(ax(a),'YTick',10.^(-10:1:0))
     end
-    if a == 3
+    if a == 4
         set(ax(a), 'XTickLabels', [])
         plot(ax(a), xlim ,[0 0], 'k-')
         axes(ax(a))
         symlog('y', -3);
     end
-    if a ~= 4
+    if a ~= 5
         set(ax(a),'XTickLabel',{' '})
     end
-    set(ax(4),'YScale','linear')
+    set(ax(5),'YScale','linear')
 
 end
 

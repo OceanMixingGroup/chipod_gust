@@ -27,7 +27,7 @@ else
 end
 %---------------------intrepolate referece speed to pitot time----------------------
 
-p_ref_spd = interp1(a_time, a_spd, p_time);
+p_ref_spd = clever_interp(a_time, a_spd, p_time);
 
 %---------------------cal v0 time series----------------------
 tmp_v0 = p_v_cal - .5*1025/s_pd*p_ref_spd.^2;

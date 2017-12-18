@@ -18,7 +18,7 @@ dt1   = nanmean( diff(x1));
 
 if dt1 > 2*dt
    ww =  round(dt1/dt);
-   y  =  movmean( y, ww);
+   y  =  movmean( y, ww, 'omitnan');
 end
 
 if size(x,2) == size(y,1)

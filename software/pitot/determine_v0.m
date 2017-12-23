@@ -164,6 +164,9 @@ if do_v0_self
 
             linkaxes(ax, 'x');
             xlim(ax(1), time_range)
+
+         print(gcf,[basedir '/pics/pitot_self_diagnostic.png'],'-dpng','-r100','-painters')
+         
             
    end
 
@@ -248,8 +251,8 @@ if do_plot
          a_L    = 'V0_{fit}';
          p_L    = 'V0_{self}';
          [fig] =  compare_velocity_timeseries(Pf.P.time, Pf.P.U, a_L, Ps.P.time, Ps.P.U, p_L);
-         print(gcf,[basedir '/pics/V0_fit_vs_self.png'],'-dpng','-r100')
-         savefig(fig,[basedir '/pics/V0_fit_vs_self.fig'])
+         print(gcf,[basedir '/pics/pitot_V0_fit_vs_self.png'],'-dpng','-r100')
+         savefig(fig,[basedir '/pics/pitot_V0_fit_vs_self.fig'])
    end
    if (exist(fidf, 'file') & exist(fidvelm, 'file') )
       load(fidvelm);
@@ -258,8 +261,8 @@ if do_plot
       a_L    = 'ADCP';
       p_L    = 'Pitot V0_{fit}';
       [fig] =  compare_velocity_timeseries(vel_m.time, vel_m.U, a_L, Pf.P.time, Pf.P.U, p_L);
-      print(fig,[basedir '/pics/Pitot_vs_ADCP_V0_fit.png'],'-dpng','-r100')
-      savefig(fig,[basedir '/pics/Pitot_vs_ADCP_V0_fit.fig'])
+      print(fig,[basedir '/pics/pitot_vs_ADCP_V0_fit.png'],'-dpng','-r100')
+      savefig(fig,[basedir '/pics/pitot_vs_ADCP_V0_fit.fig'])
    end
 end
 

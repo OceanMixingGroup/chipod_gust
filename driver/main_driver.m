@@ -27,13 +27,6 @@ addpath(genpath('./chipod_gust/software/'));% include  path to preocessing routi
 %_____________________set processing flags______________________
    pflag = chi_processing_flags;     % get list of processing flags
 
-   %---------------------gust or chipod----------------------
-   if fids{1}(end-3)=='g' | fids{1}(end-3)=='G' % GusT
-      pflag = pflag.c_gst(1);
-   else                % chipod
-      pflag = pflag.c_gst(0);
-   end
-
    %---------------set processing flags automatically----------
    pflag = pflag.auto_set(basedir);
 

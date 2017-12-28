@@ -258,6 +258,15 @@ classdef chi_processing_flags
          %     this function sets a standard set of flags
          %     for the given unit directory  
          
+         % load header
+         fid_header = [unit_dir '/calib/header.mat'];
+         load(fid_header);
+         
+         if isfield(head.coef, 'T')  %GusT
+            pflag = pflag.c_gst(1);
+         else                % chipod
+            pflag = pflag.c_gst(0);
+         end
 
          % find out if gust or chipod
          % !!!!!!!!!!!!!!!!!!!!!!!!!

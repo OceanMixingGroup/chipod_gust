@@ -17,10 +17,6 @@ function [] = do_main_processing( basedir, pflag, time_lim )
 if nargin < 3 % if no time limits are set we use pratical no limits
    time_lim = [datenum(1900,1,1) datenum(2100,1,1)];
 end
-%_____________________get all raw files______________________
-
-   [fids, fdate] = chi_find_rawfiles(basedir);
-
 
 %____________________set automatic pflag______________________
    if nargin < 2
@@ -29,23 +25,17 @@ end
 
       %---------------set processing flags automatically----------
       pflag = pflag.auto_set(basedir);
-
-       pflag = pflag.make_cons();   % make sub-flags consitent with master flags 
-
-       pflag.master.use_compass = 1; % if 0, assume chipod vane moves it
-                                     % into the flow perfectly
-
-       pflag.master.use_pres = 0; % set to 0, accelerometers are
-                                  % working, else differentiate
-                                  % pressure to get speed past sensor
-       pflag.master.parallel = 0;
-
+      pflag.master.parallel = 0;
       %---------------------get flag status----------------------
       pflag.status();
 
    end
 
 %_____________________do main processing______________________
+   %_____________________get all raw files______________________
+
+   [fids, fdate] = chi_find_rawfiles(basedir);
+
 
    if(pflag.master.parallel)
       parpool;

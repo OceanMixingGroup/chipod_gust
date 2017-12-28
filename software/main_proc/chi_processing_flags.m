@@ -263,9 +263,9 @@ classdef chi_processing_flags
          load(fid_header);
          
          if isfield(head.coef, 'T')  %GusT
-            pflag = pflag.c_gst(1);
+            obj = obj.c_gst(1);
          else                % chipod
-            pflag = pflag.c_gst(0);
+            obj = obj.c_gst(0);
          end
 
          % find out if gust or chipod

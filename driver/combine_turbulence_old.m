@@ -11,11 +11,11 @@ close all;
 addpath(genpath('./chipod_gust/software/'));% include  path to preocessing routines
 
 %_____________________set flags______________________
-   do_combine  =  1; % do actually the averaging calculation (can take a couple o minutes)
-   do_plot     =  1; % generate a comparison plot between the different estimates 
-   do_mask     =  1; % NaN chi estimates using min dTdz, speed thresholds
+   do_combine  =  0; % do actually the averaging calculation (can take a couple o minutes)
+   do_plot     =  0; % generate a comparison plot between the different estimates 
+   do_mask     =  0; % NaN chi estimates using min dTdz, speed thresholds
 
-   save_fig    = 1; % save .fig files?
+   save_fig    = 0; % save .fig files?
 
    % set thresholds for masking
    min_N2         = 1e-9;

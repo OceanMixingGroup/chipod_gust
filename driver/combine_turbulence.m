@@ -11,11 +11,11 @@ close all;
 addpath(genpath('./chipod_gust/software/'));% include  path to preocessing routines
 
 %_____________________set flags______________________
-   do_combine  =  1; % do actually the averaging calculation (can take a couple o minutes)
-   do_plot     =  1; % generate a comparison plot between the different estimates 
-   do_mask     =  1; % NaN chi estimates using min dTdz, speed thresholds
-   save_fig    =  1; % save .fig files?
-   is_visible  =  'off'; % shall the figures be displayed
+   do_combine  =  0; % do actually the averaging calculation (can take a couple o minutes)
+   do_plot     =  0; % generate a comparison plot between the different estimates 
+   do_mask     =  0; % NaN chi estimates using min dTdz, speed thresholds
+   save_fig    =  0; % save .fig files?
+   is_visible  =  'on'; % shall the figures be displayed
 
 %_____________________set directories______________________    
    here    =   pwd;                % mfiles folder
@@ -26,8 +26,8 @@ addpath(genpath('./chipod_gust/software/'));% include  path to preocessing routi
    [CP] = default_parameters_combine_turbulence(basedir)
    %_____________________change as much as you like in CP______________________
       % i.e. 
-      %CP.time_range = [ datenum(2000, 1, 1, 0, 0, 0) datenum(2060, 1, 1, 0, 0, 0)];
-      CP.pflag.proc.mmg_ic = 1;
+      %CP.time_range        = [ datenum(2000, 1, 1, 0, 0, 0) datenum(2060, 1, 1, 0, 0, 0)];
+      %CP.pflag.proc.mmg_ic = 1;
 
 
 %_____________________do everything______________________

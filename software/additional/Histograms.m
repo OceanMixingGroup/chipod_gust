@@ -6,7 +6,7 @@ function Histograms(chi, hfig, normstr, ID, legendtext)
     ktbins  = linspace(-8, 1, nbins);
     jqbins  = linspace(-3, 4, nbins/2);
 
-    figure(hfig)
+    %figure(hfig)
     hfig.Position(3) = 2000;
     hfig.Position(4) = 1065;
     set(hfig, 'DefaultLegendBox', 'off')

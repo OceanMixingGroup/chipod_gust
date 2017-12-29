@@ -1,4 +1,4 @@
-function [fig] = plot_Turb(basedir, pflag, runname)
+function [fig] = plot_Turb(basedir, pflag, is_visible, runname)
 % plot_Turb.m
 %
 % load Turb.m and plot all of the variables that have been processed
@@ -11,7 +11,7 @@ function [fig] = plot_Turb(basedir, pflag, runname)
 % For example, if Turb.mat is in ../proc/Turb_min_dTdz_1e-3_60sec/Turb.mat,
 % then runname = 'Turb_min_dTdz_1e-3_60sec'
 % If Turb.mat is saved in ../proc/, leave runname = NaN;
-if nargin < 3 
+if nargin < 4 
    runname = NaN;
 end
 
@@ -68,7 +68,7 @@ toc
 ff = fields(Turb);
 ff = {ff{1:end-1}}'; % remove readme structure
 
-fig = CreateFigure;
+fig = CreateFigure(is_visible);
 [ax, ~] = create_axes(fig, 5, 1, 0);
       
  
@@ -104,7 +104,7 @@ for a = 1:5
     
     % plot
     for f = 1:length(ff)
-        if ~isstruct(Turb.(ff{f})), continue; end
+        if ~isstruct(Turb.(ff{f})) | strcmp( ff{f}, 'parameters' ) , continue; end
           if pflag.proc.(ff{f}) == 1
             pj = f; p(pj) = plot(ax(a), Turb.(ff{f}).time, Turb.(ff{f}).(var),...
                 'color', choose_color(ff{f},'color'), ...
@@ -125,7 +125,7 @@ for a = 1:5
     if a == 4
         set(ax(a), 'XTickLabels', [])
         plot(ax(a), xlim ,[0 0], 'k-')
-        axes(ax(a))
+        set(gcf, 'currentaxes', ax(a))
         symlog('y', -3);
     end
     if a ~= 5
@@ -155,7 +155,7 @@ hold(axh(a),'all');
 yl = log10(get(ax(a), 'Ylim'));
 bins = yl(1):diff(yl)/100:yl(2);
 for f = 1:length(ff)
-    if ~isstruct(Turb.(ff{f})) == 1, continue; end
+    if ~isstruct(Turb.(ff{f})) == 1 | strcmp( ff{f}, 'parameters' ) , continue; end
       if pflag.proc.(ff{f}) == 1
         [Nchi,~] = histcounts( log10(Turb.(ff{f}).chi) , bins);
         pj = f; p(pj) = plot(axh(a), Nchi , bins(1:end-1)+diff(bins(1:2)*.5),...
@@ -166,7 +166,7 @@ for f = 1:length(ff)
 end
 xlims = get(axh(a),'XLim');
 for f = 1:length(ff)
-    if ~isstruct(Turb.(ff{f})) == 1, continue; end
+    if ~isstruct(Turb.(ff{f})) == 1 | strcmp( ff{f}, 'parameters' ) , continue; end
        if pflag.proc.(ff{f}) == 1 & isfield(Turb.(ff{f}), 'stats')
         plot(axh(a), xlims(2)*0.9 ,log10( Turb.(ff{f}).stats.chimean),'<',...
                 'color', choose_color(ff{f},'color'), ...
@@ -192,7 +192,7 @@ hold(axh(a),'all');
 yl = log10(get(ax(a), 'Ylim'));
 bins = yl(1):diff(yl)/100:yl(2);
 for f = 1:length(ff)
-    if ~isstruct(Turb.(ff{f})) == 1, continue; end
+    if ~isstruct(Turb.(ff{f})) == 1 | strcmp( ff{f}, 'parameters' ) , continue; end
        if pflag.proc.(ff{f}) == 1
         [Nchi,~] = histcounts( log10(Turb.(ff{f}).eps) , bins);
         pj = f; p(pj) = plot(axh(a), Nchi , bins(1:end-1)+diff(bins(1:2)*.5),...
@@ -203,7 +203,7 @@ for f = 1:length(ff)
 end
 xlims = get(axh(a),'XLim');
 for f = 1:length(ff)
-    if ~isstruct(Turb.(ff{f})) == 1, continue; end
+    if ~isstruct(Turb.(ff{f})) == 1 | strcmp( ff{f}, 'parameters' ) , continue; end
        if pflag.proc.(ff{f}) == 1  & isfield(Turb.(ff{f}), 'stats')
         plot(axh(a), xlims(2)*0.9 , log10(Turb.(ff{f}).stats.epsmean),'<',...
                 'color', choose_color(ff{f},'color'), ...
@@ -230,7 +230,7 @@ hold(axl,'on');
 clear nleg p ffstr
 nleg = 1;
 for f = 1:length(ff)
-    if ~isstruct(Turb.(ff{f})) == 1, continue; end
+    if ~isstruct(Turb.(ff{f})) == 1 | strcmp( ff{f}, 'parameters' ) , continue; end
       if pflag.proc.(ff{f}) == 1
         pj = nleg; p(pj) = plot(axl, [0 1] ,[0 1],...
                 'color', choose_color(ff{f},'color'), ...

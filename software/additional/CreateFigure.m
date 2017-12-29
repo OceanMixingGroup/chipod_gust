@@ -1,6 +1,9 @@
-function [hfig] = CreateFigure()
+function [hfig] = CreateFigure(vis)
+    if nargin <1
+        vis = 'on';
+    end
 
-    hfig = figure('Color',[1 1 1],'visible','on', ...
+    hfig = figure('Color',[1 1 1],'visible', vis, ...
                   'Position', [100 100 1400 900]);
 
     set(hfig, 'DefaultAxesFontSize', 18);

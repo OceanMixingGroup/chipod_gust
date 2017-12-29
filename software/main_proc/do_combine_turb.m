@@ -126,7 +126,7 @@ if(do_combine)
          end
 
          try
-             load ../proc/T_m.mat
+             load([basedir '/proc/T_m.mat']);
              Smean = interp1(T1.time, (T1.S + T2.S)/2, chi.time);
              chi.S = Smean;
 
@@ -223,20 +223,20 @@ if(do_combine)
              mask_spd = ID(1);
 
              if mask_spd == 'm' & ~exist('vel_m', 'var')
-                 load ../input/vel_m.mat
+                 load([basedir '/input/vel_m.mat']);
                  vel = vel_m;
              elseif mask_spd == 'p' & ~exist('vel_p', 'var')
-                 load ../input/vel_p.mat
+                 load([basedir '/input/vel_p.mat']);
                  vel = vel_p;
              end
              spdmask = interp1(vel.time, vel.spd, chi.time);
 
              if CP.additional_mask_spd ~= ''
                  if CP.additional_mask_spd == 'm' & ~exist('vel_m', 'var')
-                     load ../input/vel_m.mat
+                     load([basedir '/input/vel_m.mat']);
                      vel = vel_m;
                  elseif CP.additional_mask_spd == 'p' & ~exist('vel_p', 'var')
-                     load ../input/vel_p.mat
+                     load([basedir '/input/vel_p.mat']);
                      vel = vel_p;
                  end
                  addspdmask = interp1(vel.time, vel.spd, chi.time);
@@ -326,8 +326,8 @@ if(do_combine)
                  subplot(223); legend(gca, 'show'); title((ID));
                  subplot(224); legend(gca, 'show'); title((ID));
 
-                 print(gcf,['../pics/histograms-masking-' ID '.png'],'-dpng','-r200','-painters')
-                 if save_fig,set(gcf, 'visible', 'on'); savefig(gcf,['../pics/histograms-masking-' ID '.fig']); end
+                 print(gcf,[basedir '/pics/histograms-masking-' ID '.png'],'-dpng','-r200','-painters')
+                 if save_fig,set(gcf, 'visible', 'on'); savefig(gcf,[basedir '/pics/histograms-masking-' ID '.fig']); end
              end
          end
 
@@ -407,18 +407,18 @@ if(do_combine)
        subplot(221); title(['Final ' num2str(CP.avgwindow/60) ' min mean']);
        subplot(222); title(['Final ' num2str(CP.avgwindow/60) ' min mean']);
 
-       print(gcf,['../pics/histograms-final.png'],'-dpng','-r200','-painters')
-       if save_fig,set(gcf, 'visible', 'on'); savefig(gcf,['../pics/histograms-final.fig']); end
+       print(gcf,[basedir '/pics/histograms-final.png'],'-dpng','-r200','-painters')
+       if save_fig,set(gcf, 'visible', 'on'); savefig(gcf,[basedir '/pics/histograms-final.fig']); end
 
        %figure(hfraw)
        set(0, 'currentfigure', hfraw);
        subplot(221); title(['raw 1s estimates']);
        subplot(222); title(['raw 1s estimates']);
-       print(gcf,['../pics/histograms-raw.png'],'-dpng','-r200','-painters')
+       print(gcf,[basedir '/pics/histograms-raw.png'],'-dpng','-r200','-painters')
 
        %figure(hfstrat)
        set(0, 'currentfigure', hfstrat);
-       print(gcf,['../pics/histograms-stratification.png'],'-dpng','-r200','-painters')
+       print(gcf,[basedir '/pics/histograms-stratification.png'],'-dpng','-r200','-painters')
    end
 
    Turb.hash = githash('driver/combine_turbulence.m');

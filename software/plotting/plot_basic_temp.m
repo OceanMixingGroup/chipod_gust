@@ -96,11 +96,13 @@ end
                   t1.Color = [col(1,:)];
                   t2 = text_corner(ax(a), ['T2P [volt]'], 3);  
                   t2.Color = [col(2,:)];
+               ylim(ax(a), 2*[prctile([T.T1Pt, T.T2Pt], 2), prctile([T.T1Pt, T.T2Pt], 98)]);
             else
                pj = 1; p(pj) = plot(ax(a), T.time(1:dtind:end), T.TPt(1:dtind:end), 'color', [col(pj,:) 1], 'Linewidth', 1);
                   xlim(ax(a), tl);
                   t1 = text_corner(ax(a), ['TP [volt]'], 1);  
                   t1.Color = [col(1,:)];
+                ylim(ax(a), 2*[prctile(T.TPt, 2), prctile(T.TPt, 98)]);
             end
                
             linkaxes(ax, 'x');   

@@ -78,12 +78,12 @@ for a = 1:5
     if a == 1
         var = 'chi';
         labelstr = '\chi [K^2/s]';
-        yl = [1e-10 1e-4];
+        yl = [];
         yscale = 'log';
     elseif a == 2
         var = 'eps';
         labelstr = '\epsilon [m^2/s^3]';
-        yl = [1e-10 1e-4];
+        yl = [];
         yscale = 'log';
     elseif a == 3
         var = 'Kt';
@@ -110,6 +110,10 @@ for a = 1:5
                 'color', choose_color(ff{f},'color'), ...
                 'LineWidth', choose_color(ff{f},'width'), ...
                 'LineStyle', choose_color(ff{f},'style'));
+
+            if isempty(yl)
+                yl = [prctile(Turb.(ff{f}).(var), 1), nanmax(Turb.(ff{f}).(var))];
+            end
         end
     end
     t = text_corner(ax(a), labelstr, 1);

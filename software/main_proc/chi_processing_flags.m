@@ -311,7 +311,7 @@ classdef chi_processing_flags
          % switch off inconsitent flags
          obj = obj.make_cons();
 
-         obj.status;
+         %obj.status;
       end
 
 

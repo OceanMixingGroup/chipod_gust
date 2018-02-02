@@ -91,3 +91,5 @@ function [CP] = default_parameters_combine_turbulence( basedir)
        %CP.pflag = CP.pflag.c_Tzi(0);      % use local (interal) stratification 
        %CP.pflag = CP.pflag.c_Tzm(0);      % use mooring stratification 
       CP.pflag = CP.pflag.make_cons();     % make sub-flags consitent with master flags
+
+      CP.pflag.status;

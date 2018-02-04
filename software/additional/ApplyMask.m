@@ -18,9 +18,10 @@ function [chi, percentage] = ApplyMask(chi, maskvar, relation, criterion, maskna
     chi.mask = isnan(chi.chi);
 
     numnewnans = sum(isnan(chi.chi(Trange)));
-    percentage = (numnewnans-numnans)/ length(Trange)*100;
+    dnans = (numnewnans-numnans);
+    percentage = dnans / length(Trange)*100;
     disp([maskname ' ' relation ' ' num2str(criterion, '%1.1e') ...
           ' NaN-ed out ' num2str(percentage, '%.2f') ...
-          '% of estimates'])
+          '% of estimates (' num2str(dnans) ' points)'])
 
 end

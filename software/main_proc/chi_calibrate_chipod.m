@@ -151,7 +151,50 @@ function [data] = chi_calibrate_chipod(rfid, head)
       chi.T1Pt = calibrate_tp( rdat.T1P, head.coef.T1P, rdat.T1, head.coef.T1, 100*ones(size(rdat.T1)) );
       chi.T2Pt = calibrate_tp( rdat.T2P, head.coef.T2P, rdat.T2, head.coef.T2, 100*ones(size(rdat.T1)) );
 
-   % pitot_voltage
+      % generate bit noise time series, and figure out variance when
+      % differentiator hits noise floor
+      % 4.096 V / (16 bit quantization) + A2D error of 0-6 counts peak-peak == 3 counts amplitude
+      bit_noise_volts = randi([0, 6], length(rdat.T1P), 1) * (4.096/2^16);
+
+      t1pnoise = calibrate_tp(bit_noise_volts, head.coef.T1P, ...
+                              rdat.T1, head.coef.T1, 100*ones(size(rdat.T1P)) );
+      t2pnoise = calibrate_tp(bit_noise_volts, head.coef.T2P, ...
+                              rdat.T2, head.coef.T2, 100*ones(size(rdat.T1P)) );
+
+      ndt = 100;
+      floor1 = moving_var(t1pnoise, ndt, ndt);
+      floor2 = moving_var(t2pnoise, ndt, ndt);
+      T1Pfloor = sqrt(prctile(floor1, 95));
+      T2Pfloor = sqrt(prctile(floor2, 95));
+
+      % Becherer & Moum (2017) : eqns 27-31
+      % We need to scale their CTp by TP gain i.e. head.coef.T1P(2)
+      % (see data_reduction stuff)
+      ctp1 = (2 * mean(rdat.T1) * head.coef.T1(3) + head.coef.T1(2))/head.coef.T1P(2);
+      ctp2 = (2 * mean(rdat.T2) * head.coef.T2(3) + head.coef.T2(2))/head.coef.T2P(2);
+      % 4.096 V / (16 bit quantization) + A2D error of 0-6 counts peak-peak == 3 counts amplitude
+      chi.T1P_spec_floor = ctp1.^2 * ((4.096/2^16) * 3)^2 / 100;
+      chi.T2P_spec_floor = ctp2.^2 * ((4.096/2^16) * 3)^2 / 100;
+      % integral (noise_floor * df) = variance
+      % noise_floor * integral_(0)^(50 Hz) (df) = variance
+      % chi.T2P_spec_floor * 50 == var(t2pnoise(1:100), 1) % this checks out
+      % [S, f] = fast_psd(t2pnoise(1:100), 50, 100)
+      % loglog(f, S); liney(chi.T2P_spec_floor) % this should be roughly mean of estimated spectrum
+
+      % noise floor debugging plots
+      % mask = moving_var(chi.T2Pt, ndt, 1) < 1.2*(chi.T2P_spec_floor * 50);
+      % t2v = moving_var(chi.T2Pt, ndt, ndt);
+      % figure;
+      % ax(1) = subplot(311);
+      % semilogy(chi.time_tp(1:ndt:end), t2v); hold on;
+      % semilogy(chi.time_tp(1:ndt:end), floor2);
+      % liney(chi.T2P_spec_floor * 50)
+      % ax(2) = subplot(312); plot(chi.time, chi.T2);
+      % ax(3) = subplot(313); plot(chi.time_tp, chi.T2Pt); hold on; ...
+      %         plot(chi.time_tp(mask), chi.T2Pt(mask), '.')
+      % linkaxes(ax, 'x')
+
+      % pitot_voltage
       % find pitot data W or WP
        if isfield(rdat, 'W')
          dV1 = abs(nanmean(rdat.W)-2.02);

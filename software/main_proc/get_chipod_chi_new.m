@@ -219,6 +219,7 @@ for b=1:n_iterations
         stats.n_freq=length(f_range);
         chi=6*tdif*integrate_new(min(b_freq),max(b_freq),b_freq,b_spec);
     else
+        % fit has failed.
         stats.k_start=NaN;
         stats.k_stop=NaN;
         stats.f_start=NaN;

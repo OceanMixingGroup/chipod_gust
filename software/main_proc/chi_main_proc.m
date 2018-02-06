@@ -165,12 +165,14 @@ for i = 1:length(pflag.id)
             case 'T1'
                Tp.tp   = data.T1Pt;
                Tp.time = data.time_tp;
+               Tp.spec_floor = data.T1P_spec_floor;
                T.time  = data.time;
                T.T     = data.T1;
                T.depth = data.depth;
            case 'T2'
                Tp.tp   = data.T2Pt;
                Tp.time = data.time_tp;
+               Tp.spec_floor = data.T2P_spec_floor;
                T.time  = data.time;
                T.T     = data.T2;
                T.depth = data.depth;

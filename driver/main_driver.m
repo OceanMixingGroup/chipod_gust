@@ -56,6 +56,11 @@ addpath(genpath('./chipod_gust/software/'));% include  path to preocessing routi
                                % pressure to get speed past sensor
     pflag.master.parallel = 1;
 
+    pflag.master.winters_dasaro = 1; % do winters & d'asaro estimate of Kt, Jq
+                                     % ONLY for pumped chipods
+    pflag.master.wda_dt = 60; % (in seconds) time-interval over which to
+                              % apply Winters & D'Asaro methodology
+
    %---------------------get flag status----------------------
    pflag.status();
 

@@ -210,6 +210,29 @@ for i = 1:length(pflag.id)
                [chi, stats] = chi_chi_proc(Tp, S, Tz, T);
            end
 
+           %%
+
+           if pflag.master.winters_dasaro
+               tic;
+               ndt = pflag.master.wda_dt * round(1/diff(data.time(1:2)*86400));
+               idx = 1;
+               plotflag = 0;
+               Nt = length(1:ndt:length(data.a_dis_z));
+               wda = cell(Nt, 1);
+               for t0=1:ndt:length(data.a_dis_z)
+                   wda{idx} = winters_dasaro_avg(t0, min(t0 + ndt, length(data.a_dis_z)), ...
+                                                 data, chi, T, plotflag);
+                   idx = idx+1;
+               end
+               toc;
+
+               chi.wda = merge_cell_structs(wda);
+               chi.wda.dt = pflag.master.wda_dt;
+               chi.wda.nbins = chi.wda.nbins(1);
+
+               % wda = process_wda_estimate(chi, chi.wda);
+               % wda_compare_plot; % script to make comparison plots
+           end
          %---------------------save data----------------------
           save([sdir_chi filesep  'chi' savestamp], 'chi');
           save([sdir_stats filesep  'stats' savestamp], 'stats');
@@ -219,7 +242,7 @@ end
 
 %_____________________do pitot epsilon______________________
 if pflag.master.epsp
-      disp('epsilon (Pitot) is processed')
+      disp('epsilon (Pitot) is being processed')
       
       % load Pitot header
       load([basedir filesep 'calib' filesep 'header_p.mat']);

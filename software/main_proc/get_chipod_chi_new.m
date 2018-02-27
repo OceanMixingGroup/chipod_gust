@@ -119,6 +119,7 @@ for b=1:n_iterations
         stats.f_start=NaN;
         stats.f_stop=NaN;
         stats.n_freq=NaN;
+        stats.ki = NaN;
         %         [f_start f_stop min(freq) max(freq)]
         %         pause
         spec=k.*NaN;
@@ -217,6 +218,7 @@ for b=1:n_iterations
         stats.f_start=f_range(1);
         stats.f_stop=f_range(end);
         stats.n_freq=length(f_range);
+        stats.ki = 0.01366*kb.*sqrt(tdif./nu);
         chi=6*tdif*integrate_new(min(b_freq),max(b_freq),b_freq,b_spec);
     else
         % fit has failed.
@@ -225,6 +227,7 @@ for b=1:n_iterations
         stats.f_start=NaN;
         stats.f_stop=NaN;
         stats.n_freq=NaN;
+        stats.ki = NaN;
         b_spec=NaN;
         chi=NaN;
     end

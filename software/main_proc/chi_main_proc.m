@@ -139,12 +139,14 @@ for i = 1:length(pflag.id)
 
       if pflag.proc.(id) % check if flag is active 
 
-         disp([ id ' is processed '  ]);
+         disp([ id ' is being processed '  ]);
          
          % create output directory if not exist yet
-         sdir = [savedir 'chi' filesep 'chi_' id];
-         [~, ~, ~] = mkdir(sdir);
-         
+         sdir_chi = [savedir 'chi' filesep 'chi_' id];
+         sdir_stats = [savedir 'chi' filesep 'chi_' id filesep 'stats' filesep];
+         [~, ~, ~] = mkdir(sdir_chi);
+         [~, ~, ~] = mkdir(sdir_stats);
+
          %---------------------set input prarmeters----------------------
            switch spd_f;
             case 'vel_p'
@@ -203,14 +205,14 @@ for i = 1:length(pflag.id)
 
          %--------------------- Chi Processing----------------------
            if id([-1:0]+end) == 'ic'
-             chi = chi_chi_proc_ic(Tp, S, Tz, T) ;
+               [chi, stats] = chi_chi_proc_ic(Tp, S, Tz, T) ;
            else
-              chi = chi_chi_proc(Tp, S, Tz, T);
+               [chi, stats] = chi_chi_proc(Tp, S, Tz, T);
            end
 
          %---------------------save data----------------------
-          save([sdir filesep  'chi' savestamp], 'chi');
-         
+          save([sdir_chi filesep  'chi' savestamp], 'chi');
+          save([sdir_stats filesep  'stats' savestamp], 'stats');
 
       end
 end

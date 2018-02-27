@@ -68,6 +68,14 @@ end
                % keep averaging window 0 here.
                % Only merge, average later in combine_turbulene.m
                chi_merge_and_avg(basedir, ddir, 0, time_lim );
+
+               try
+                   ddir = ['chi/chi_' id filesep 'stats'];
+                   chi_merge_and_avg(basedir, ddir, 0);
+               catch ME
+                   disp(ME)
+                   disp('Error! have the fitting stats been saved? Skipping...')
+               end
             end
       end
 

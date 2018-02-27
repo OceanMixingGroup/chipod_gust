@@ -1,4 +1,4 @@
-function [chi] = chi_chi_proc(Tp, S, Tz, T)
+function [chi, stats] = chi_chi_proc(Tp, S, Tz, T)
 %% [chi] = chi_chi_proc(Tp, S, Tz)
 %
 %   This is the main chi processing routine
@@ -112,6 +112,14 @@ thermistor_cutoff_frequency  = 32;
    %---------------------initialize----------------------
    chi.chi     = nan(1,Ni); 
    chi.eps     = nan(1,Ni);
+   stats = cell(1, Ni);
+
+   nanstats.k_start = nan;
+   nanstats.k_stop = nan;
+   nanstats.f_start = nan;
+   nanstats.f_stop = nan;
+   nanstats.n_freq = nan;
+   nanstats.ki = nan;
 
    %-------loop through all 1 sec seqments---------------
    for i = 1:Ni
@@ -134,23 +142,46 @@ thermistor_cutoff_frequency  = 32;
           if trapz(freq, tp_power) < 4*Tp.spec_floor*nfft
               chi.chi(i) = 0;
               chi.eps(i) = 0;
+              stats{i} = nanstats;
               continue;
           end
 
           % fit spectrum
-          [chi_tmp, eps_tmp , k,spec, k_kraich, spec_kraich, stats] =...
+          [chi_tmp, eps_tmp , k,spec, k_kraich, spec_kraich, stats{i}] =...
                   get_chipod_chi_new( freq, tp_power, chi.spd(i), nu(i), tdif(i), chi.dTdz(i), chi.N2(i)); 
 
           chi.chi(i) = chi_tmp(1);
           chi.eps(i) = eps_tmp(1);
-                     
 
       else % masked out 
           chi.chi(i)  =  nan;
           chi.eps(i)  =  nan;
           chi.spd(i)  =  nanmean(S.spd(I{i}));
+          stats{i}  = nanstats;
       end
-            
 
    end
 
+   stats = merge_cell_structs(stats);
+   % these two can be reconstructed using wavenumbers and chi.spd
+   stats = rmfield(stats, 'f_start');
+   stats = rmfield(stats, 'f_stop');
+   stats.time = chi.time;
+
+   % useful debugging plot
+   % figure;
+   % ax(1) = subplot(311)
+   % plot(T.time, T.T)
+   % ylabel('T')
+   % datetick;ax(2) = subplot(312)
+   % plot(Tp.time, Tp.tp)
+   % ylabel('Tp')
+   % datetick;
+   % ax(3) = subplot(313)
+   % semilogy(chi.time, chi.chi)
+   % hold on;
+   % semilogy(chi.time, chi.eps)
+   % legend('\chi', '\epsilon')
+   % datetick;
+   % linkaxes(ax, 'x')
+   % keyboard

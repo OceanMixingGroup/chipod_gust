@@ -10,8 +10,13 @@
 \usepackage{color}
 \usepackage{float}
 \usepackage{gensymb}
-\usepackage{amsmath}
+\usepackage{mathtools}
 \usepackage{siunitx}
+\usepackage{fixltx2e}
+\usepackage[mathletters]{ucs}
+\usepackage[utf8x]{inputenx}
+\usepackage[T1]{fontenc}
+
 \DeclareGraphicsRule{.tif}{png}{.png}{`convert #1 `dirname #1`/`basename #1 .tif`.png}
 
 \usepackage{fancyhdr}
@@ -59,6 +64,8 @@
 
 % The following makes ODEs and PDEs easier to write.
 % For an example, see the second problem below. - Vallis Solution template
+\newcommand{\dr}{\mathop{}\!\mathrm{d}}
+\newcommand{\D}{\mathop{}\!\mathrm{D}}
 \newcommand{\dd}[3][]{{\frac{\dr^{#1} #2}{\dr #3^{#1}}}}
 \newcommand{\pp}[3][]{{\frac{\partial^{#1} #2}{\partial #3^{#1}}}}
 \newcommand{\DD}[1]{{\frac{\D#1}{\D t}}}
@@ -111,5 +118,5 @@
 \input{references}
 \input{git}
 \input{sensors}
-
+\input{ktjq}
 \end{document}

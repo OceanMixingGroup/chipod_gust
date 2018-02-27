@@ -2,7 +2,7 @@
 
 %_____________________which raw file______________________
 i=2;
-do_save  =  1; % shall the calibration data be written to the header file?
+do_save  =  0; % shall the calibration data be written to the header file?
 
 
 %_____________________include path of processing flies______________________

@@ -52,36 +52,33 @@ for s =1:length(F)
 
       % names of subfields
       FF = fields(A.(F{s}));
-      
+
+      avged = cell(size(fids));
+
       % average first file
       if aw == 0
-         avg.(F{s}) = A.(F{s});
+         avged{1} = A.(F{s});
       else
-         avg.(F{s}) = average_fields(A.(F{s}), aw);
+         avged{1} = average_fields(A.(F{s}), aw);
       end
 
-
    %_____________________loop through rest of files______________________
+   % for each file, read the data and append to cell array 'avged'
    for i = 2:length(fids)
 
       fid = fids{i};
-      %load file
       A = load([basedir 'proc' filesep ddir filesep fid]);
 
       % average
       if aw == 0
-         tmp = A.(F{s});
+         avged{i} = A.(F{s});
       else
-         tmp = average_fields(A.(F{s}), aw);
+         avged{i} = average_fields(A.(F{s}), aw);
       end
-
-      % merge fields 
-      for f = 1:length(FF)
-         avg.(F{s}).(FF{f}) = [avg.(F{s}).(FF{f}) tmp.(FF{f})];
-      end
-      
-
    end
+
+   % merge all fields
+   avg.(F{s}) = merge_cell_structs(avged);
 end
 
 %---------------------save data----------------------

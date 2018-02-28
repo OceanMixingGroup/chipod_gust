@@ -66,8 +66,7 @@ if ~do_dry_run
 
    do_main_processing( basedir, pflag)
 
-
    %_____________________combine all chi_data______________________
-   % combine_turbulence;
+   combine_turbulence;
 
 end % ~dry run

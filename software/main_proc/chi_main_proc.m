@@ -139,8 +139,6 @@ for i = 1:length(pflag.id)
 
       if pflag.proc.(id) % check if flag is active 
 
-         disp([ id ' is being processed '  ]);
-         
          % create output directory if not exist yet
          sdir_chi = [savedir 'chi' filesep 'chi_' id];
          sdir_stats = [savedir 'chi' filesep 'chi_' id filesep 'stats' filesep];
@@ -213,7 +211,6 @@ for i = 1:length(pflag.id)
            %%
 
            if pflag.master.winters_dasaro
-               tic;
                ndt = pflag.master.wda_dt * round(1/diff(data.time(1:2)*86400));
                idx = 1;
                plotflag = 0;
@@ -224,7 +221,6 @@ for i = 1:length(pflag.id)
                                                  data, chi, T, plotflag);
                    idx = idx+1;
                end
-               toc;
 
                chi.wda = merge_cell_structs(wda);
                chi.wda.dt = pflag.master.wda_dt;

@@ -63,8 +63,7 @@ end
       %_loop through all processing flags for chi processing_
       for i = 1:length(pflag.id)
             [id, ~, ~, ~] = pflag.get_id(i);
-            if pflag.proc.(id) % check if flag is active 
-               disp([ id ' is being merged '  ]);
+            if pflag.proc.(id) % check if flag is active
                ddir = ['chi' filesep 'chi_' id];
                % keep averaging window 0 here.
                % Only merge, average later in combine_turbulene.m
@@ -82,7 +81,6 @@ end
 
    %_____________merge eps data______________________
    if pflag.master.epsp
-      disp('Pitot epsilon data are being merged')
       % keep averaging window 0 here.
       % Only merge, average later in combine_turbulene.m
       chi_merge_and_avg(basedir, 'eps', 0, time_lim);

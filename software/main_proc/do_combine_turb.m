@@ -396,8 +396,8 @@ function [chi] = add_nans(CP, chi)
    % for temp sensor
    if ~isempty(CP.nantimes{CP.sensor})
        for tt = 1:size(CP.nantimes{CP.sensor}, 1)
-           chi.chi(find_approx(chi.time, CP.nantimes{sensor}(tt, 1), 1): ...
-                   find_approx(chi.time, CP.nantimes{sensor}(tt, 2), 1)) = NaN;
+           chi.chi(find_approx(chi.time, CP.nantimes{CP.sensor}(tt, 1), 1): ...
+                   find_approx(chi.time, CP.nantimes{CP.sensor}(tt, 2), 1)) = NaN;
        end
        chi.eps(isnan(chi.chi)) = NaN;
    end

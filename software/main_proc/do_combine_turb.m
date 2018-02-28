@@ -45,9 +45,9 @@ end
    % determine if chipod or gusT
    load([basedir '/calib/header.mat'])
    if isfield(head.coef, 'T1')
-       isChipod = 1;
+       CP.isChipod = 1;
    else
-       isChipod = 0;
+       CP.isChipod = 0;
    end
 
 
@@ -79,7 +79,7 @@ if(do_combine)
          disp(['----------> adding ' ID ]);
          load([dirname 'chi_' ID '.mat'])
 
-         [sensor, isPitotEstimate] = process_estimate_ID(ID, isChipod);
+         CP = process_estimate_ID(CP, ID);
 
          % find desired time range
          iiTrange = find( chi.time >= CP.time_range(1) & chi.time<= CP.time_range(2) );
@@ -103,7 +103,7 @@ if(do_combine)
          end
 
          % add nans when sensors die or glitch
-         chi = add_nans(chi, CP, sensor, isPitotEstimate)
+         chi = add_nans(CP, chi);
 
          chi.Kt = 0.5 * chi.chi ./ chi.dTdz.^2;
          chi.Jq = -1025 .* 4200 .* chi.Kt .* chi.dTdz;
@@ -133,7 +133,7 @@ if(do_combine)
          end
 
          if do_mask
-             [spdmask, addspdmask] = determine_speed_masks(ID, CP);
+             [spdmask, addspdmask] = determine_speed_masks(basedir, ID, CP, chi);
 
              if CP.mask_flushing
 
@@ -247,7 +247,7 @@ if(do_combine)
 
          % Tz (min_dTdz)-crossing filter
          Tz_min_cross = generate_min_dTdz_crossing_mask(Turb.(ID).dTdz, ...
-                                                        CP.min_dTdz, 0)
+                                                        CP.min_dTdz, 0);
          Turb.(ID) = ApplyMask(Turb.(ID), Tz_min_cross, '=', 1, 'min_Tz crossing');
 
          % recalculate using averaged quantities
@@ -335,32 +335,32 @@ if do_plot
 end
 end
 
-function [sensor, isPitotEstimate] = process_estimate_ID(ID, isChipod)
+function [CP] = process_estimate_ID(CP, ID)
 
-    if isChipod
+    if CP.isChipod
         if ID(end) == '1' ...
                     | (length(ID) > 3 & strcmpi(ID(end-3:end), '1_ic')) % sensor T1
-            sensor = 1;
+            CP.sensor = 1;
         end
         if ID(end) == '2' ...
                     | (length(ID) > 3 & strcmpi(ID(end-3:end), '2_ic')) % sensor T2
-            sensor = 2;
+            CP.sensor = 2;
         end
     else
-        sensor = 1; % gusT has only one sensor
+        CP.sensor = 1; % gusT has only one sensor
     end
 
     if ~isempty(strfind(ID, 'p'))
-        isPitotEstimate = 1;
+        CP.isPitotEstimate = 1;
     else
-        isPitotEstimate = 0;
+        CP.isPitotEstimate = 0;
     end
 
 end
 
-function [chi] = add_nans(chi, CP, sensor, isPitotEstimate)
+function [chi] = add_nans(CP, chi)
    %___________________NaN out after sensor death______________________
-   if sensor == 1 % sensor T1 or gusT T
+   if CP.sensor == 1 % sensor T1 or gusT T
        death = find(chi.time > CP.T1death, 1, 'first');
        if ~isempty(death)
            disp(['NaNing out sensor T1 after it died on ' datestr(CP.T1death)])
@@ -370,8 +370,8 @@ function [chi] = add_nans(chi, CP, sensor, isPitotEstimate)
        end
    end
 
-   if isChipod
-       if sensor == 2 % sensor T2
+   if CP.isChipod
+       if CP.sensor == 2 % sensor T2
            death = find(chi.time > CP.T2death, 1, 'first');
            if ~isempty(death)
                disp(['NaNing out sensor T2 after it died on ' datestr(CP.T2death)])
@@ -382,10 +382,10 @@ function [chi] = add_nans(chi, CP, sensor, isPitotEstimate)
        end
    end
 
-   if ~isPitotEstimate
-       death = find(chi.time > adcpdeath, 1, 'first');
+   if ~CP.isPitotEstimate
+       death = find(chi.time > CP.adcpdeath, 1, 'first');
        if ~isempty(death)
-           disp(['NaNing out after mooring velocity died on ' datestr(adcpdeath)]);
+           disp(['NaNing out after mooring velocity died on ' datestr(CP.adcpdeath)]);
            chi.chi(death:end) = NaN;
            chi.eps(death:end) = NaN;
            chi.T(death:end) = NaN;
@@ -394,15 +394,15 @@ function [chi] = add_nans(chi, CP, sensor, isPitotEstimate)
 
    %____________________NaN out specific time ranges as necessary____________
    % for temp sensor
-   if ~isempty(CP.nantimes{sensor})
-       for tt = 1:size(CP.nantimes{sensor}, 1)
+   if ~isempty(CP.nantimes{CP.sensor})
+       for tt = 1:size(CP.nantimes{CP.sensor}, 1)
            chi.chi(find_approx(chi.time, CP.nantimes{sensor}(tt, 1), 1): ...
                    find_approx(chi.time, CP.nantimes{sensor}(tt, 2), 1)) = NaN;
        end
        chi.eps(isnan(chi.chi)) = NaN;
    end
 
-   if isPitotEstimate & ~isempty(CP.nantimes{3})
+   if CP.isPitotEstimate & ~isempty(CP.nantimes{3})
        for tt = 1:size(CP.nantimes{3}, 1)
            chi.chi(find_approx(chi.time, CP.nantimes{3}(tt, 1), 1): ...
                    find_approx(chi.time, CP.nantimes{3}(tt, 2), 1)) = NaN;
@@ -463,7 +463,7 @@ function [Tz] = determine_additional_Tz_mask(CP)
 
 end
 
-function [spdmask, addspdmask] = determine_speed_masks(ID, CP)
+function [spdmask, addspdmask] = determine_speed_masks(basedir, ID, CP, chi)
 
     % speed mask could change depending on estimate
     mask_spd = ID(1);

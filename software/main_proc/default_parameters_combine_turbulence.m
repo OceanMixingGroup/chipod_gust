@@ -61,7 +61,7 @@ function [CP] = default_parameters_combine_turbulence( basedir)
    CP.T2death = datenum(2060, 1, 1, 0, 0, 0); % T2 sensor
 
    % mooring velocity measurement death
-   adcpdeath = datenum(2060, 1, 1, 0, 0, 0); % current meter dies here
+   CP.adcpdeath = datenum(2060, 1, 1, 0, 0, 0); % current meter dies here
 
    %_____________ additional time ranges to NaN out as necessary________________
    % make an array that looks like

@@ -14,7 +14,7 @@ function [CP] = default_parameters_combine_turbulence( basedir)
 %
 
    % set thresholds for masking
-   CP.min_N2         = 1e-9;
+   CP.min_N2         = 1e-6;
    CP.min_dTdz       = 1e-3;
    CP.min_spd        = 0.05;
    CP.min_inst_spd   = CP.min_spd; % min instantaneous speed past sensor

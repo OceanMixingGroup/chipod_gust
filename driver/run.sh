@@ -11,4 +11,11 @@ then
    s=${s%?}
 fi
 
-nohup matlab.2017a -nodisplay -nosplash -r $s > ./out/out_$s & echo $! > ./out/pid_$s
+if [[ $(hostname) == matlab* ]]
+then
+   # if you are login at matlab server
+   nohup matlab.2017a -nodisplay -nosplash -r $s > ./out/out_$s & echo $! > ./out/pid_$s
+
+else
+   nohup matlab -nodisplay -nosplash -r $s > ./out/out_$s & echo $! > ./out/pid_$s
+fi

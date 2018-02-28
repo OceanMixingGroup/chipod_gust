@@ -173,6 +173,16 @@ if(do_combine)
              end
          end
 
+         if ~isPitotEstimate
+             death = find(chi.time > adcpdeath, 1, 'first')
+             if ~isempty(death)
+                 disp(['NaNing out after mooring velocity died on ' datestr(adcpdeath)]);
+                 chi.chi(death:end) = NaN;
+                 chi.eps(death:end) = NaN;
+                 chi.T(death:end) = NaN;
+             end
+         end
+
          %____________________NaN out specific time ranges as necessary____________
          % for temp sensor
          if ~isempty(CP.nantimes{sensor})

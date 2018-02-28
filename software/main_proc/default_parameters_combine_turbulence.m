@@ -61,6 +61,8 @@ function [CP] = default_parameters_combine_turbulence( basedir)
    CP.T1death = datenum(2060, 1, 1, 0, 0, 0); % chipod T1 or gustT T sensor
    CP.T2death = datenum(2060, 1, 1, 0, 0, 0); % T2 sensor
 
+   % mooring velocity measurement death
+   adcpdeath = datenum(2060, 1, 1, 0, 0, 0); % current meter dies here
 
 
 %_________ which estimates should I process?_______________________

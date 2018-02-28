@@ -14,6 +14,7 @@ function [] = do_main_processing( basedir, pflag, time_lim )
 %        Johannes Becherer
 %        Thu Dec 28 12:33:57 PST 2017
 
+ticstart = tic;
 if nargin < 3 % if no time limits are set we use pratical no limits
    time_lim = [datenum(1900,1,1) datenum(2100,1,1)];
 end
@@ -86,3 +87,6 @@ end
       % Only merge, average later in combine_turbulene.m
       chi_merge_and_avg(basedir, 'eps', 0, time_lim);
    end
+
+   disp('Finished running main processing.')
+   toc(ticstart)

@@ -40,7 +40,6 @@ if nargin < 2
    savedir = [basdir 'proc/'];
 end
 
-
    motionfile = [basedir 'proc' filesep '/motion.mat'];
 
    % determine if chipod or gusT
@@ -51,22 +50,8 @@ end
        isChipod = 0;
    end
 
-if do_mask
-    if CP.additional_mask_dTdz == 'm'
-        disp('additional masking using mooring dTdz')
-        load([basedir 'input/dTdz_m.mat'])
-        Tz = Tz_m;
-        clear Tz_m;
 
-    elseif CP.additional_mask_dTdz == 'i'
-        disp('additional masking using internal dTdz')
-        load([basedir 'input/dTdz_i.mat'])
-        Tz = Tz_i;
-        clear Tz_i;
-    else
-        Tz = [];
-    end
-end
+   if do_mask, Tz = determine_additional_Tz_mask(CP); end
 
 %_____________________find all available chi data______________________
 if(do_combine)
@@ -90,28 +75,11 @@ if(do_combine)
              continue;
          end
 
-         if isChipod
-             if ID(end) == '1' ...
-                         | (length(ID) > 3 & strcmpi(ID(end-3:end), '1_ic')) % sensor T1
-                 sensor = 1;
-             end
-             if ID(end) == '2' ...
-                         | (length(ID) > 3 & strcmpi(ID(end-3:end), '2_ic')) % sensor T2
-                 sensor = 2;
-             end
-         else
-             sensor = 1; % gusT has only one sensor
-         end
-
-         if ~isempty(strfind(ID, 'p'))
-             isPitotEstimate = 1;
-         else
-             isPitotEstimate = 0;
-         end
-
          disp(' ');
          disp(['----------> adding ' ID ]);
          load([dirname 'chi_' ID '.mat'])
+
+         [sensor, isPitotEstimate] = process_estimate_ID(ID, isChipod);
 
          % find desired time range
          iiTrange = find( chi.time >= CP.time_range(1) & chi.time<= CP.time_range(2) );
@@ -127,79 +95,15 @@ if(do_combine)
 
          try
              load([basedir '/proc/T_m.mat']);
-             Smean = interp1(T1.time, (T1.S + T2.S)/2, chi.time);
-             chi.S = Smean;
+             chi.S = interp1(T1.time, (T1.S + T2.S)/2, chi.time);
 
-             dz = abs(T1.z - T2.z);
-             % SBE-37 accuracy is 2e-3 C & 3e-3 psu
-             sbe_dTdz = 2*2e-3/dz;
-             sbe_dSdz = 2*3e-4/dz;
-             sbe_N2 = 9.81 * (1.7e-4 * sbe_dTdz + 7.6e-4 * sbe_dSdz);
-
-             if CP.min_dTdz < sbe_dTdz & ID(2) == 'm'
-                 disp(['WARNING: min_dTdz < minimum resolvable based on ' ...
-                       'SBE-37 accuracy specifications i.e. ' ...
-                       num2str(sbe_dTdz, '%.1e')]);
-             end
-             if CP.min_N2 < sbe_N2 & ID(2) == 'm'
-                 disp(['WARNING: min_N2 < minimum resolvable based on ' ...
-                       'SBE-37 accuracy specifications i.e. ' ...
-                       num2str(sbe_N2, '%.1e')]);
-             end
+             compare_min_dTdz_N2_against_SBE_specs(abs(T1.z - T2.z), CP, ID);
          catch ME
-             Smean = 35*ones(size(chi.time));
+             chi.S = 35*ones(size(chi.time));
          end
 
-         %___________________NaN out after sensor death______________________
-         if sensor == 1 % sensor T1 or gusT T
-             death = find(chi.time > CP.T1death, 1, 'first');
-             if ~isempty(death)
-                 disp(['NaNing out sensor T1 after it died on ' datestr(CP.T1death)])
-                 chi.chi(death:end) = NaN;
-                 chi.eps(death:end) = NaN;
-                 chi.T(death:end) = NaN;
-             end
-         end
-
-         if isChipod
-             if sensor == 2 % sensor T2
-                 death = find(chi.time > CP.T2death, 1, 'first');
-                 if ~isempty(death)
-                     disp(['NaNing out sensor T2 after it died on ' datestr(CP.T2death)])
-                     chi.chi(death:end) = NaN;
-                     chi.eps(death:end) = NaN;
-                     chi.T(death:end) = NaN;
-                 end
-             end
-         end
-
-         if ~isPitotEstimate
-             death = find(chi.time > adcpdeath, 1, 'first')
-             if ~isempty(death)
-                 disp(['NaNing out after mooring velocity died on ' datestr(adcpdeath)]);
-                 chi.chi(death:end) = NaN;
-                 chi.eps(death:end) = NaN;
-                 chi.T(death:end) = NaN;
-             end
-         end
-
-         %____________________NaN out specific time ranges as necessary____________
-         % for temp sensor
-         if ~isempty(CP.nantimes{sensor})
-             for tt = 1:size(CP.nantimes{sensor}, 1)
-                 chi.chi(find_approx(chi.time, CP.nantimes{sensor}(tt, 1), 1): ...
-                         find_approx(chi.time, CP.nantimes{sensor}(tt, 2), 1)) = NaN;
-             end
-             chi.eps(isnan(chi.chi)) = NaN;
-         end
-
-         if isPitotEstimate & ~isempty(CP.nantimes{3})
-              for tt = 1:size(CP.nantimes{3}, 1)
-                 chi.chi(find_approx(chi.time, CP.nantimes{3}(tt, 1), 1): ...
-                         find_approx(chi.time, CP.nantimes{3}(tt, 2), 1)) = NaN;
-             end
-             chi.eps(isnan(chi.chi)) = NaN;
-         end
+         % add nans when sensors die or glitch
+         chi = add_nans(chi, CP, sensor, isPitotEstimate)
 
          chi.Kt = 0.5 * chi.chi ./ chi.dTdz.^2;
          chi.Jq = -1025 .* 4200 .* chi.Kt .* chi.dTdz;
@@ -229,48 +133,11 @@ if(do_combine)
          end
 
          if do_mask
-             % speed mask could change depending on estimate
-             mask_spd = ID(1);
-
-             if mask_spd == 'm' & ~exist('vel_m', 'var')
-                 load([basedir '/input/vel_m.mat']);
-                 vel = vel_m;
-             elseif mask_spd == 'p' & ~exist('vel_p', 'var')
-                 load([basedir '/input/vel_p.mat']);
-                 vel = vel_p;
-             end
-             spdmask = interp1(vel.time, vel.spd, chi.time);
-
-             if CP.additional_mask_spd ~= ''
-                 if CP.additional_mask_spd == 'm' & ~exist('vel_m', 'var')
-                     load([basedir '/input/vel_m.mat']);
-                     vel = vel_m;
-                 elseif CP.additional_mask_spd == 'p' & ~exist('vel_p', 'var')
-                     load([basedir '/input/vel_p.mat']);
-                     vel = vel_p;
-                 end
-                 addspdmask = interp1(vel.time, vel.spd, chi.time);
-             end
+             [spdmask, addspdmask] = determine_speed_masks(ID, CP);
 
              if CP.mask_flushing
-                 if ~exist(motionfile, 'file')
-                     error(['proc/motion.mat not found. IGNORING ' ...
-                            'FLUSHING MASKING. Run do_temp_proc ' ...
-                            'to create proc/motion.mat']);
-                 end
 
-                 if ~exist('motion', 'var')
-                     load(motionfile);
-                 end
-
-                 if ~isequal(motion.time, chi.time)
-                     ff = fieldnames(motion);
-                     for f=1:length(ff)
-                         if strcmpi(ff{f}, 'time'), continue; end
-                         motion.(ff{f}) = interp1(motion.time, motion.(ff{f}), chi.time);
-                     end
-                     motion.time = chi.time;
-                 end
+                 motion = process_motion_file(motionfile);
 
                  if ~exist('badMotion', 'var') | length(badMotion)~=length(chi.chi)
                      badMotion = make_flushing_mask(motion, mask_spd, vel, do_plot);
@@ -279,9 +146,7 @@ if(do_combine)
                          if save_fig, set(gcf, 'visible', 'on'); savefig(gcf, [basedir 'pics' filesep 'angles.fig']); end
                      end
                  end
-             end
 
-             if CP.mask_flushing
                  chi = ApplyMask(chi, badMotion, '=', 1, 'volume not being flushed');
                  if do_plot, Histograms(chi, hfig, CP.normstr, (ID), 'volume flushed'); end
              end
@@ -320,7 +185,8 @@ if(do_combine)
                                                ['Additional Tz_' CP.additional_mask_dTdz]);
                  chi.stats.additional_dTdz_mask_percentage = percentage;
                  perlabel = [' -' num2str(percentage, '%.1f') '%'];
-                 if do_plot, Histograms(chi, hfig, CP.normstr, (ID), ['Additional Tz_' CP.additional_mask_dTdz perlabel]); end
+                 if do_plot, Histograms(chi, hfig, CP.normstr, (ID), ...
+                                        ['Additional Tz_' CP.additional_mask_dTdz perlabel]); end
              end
 
              % remove values greater than thresholds
@@ -342,7 +208,7 @@ if(do_combine)
          end
 
          % convert averaging window from seconds to points
-         ww =  round(CP.avgwindow/(diff(chi.time(1:2))*3600*24));
+         ww = round(CP.avgwindow/(diff(chi.time(1:2))*3600*24));
          dw = round(CP.deglitch_window/(diff(chi.time(1:2))*3600*24));
 
          if isempty(ic_test)
@@ -388,7 +254,7 @@ if(do_combine)
          % if we average over a time period greater than
          % sampling period of dTdz, this estimate will differ!
          Turb.(ID).Kt = 0.5 * Turb.(ID).chi ./ Turb.(ID).dTdz.^2 + ...
-             sw_tdif(interp1(chi.time, Smean, Turb.(ID).time), ...
+             sw_tdif(interp1(chi.time, chi.S, Turb.(ID).time), ...
                      Turb.(ID).T, CP.ChipodDepth);
          Turb.(ID).Jq = -1025 .* 4200 .* Turb.(ID).Kt .* Turb.(ID).dTdz;
 
@@ -400,24 +266,12 @@ if(do_combine)
              Histograms(Turb.(ID), hfig2, 'pdf', ID, ID);
          end
          
-         % include statistics
-         Turb.(ID).stats.chimean = nanmean(Turb.(ID).chi);
-         Turb.(ID).stats.epsmean = nanmean(Turb.(ID).eps);
-         Turb.(ID).stats.Ktmean  = nanmean(Turb.(ID).Kt);
-         Turb.(ID).stats.Jqmean  = nanmean(Turb.(ID).Jq);
-         Turb.(ID).stats.chimedian = nanmedian(Turb.(ID).chi);
-         Turb.(ID).stats.epsmedian = nanmedian(Turb.(ID).eps);
-         Turb.(ID).stats.Ktmedian  = nanmedian(Turb.(ID).Kt);
-         Turb.(ID).stats.Jqmedian  = nanmedian(Turb.(ID).Jq);
-         Turb.(ID).stats.chistd = nanstd(Turb.(ID).chi);
-         Turb.(ID).stats.epsstd = nanstd(Turb.(ID).eps);
-         Turb.(ID).stats.Ktstd  = nanstd(Turb.(ID).Kt);
-         Turb.(ID).stats.Jqstd  = nanstd(Turb.(ID).Jq);
+         % include statistics (means and medians for each quantity)
+         Turb.(ID) = calc_statistics(Turb.(ID));
       end
    end
 
    if do_plot
-       %figure(hfig2)
        set(0, 'currentfigure', hfig2);
        subplot(221); title(['Final ' num2str(CP.avgwindow/60) ' min mean']);
        subplot(222); title(['Final ' num2str(CP.avgwindow/60) ' min mean']);
@@ -425,13 +279,11 @@ if(do_combine)
        print(gcf,[basedir '/pics/histograms-final.png'],'-dpng','-r200','-painters')
        if save_fig,set(gcf, 'visible', 'on'); savefig(gcf,[basedir '/pics/histograms-final.fig']); end
 
-       %figure(hfraw)
        set(0, 'currentfigure', hfraw);
        subplot(221); title(['raw 1s estimates']);
        subplot(222); title(['raw 1s estimates']);
        print(gcf,[basedir '/pics/histograms-raw.png'],'-dpng','-r200','-painters')
 
-       %figure(hfstrat)
        set(0, 'currentfigure', hfstrat);
        print(gcf,[basedir '/pics/histograms-stratification.png'],'-dpng','-r200','-painters')
    end
@@ -481,7 +333,180 @@ if do_plot
          savefig(fig,[basedir '/pics/Compare_Turb.fig'])
       end
 end
+end
 
+function [sensor, isPitotEstimate] = process_estimate_ID(ID, isChipod)
+
+    if isChipod
+        if ID(end) == '1' ...
+                    | (length(ID) > 3 & strcmpi(ID(end-3:end), '1_ic')) % sensor T1
+            sensor = 1;
+        end
+        if ID(end) == '2' ...
+                    | (length(ID) > 3 & strcmpi(ID(end-3:end), '2_ic')) % sensor T2
+            sensor = 2;
+        end
+    else
+        sensor = 1; % gusT has only one sensor
+    end
+
+    if ~isempty(strfind(ID, 'p'))
+        isPitotEstimate = 1;
+    else
+        isPitotEstimate = 0;
+    end
+
+end
+
+function [chi] = add_nans(chi, CP, sensor, isPitotEstimate)
+   %___________________NaN out after sensor death______________________
+   if sensor == 1 % sensor T1 or gusT T
+       death = find(chi.time > CP.T1death, 1, 'first');
+       if ~isempty(death)
+           disp(['NaNing out sensor T1 after it died on ' datestr(CP.T1death)])
+           chi.chi(death:end) = NaN;
+           chi.eps(death:end) = NaN;
+           chi.T(death:end) = NaN;
+       end
+   end
+
+   if isChipod
+       if sensor == 2 % sensor T2
+           death = find(chi.time > CP.T2death, 1, 'first');
+           if ~isempty(death)
+               disp(['NaNing out sensor T2 after it died on ' datestr(CP.T2death)])
+               chi.chi(death:end) = NaN;
+               chi.eps(death:end) = NaN;
+               chi.T(death:end) = NaN;
+           end
+       end
+   end
+
+   if ~isPitotEstimate
+       death = find(chi.time > adcpdeath, 1, 'first');
+       if ~isempty(death)
+           disp(['NaNing out after mooring velocity died on ' datestr(adcpdeath)]);
+           chi.chi(death:end) = NaN;
+           chi.eps(death:end) = NaN;
+           chi.T(death:end) = NaN;
+       end
+   end
+
+   %____________________NaN out specific time ranges as necessary____________
+   % for temp sensor
+   if ~isempty(CP.nantimes{sensor})
+       for tt = 1:size(CP.nantimes{sensor}, 1)
+           chi.chi(find_approx(chi.time, CP.nantimes{sensor}(tt, 1), 1): ...
+                   find_approx(chi.time, CP.nantimes{sensor}(tt, 2), 1)) = NaN;
+       end
+       chi.eps(isnan(chi.chi)) = NaN;
+   end
+
+   if isPitotEstimate & ~isempty(CP.nantimes{3})
+       for tt = 1:size(CP.nantimes{3}, 1)
+           chi.chi(find_approx(chi.time, CP.nantimes{3}(tt, 1), 1): ...
+                   find_approx(chi.time, CP.nantimes{3}(tt, 2), 1)) = NaN;
+       end
+       chi.eps(isnan(chi.chi)) = NaN;
+   end
+end
+
+function [] = compare_min_dTdz_N2_against_SBE_specs(dz, CP, ID)
+    % SBE-37 accuracy is 2e-3 C & 3e-3 psu
+    sbe_dTdz = 2*2e-3/dz;
+    sbe_dSdz = 2*3e-4/dz;
+    sbe_N2 = 9.81 * (1.7e-4 * sbe_dTdz + 7.6e-4 * sbe_dSdz);
+
+    if CP.min_dTdz < sbe_dTdz & ID(2) == 'm'
+        disp(['WARNING: min_dTdz < minimum resolvable based on ' ...
+              'SBE-37 accuracy specifications i.e. ' ...
+              num2str(sbe_dTdz, '%.1e')]);
+    end
+    if CP.min_N2 < sbe_N2 & ID(2) == 'm'
+        disp(['WARNING: min_N2 < minimum resolvable based on ' ...
+              'SBE-37 accuracy specifications i.e. ' ...
+              num2str(sbe_N2, '%.1e')]);
+    end
+end
+
+function [chi] = calc_statistics(chi)
+    chi.stats.chimean = nanmean(chi.chi);
+    chi.stats.epsmean = nanmean(chi.eps);
+    chi.stats.Ktmean  = nanmean(chi.Kt);
+    chi.stats.Jqmean  = nanmean(chi.Jq);
+    chi.stats.chimedian = nanmedian(chi.chi);
+    chi.stats.epsmedian = nanmedian(chi.eps);
+    chi.stats.Ktmedian  = nanmedian(chi.Kt);
+    chi.stats.Jqmedian  = nanmedian(chi.Jq);
+    chi.stats.chistd = nanstd(chi.chi);
+    chi.stats.epsstd = nanstd(chi.eps);
+    chi.stats.Ktstd  = nanstd(chi.Kt);
+    chi.stats.Jqstd  = nanstd(chi.Jq);
+end
+
+function [Tz] = determine_additional_Tz_mask(CP)
+
+    if CP.additional_mask_dTdz == 'm'
+        disp('additional masking using mooring dTdz')
+        load([basedir 'input/dTdz_m.mat'])
+        Tz = Tz_m;
+        clear Tz_m;
+
+    elseif CP.additional_mask_dTdz == 'i'
+        disp('additional masking using internal dTdz')
+        load([basedir 'input/dTdz_i.mat'])
+        Tz = Tz_i;
+        clear Tz_i;
+    else
+        Tz = [];
+    end
+
+end
+
+function [spdmask, addspdmask] = determine_speed_masks(ID, CP)
+
+    % speed mask could change depending on estimate
+    mask_spd = ID(1);
+
+    if mask_spd == 'm' & ~exist('vel_m', 'var')
+        load([basedir '/input/vel_m.mat']);
+        vel = vel_m;
+    elseif mask_spd == 'p' & ~exist('vel_p', 'var')
+        load([basedir '/input/vel_p.mat']);
+        vel = vel_p;
+    end
+    spdmask = interp1(vel.time, vel.spd, chi.time);
+
+    if CP.additional_mask_spd ~= ''
+        if CP.additional_mask_spd == 'm' & ~exist('vel_m', 'var')
+            load([basedir '/input/vel_m.mat']);
+            vel = vel_m;
+        elseif CP.additional_mask_spd == 'p' & ~exist('vel_p', 'var')
+            load([basedir '/input/vel_p.mat']);
+            vel = vel_p;
+        end
+        addspdmask = interp1(vel.time, vel.spd, chi.time);
+    else
+        addspdmask = [];
+    end
+end
+
+function [motion] = process_motion_file(motionfile)
+    if ~exist(motionfile, 'file')
+        error(['proc/motion.mat not found. IGNORING ' ...
+               'FLUSHING MASKING. Run do_temp_proc ' ...
+               'to create proc/motion.mat']);
+    end
+
+    if ~isequal(motion.time, chi.time)
+        ff = fieldnames(motion);
+        for f=1:length(ff)
+            if strcmpi(ff{f}, 'time'), continue; end
+            motion.(ff{f}) = interp1(motion.time, motion.(ff{f}), chi.time);
+        end
+        motion.time = chi.time;
+    end
+end
 
 % Examples of using TestMask and DebugPlots to check masking
 % TestMask(chi, abs(chi.dTdz), '<', [1e-4, 3e-4, 1e-3], 'Tz');
@@ -492,4 +517,3 @@ end
 % DebugPlots([], t0, t1, chi1, 'T_z > 3e-4', 1)
 % load ../proc/temp.mat
 % load ../proc/Turb.mat
-end

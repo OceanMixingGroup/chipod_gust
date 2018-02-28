@@ -379,6 +379,11 @@ if(do_combine)
          % (because we divide by this dTdz for Kt, Jq)
          Turb.(ID) = ApplyMask(Turb.(ID), abs(Turb.(ID).dTdz), '<', CP.min_dTdz, 'avg dTdz');
 
+         % Tz (min_dTdz)-crossing filter
+         Tz_min_cross = generate_min_dTdz_crossing_mask(Turb.(ID).dTdz, ...
+                                                        CP.min_dTdz, 0)
+         Turb.(ID) = ApplyMask(Turb.(ID), Tz_min_cross, '=', 1, 'min_Tz crossing');
+
          % recalculate using averaged quantities
          % if we average over a time period greater than
          % sampling period of dTdz, this estimate will differ!

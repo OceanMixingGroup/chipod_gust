@@ -1,0 +1,65 @@
+\chapter{Inferring $K_T$, $J_q$ from $χ$}
+
+\newcommand{\Tbins}{T_\text{bins}}
+
+Osborn \& Cox:
+\begin{equation}
+  J_q^t = \frac{\langle χ \rangle}{⟨\pp Tz⟩^2}
+\end{equation}
+These angle brackets are interpreted as a time average for χpods and a depth-bin average for profilers like Chameleon.
+
+The Osborn \& Cox formulation is not well behaved when stratification is low.
+It gets worse in places with large salinity influence: large enough that $T_z < 0$ some of the time.
+In these cases, getting ``reasonable'' values for $K_T$ and $J_q^t$ requires masking out estimates when $T_z$ is less than some ill-defined threshold.
+
+Winters \& D'Asaro:
+
+\begin{equation}
+  J_q^t =  \dd{z^*}{T} \langle χ \rangle_{z^*}
+\end{equation}
+
+$z^*$ being the ``reference'' state — usually a fully sorted 3D scalar field, but this can be approximated by Thorpe sorting.
+The angle brackets represent averaging in ``isoscalar'' (isothermal) space.
+The Winters \& D'Asaro formulation has the advantage that it can be well-defined for low gradients — thinking about distances between isoscalar surfaces.
+The idea is that the averaging occurs in a volume between two isothermal surfaces.
+The required gradient is then the average spacing between these two surfaces.
+Doing this requires treating the χpod as a profiler, being pumped by surface waves.
+We can keep track of the isotherms seen by the χpod in a chunk of data; and estimate the average distance between those isotherms.
+For dense enough sampling this average distance should converge to the distance between the isotherms in the fully sorted field (this is the necessary gradient).
+Note that the χpod densely samples approximately 1-2 metres of the water column.
+In low stratification, estimating the spacing requires high-resolution temperature measurements but that is exactly what the χpod! Consider a 1 minute chunk of data.
+\begin{itemize}
+\item
+  Once $χ$ has been estimated, we have $χ ≡ χ(t) ≡ χ(T)$, T being temperature (1 second averages).
+
+\item
+  We can divide the temperature time series into $N$ quantiles, bin the $χ$ estimates in these temperature bins and then average them to get $\langle  χ \rangle ≡ χ(\Tbins)$. This is what \cite{Winters1996} call ``isoscalar averaging'' --- every $χ$ estimate made between 2 isothermal surfaces is averaged together.
+
+\end{itemize}
+
+Next, we need to determine the average distance between the isothermal surfaces $\Tbins$.
+\begin{itemize}
+\item
+  Each ``up-'' and ``down-cast'' in the minute is first individually Thorpe sorted.
+\item
+  Find the location of the isotherms ($\Tbins$) in the sorted profiles and difference them to get $Δz(\Tbins)$.
+\item
+  Average in isothermal space $⟨Δz⟩$; i.e. average every $Δz$ measurement for each bin. $⟨Δz⟩$ is the \emph{average distance between the isotherms represented by the bin edges $\Tbins$}
+\item
+  $⟨Δz⟩/Δ\Tbins$ is the necessary gradient for each bin.
+
+\item
+  \begin{equation}
+    J_q^t = - \frac 12 \frac{⟨Δz⟩}{Δ\Tbins} \; ⟨χ⟩
+  \end{equation}
+  We now have a $J_q^t$ estimate for each temperature bin. Depth-average this value to get the \emph{volume-average $J_q^t$ in the volume sampled by the χpod in the 60 second chunk of data}
+
+\item
+  When salinity controls density, it is possible that $dT/dz < 0$ for extended periods of time. Thorpe sorting cannot preserve this sign (unless there are coincident measurements of salinity, in which case you would sort density). The only sensible thing to do is to determine the sign of the mean (or ``large-scale'') gradient from other sources such as nearby CTDs on the mooring.
+\end{itemize}
+
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "docs"
+%%% End:

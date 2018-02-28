@@ -18,9 +18,8 @@ function [CP] = default_parameters_combine_turbulence( basedir)
    CP.min_dTdz       = 1e-3;
    CP.min_spd        = 0.05;
    CP.min_inst_spd   = CP.min_spd; % min instantaneous speed past sensor
-   CP.mask_inst_spd  = 1; % estimates are crappy if sensor isn't moving
-                      % enough.
-                      % screws the spectrum calculation...
+   CP.mask_inst_spd  = 1; % estimates are crappy if sensor isn't moving enough.
+                          % screws the spectrum calculation...
 
    % maximum values; anything greater is NaNed out
    CP.max_chi     = 1e-3;
@@ -30,7 +29,7 @@ function [CP] = default_parameters_combine_turbulence( basedir)
 
    CP.avgwindow   = 600; % averaging window in seconds
    CP.avgvalid    = 30; % percent valid values in averaging window for avg to
-                  % be non-NaN
+                        % be non-NaN
 
    % deglitching parameters
    CP.deglitch_window   = 180; % in seconds
@@ -64,6 +63,15 @@ function [CP] = default_parameters_combine_turbulence( basedir)
    % mooring velocity measurement death
    adcpdeath = datenum(2060, 1, 1, 0, 0, 0); % current meter dies here
 
+   %_____________ additional time ranges to NaN out as necessary________________
+   % make an array that looks like
+   % nantimes{sensor_number} = [start_time1, end_time1;
+   %                            start_time2, end_time2;]
+   % start_time & end_time must be datenum
+   CP.nantimes{1} = []; % sensor T1 for chipod or T sensor on gusT
+   CP.nantimes{2} = []; % sensor T2 for chipod
+   CP.nantimes{3} = []; % pitot sensor
+
 
 %_________ which estimates should I process?_______________________
    CP.pflag = chi_processing_flags;
@@ -82,16 +90,4 @@ function [CP] = default_parameters_combine_turbulence( basedir)
        %CP.pflag = CP.pflag.c_vel_m(0);    % use mooring velocities 
        %CP.pflag = CP.pflag.c_Tzi(0);      % use local (interal) stratification 
        %CP.pflag = CP.pflag.c_Tzm(0);      % use mooring stratification 
-      CP.pflag = CP.pflag.make_cons();     % make sub-flags consitent with master flags 
-
-
-
-%_____________ additional time ranges to NaN out as necessary________________
-   % make an array that looks like
-   % nantimes{sensor_number} = [start_time1, end_time1;
-   %                            start_time2, end_time2;]
-   % start_time & end_time must be datenum
-   CP.nantimes{1} = []; % sensor T1 for chipod or T sensor on gusT
-   CP.nantimes{2} = []; % sensor T2 for chipod
-   CP.nantimes{3} = []; % pitot sensor
-
+      CP.pflag = CP.pflag.make_cons();     % make sub-flags consitent with master flags

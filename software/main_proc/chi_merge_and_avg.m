@@ -1,5 +1,5 @@
-function []  = chi_merge_and_avg(basedir, ddir, aw , time_lim)
-%% []  = chi_merge_and_avg(basedir, dir, aw, [time_lim])
+function []  = chi_merge_and_avg(basedir, ddir, aw , time_lim, sname)
+%% []  = chi_merge_and_avg(basedir, dir, aw, [time_lim, sdir])
 %     
 %     This function averages all idividual files in dir
 %     in to a single file called 
@@ -10,14 +10,24 @@ function []  = chi_merge_and_avg(basedir, ddir, aw , time_lim)
 %        dir      :  sub directory of proc (e.g. temp, chi ...)
 %        aw       :  average width in sec (if 0 no averaging)
 %        time_lim :  optional, time limits to cut the field
+%        sname     :  optional, path+file prefix for merged file
 %
 %   created by: 
 %        Johannes Becherer
 %        Tue Sep 20 16:28:51 PDT 2016
 %
 
-if nargin < 4 % if no time limits are set we use pratical no limits
+% if no time limits are set we use pratical no limits
+if nargin < 4 | isempty(time_lim)
    time_lim = [datenum(1900,1,1) datenum(2100,1,1)];
+end
+
+if nargin < 5
+    sname = [basedir 'proc' filesep ddir];
+end
+
+if nargin == 5
+    sname = [basedir 'proc' filesep sname];
 end
 
 if ~isdir([basedir 'proc' filesep ddir])
@@ -83,9 +93,9 @@ end
 
 %---------------------save data----------------------
    if aw == 0
-      sfid =[basedir 'proc' filesep ddir '.mat'] ;
+      sfid =[sname '.mat'] ;
    else
-      sfid =[basedir 'proc' filesep ddir '_' num2str(aw) 'sec.mat'] ;
+      sfid =[sname '_' num2str(aw) 'sec.mat'] ;
    end
 
    % find fields in avg

@@ -60,18 +60,20 @@ end
 
    %_____________________merge all days______________________
    disp('merge all days')
-      %_loop through all processing flags for chi processing_
+      %_loop through all processing flags for chi processing
+      % keep averaging window 0 here.
+      % Only merge, average later in combine_turbulene.m
       for i = 1:length(pflag.id)
             [id, ~, ~, ~] = pflag.get_id(i);
             if pflag.proc.(id) % check if flag is active
                ddir = ['chi' filesep 'chi_' id];
-               % keep averaging window 0 here.
-               % Only merge, average later in combine_turbulene.m
                chi_merge_and_avg(basedir, ddir, 0, time_lim );
 
                try
-                   ddir = ['chi/chi_' id filesep 'stats'];
-                   chi_merge_and_avg(basedir, ddir, 0);
+                   ddir = ['chi' filesep 'chi_' id filesep 'stats'];
+                   mkdir([basedir filesep 'proc' filesep 'chi' filesep 'stats' filesep]);
+                   statsname = ['chi' filesep 'stats/chi_' id '_stats'];
+                   chi_merge_and_avg(basedir, ddir, 0, [], statsname);
                catch ME
                    disp(ME)
                    disp('Error! have the fitting stats been saved? Skipping...')

@@ -378,7 +378,7 @@ if(do_combine)
          Turb.(ID).Jq = -1025 .* 4200 .* Turb.(ID).Kt .* Turb.(ID).dTdz;
 
          [Turb.(ID), Turb.(ID).stats.max_Kt_percentage] = ApplyMask(Turb.(ID), Turb.(ID).Kt, '>', CP.max_Kt, 'max_Kt');
-         [Turb.(ID), Turb.(ID).stats.max_Jq_percentage] = ApplyMask(Turb.(ID), Turb.(ID).Jq, '>', CP.max_Jq, 'max_Jq');
+         [Turb.(ID), Turb.(ID).stats.max_Jq_percentage] = ApplyMask(Turb.(ID), abs(Turb.(ID).Jq), '>', CP.max_Jq, 'max_Jq');
 
          if do_plot
              if ~exist('hfig2', 'var'), hfig2 = CreateFigure(is_visible); end

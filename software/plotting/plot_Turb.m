@@ -73,6 +73,7 @@ ff = fields(Turb);
 ff = {ff{1:end-1}}'; % remove readme structure
 
 fig = CreateFigure(is_visible);
+fig.Name = 'plot_Turb: compare all estimates';
 [ax, ~] = create_axes(fig, 5, 1, 0);
       
  

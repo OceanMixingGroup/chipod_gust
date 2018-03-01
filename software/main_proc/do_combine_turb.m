@@ -107,19 +107,24 @@ if(do_combine)
 
          if do_plot
              hfig = CreateFigure(is_visible);
+             hfig.Name = ['Histograms: effect of masking for ' ID];
              Histograms(chi, hfig, CP.normstr, ID, 'raw');
 
-             if ~exist('hfraw', 'var'), hfraw = CreateFigure(is_visible); end
+             if ~exist('hfraw', 'var')
+                 hfraw = CreateFigure(is_visible);
+                 hfraw.Name = ['Histograms: compare different 1 sec estimates']
+             end
              Histograms(chi, hfraw, 'pdf', ID, ID);
 
              if ~exist('hfstrat', 'var')
                  hfstrat = CreateFigure(is_visible);
+                 hfstrat.Name = ['Histograms: background stratification for ' ID]
                  shown_Tz = '';
              end
 
              if isempty(strfind(shown_Tz, ID(2)))
                  StratHist(hfstrat, chi, ID);
-                 subplot(222);
+                 set(0, 'currentfigure', hfstrat); subplot(222);
                  hplt = plot(CP.avgwindow/60*[1, 1], ylim, 'k--');
                  legend(hplt, 'averaging window')
                  shown_Tz = [shown_Tz ID(2)];
@@ -284,14 +289,20 @@ if(do_combine)
          Turb.(ID).wda = chi.wda;
 
          if do_plot
-             if ~exist('hfig2', 'var'), hfig2 = CreateFigure(is_visible); end
+             if ~exist('hfig2', 'var')
+                 hfig2 = CreateFigure(is_visible);
+                 hfig2.Name = ['Histograms: all final processed estimates'];
+             end
              Histograms(Turb.(ID), hfig2, 'pdf', ID, ID);
              Histograms(Turb.(ID).wda, hfig2, 'pdf', ID, [ID 'W&DA']);
 
              if isfield(Turb.(ID), 'wda')
                  hwda = CreateFigure(is_visible);
-                 DebugPlots([], [], [], Turb.(ID), 'wda', 86400/600);
+                 hwda.Name = ['Compare Osborn-Cox vs. Winters-D''Asaro : ' ID];
+                 tavg = 86400;
+                 DebugPlots([], [], [], Turb.(ID), ID, tavg/CP.avgwindow);
                  DebugPlots([], [], [], Turb.(ID).wda, [ID 'wda'], 86400/Turb.(ID).wda.dt(1));
+                 print(gcf,[basedir '/pics/compare-wda-oc-' ID '.png'],'-dpng','-r200','-painters');
              end
 
          end

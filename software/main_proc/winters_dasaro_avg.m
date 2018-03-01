@@ -13,9 +13,6 @@ function [wda] = winters_dasaro_avg(t0, t1, data, chi, T, plotflag)
 
     optional = 0;
 
-    tstart = data.time(t0);
-    tstop = data.time(t1);
-
     zfull = -(data.a_dis_z(t0:t1)-data.a_dis_z(t0));
     Tfull = T.T(t0:t1);
 
@@ -24,9 +21,12 @@ function [wda] = winters_dasaro_avg(t0, t1, data, chi, T, plotflag)
     [~, locs2] = findpeaks(-data.a_dis_z(t0:t1));
     locs = sort([t0; locs1+t0-1; locs2+t0-1; t1]);
 
-    chit0 = find_approx(chi.time, tstart);
-    chit1 = find_approx(chi.time, tstop);
+    chit0 = find_approx(chi.time, data.time(t0));
+    chit1 = find_approx(chi.time, data.time(t1));
     Tchi = chi.T(chit0:chit1);
+
+    tstart = chi.time(chit0);
+    tstop = chi.time(chit1);
 
     il = 1; Tprof = [];
     for ll=1:length(locs)-1
@@ -68,7 +68,7 @@ function [wda] = winters_dasaro_avg(t0, t1, data, chi, T, plotflag)
     dzmat = nan(length(dT), length(locs));
 
     if plotflag
-        clf;
+        CreateFigure;
         htemp = subplot(2,4,[1, 5]); hold on; xlabel('Temp'); ylabel('z (accel)')
         hsort = subplot(2,4,[4, 8]); hold on; xlabel('Temp (sorted)'); ylabel('z (interp)')
         hsort.XGrid = 'on'; hsort.XTick = Tbins; hsort.XAxis.TickLabelRotation = 30;
@@ -204,9 +204,9 @@ function [wda] = winters_dasaro_avg(t0, t1, data, chi, T, plotflag)
         hsort.PlotBoxAspectRatio = [1 2 1];
         htemp.PlotBoxAspectRatio = [1 2 1];
         hsort.XLim = [min(T.T(t0:t1))-1e-3 max(T.T(t0:t1))+1e-3];
-        hsort.Title.String = ['Jq_{DA} = ' num2str(Jqda, '%.1f') ...
-                            ' | Jq_{i} = ' num2str(Jqi, '%.1f') ...
-                            ' | Jq_{m} = ' num2str(Jqm, '%.1f')];
+        % hsort.Title.String = ['Jq_{DA} = ' num2str(Jqda, '%.1f') ...
+        %                     ' | Jq_{i} = ' num2str(Jqi, '%.1f') ...
+        %                     ' | Jq_{m} = ' num2str(Jqm, '%.1f')];
     end
 end
 

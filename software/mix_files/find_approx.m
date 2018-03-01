@@ -6,16 +6,14 @@ function g = find_approx(m,v,n)
 % the third argument (default n=1) tells how many values to find; n=3 means
 % the nearest 3 indices in order of descending nearness.
 
-g=find(m==v);
-if isempty(g)
-    [nul g]=min(abs(m-v));
-    if isnan(nul), g=nan; end
-end
-
 if nargin>2
-    g=zeros(n,1)*nan;
+    g=nan(n,1);
     for nn=1:n
         [nul g(nn)]=min(abs(m-v));
         m(g(nn))=nan;
     end
+
+else
+    [nul g]=min(abs(m-v));
+    if isnan(nul), g=nan; end
 end

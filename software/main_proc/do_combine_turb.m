@@ -300,10 +300,15 @@ if(do_combine)
              if isfield(Turb.(ID), 'wda')
                  hwda = CreateFigure(is_visible);
                  hwda.Name = ['Compare Osborn-Cox vs. Winters-D''Asaro : ' ID];
-                 tavg = 86400;
-                 DebugPlots([], [], [], Turb.(ID), ID, tavg/CP.avgwindow);
-                 DebugPlots([], [], [], Turb.(ID).wda, [ID 'wda'], 86400/Turb.(ID).wda.dt(1));
+                 tavg = 3600;
+                 ax = plot_estimate(Turb.(ID), ID, tavg);
+                 ax = plot_estimate(Turb.(ID).wda, [ID 'wda'], tavg);
+                 % symmetric-log axes for dT/dz and Jq
+                 set(ax(5), 'ylim', [-1 1]*2000)
+                 symlog(ax(2), 'y', -3);
+                 symlog(ax(5), 'y', 1);
                  print(gcf,[basedir '/pics/compare-wda-oc-' ID '.png'],'-dpng','-r200','-painters');
+                 if save_fig, savefig(gcf, [basedir '/pics/compare-wda-oc-' ID '.fig']); end
              end
 
          end

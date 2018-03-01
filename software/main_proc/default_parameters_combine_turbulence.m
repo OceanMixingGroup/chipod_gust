@@ -31,6 +31,11 @@ function [CP] = default_parameters_combine_turbulence( basedir)
    CP.avgvalid    = 30; % percent valid values in averaging window for avg to
                         % be non-NaN
 
+   % checking for bad fits
+   CP.min_n_freq = 3; % require at least 3 points in fitting range [k_start, k_stop]
+   CP.mask_ic_fits = 1; % mask fits in the inertial convective range with 1
+                        % second data?
+
    % deglitching parameters
    CP.deglitch_window   = 180; % in seconds
    CP.deglitch_nstd     = 3; % n std. dev. threshold

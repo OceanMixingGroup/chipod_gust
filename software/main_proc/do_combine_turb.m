@@ -166,7 +166,25 @@ if(do_combine)
              [chi, chi.stats.max_chi_percentage] = ApplyMask(chi, chi.chi, '>', CP.max_chi, 'max_chi');
              [chi, chi.stats.max_eps_percentage] = ApplyMask(chi, chi.eps, '>', CP.max_eps, 'max_eps');
 
-             % filter out bad fits
+             % filter out bad fits using fitting statistics
+             statsname = [basedir filesep 'proc' filesep 'chi' filesep 'stats' ...
+                         filesep 'chi_' ID '_stats.mat'];
+             if exist(statsname, 'file')
+                 load(statsname);
+                 stats = truncate_time(stats, CP.time_range);
+
+                 [chi, chi.stats.nfreq_percentage] = ...
+                     ApplyMask(chi, stats.n_freq, '<', CP.min_n_freq, 'min n_freq');
+
+                 if CP.mask_ic_fits
+                     [chi, chi.stats.ic_fit_percentage] = ...
+                         ApplyMask(chi, stats.k_stop < stats.ki, '=', 1, 'fully IC fit');
+                 end
+                 perlabel = [' -' num2str(chi.stats.nfreq_percentage + chi.stats.ic_fit_percentage, '%.1f') '%'];
+                 if do_plot, Histograms(chi, hfig, CP.normstr, (ID), ['bad fits' perlabel]); end
+             else
+                 disp(['Combined stats file does not exist. Cannot filter out bad fits.'])
+             end
 
              % obtain Kt, Jq using Winters & D'Asaro methodology
              if isfield(chi, 'wda')

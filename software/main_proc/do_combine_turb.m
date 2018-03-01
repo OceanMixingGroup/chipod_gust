@@ -85,17 +85,7 @@ if(do_combine)
          ww = round(CP.avgwindow/(diff(chi.time(1:2))*3600*24));
          dw = round(CP.deglitch_window/(diff(chi.time(1:2))*3600*24));
 
-         % find desired time range
-         iiTrange = find( chi.time >= CP.time_range(1) & chi.time<= CP.time_range(2) );
-
-         % extract valid time range here so that histograms work
-         ff = fieldnames(chi);
-         for nn = 1:length(ff)
-             try
-                 chi.(ff{nn}) = chi.(ff{nn})(iiTrange);
-             catch ME;
-             end
-         end
+         chi = truncate_time(chi, CP.time_range);
 
          try
              load([basedir '/proc/T_m.mat']);
@@ -528,6 +518,23 @@ function [motion] = process_motion_file(motionfile)
         end
         motion.time = chi.time;
     end
+end
+
+function [out] = truncate_time(in, time_range)
+
+    % find desired time range
+    iiTrange = find( in.time >= time_range(1) & in.time <= time_range(2) );
+
+    % extract valid time range here so that histograms work
+    ff = fieldnames(in);
+    for nn = 1:length(ff)
+        try
+            out.(ff{nn}) = in.(ff{nn})(iiTrange);
+        catch ME;
+            out.(ff{nn}) = in.(ff{nn});
+        end
+    end
+
 end
 
 % Examples of using TestMask and DebugPlots to check masking

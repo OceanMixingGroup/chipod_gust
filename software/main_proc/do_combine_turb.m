@@ -112,13 +112,13 @@ if(do_combine)
 
              if ~exist('hfraw', 'var')
                  hfraw = CreateFigure(is_visible);
-                 hfraw.Name = ['Histograms: compare different 1 sec estimates']
+                 hfraw.Name = ['Histograms: compare different 1 sec estimates'];
              end
              Histograms(chi, hfraw, 'pdf', ID, ID);
 
              if ~exist('hfstrat', 'var')
                  hfstrat = CreateFigure(is_visible);
-                 hfstrat.Name = ['Histograms: background stratification for ' ID]
+                 hfstrat.Name = ['Histograms: background stratification for ' ID];
                  shown_Tz = '';
              end
 

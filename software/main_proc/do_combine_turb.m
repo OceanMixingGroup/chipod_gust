@@ -567,12 +567,12 @@ function [out] = truncate_time(in, time_range)
 
 end
 
-% Examples of using TestMask and DebugPlots to check masking
+% Examples of using TestMask and plot_estimate to check masking
 % TestMask(chi, abs(chi.dTdz), '<', [1e-4, 3e-4, 1e-3], 'Tz');
 % t0 = datenum(2014, 01, 01);
 % t1 = datenum(2014, 03, 01);
-% DebugPlots([], t0, t1, chi, 'raw', 1)
+% plot_estimate(chi, 'raw', 0, [], t0, t1);
 % chi1 = ApplyMask(chi, abs(chi.dTdz), '<', 3e-4, 'T_z');
-% DebugPlots([], t0, t1, chi1, 'T_z > 3e-4', 1)
+% plot_estimate(chi1, 'T_z > 3e-4', 0, [], t0, t1);
 % load ../proc/temp.mat
 % load ../proc/Turb.mat

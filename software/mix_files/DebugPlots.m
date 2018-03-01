@@ -1,6 +1,8 @@
 function [] = DebugPlots(hfig, t0, t1, chi, name, ww)
 
     if ~exist('ww', 'var'), ww = 1; end
+    if isempty(t0), t0 = chi.time(1); end
+    if isempty(t1), t1 = chi.time(end); end
     if isempty(hfig), hfig = gcf(); end
 
     i0 = find_approx(chi.time, t0, 1);
@@ -14,12 +16,12 @@ function [] = DebugPlots(hfig, t0, t1, chi, name, ww)
     catch ME
         CreateFigure;
     end
-    % ax(1) = subplot(511);
-    % semilogy(time, moving_average(chi.chi(tind), ww, ww), 'displayname', name)
-    % ylabel('\chi')
-    % Common()
+    ax(1) = subplot(511);
+    semilogy(time, moving_average(chi.chi(tind), ww, ww), 'displayname', name)
+    ylabel('\chi')
+    Common()
 
-    ax(1) = subplot(411);
+    ax(1) = subplot(512);
     plot(time, moving_average(chi.dTdz(tind), ww, ww), 'displayname', name)
     hold on;
     plot(xlim, [0, 0], 'k--');
@@ -27,17 +29,17 @@ function [] = DebugPlots(hfig, t0, t1, chi, name, ww)
     Common()
     % symlog(gca, 'y', 5e-3);
 
-    ax(2) = subplot(412);
+    ax(2) = subplot(513);
     try
-        semilogy(time, chi.eps(tind), 'displayname', name)
+        semilogy(time, moving_average(chi.eps(tind), ww, ww), 'displayname', name)
     catch ME
-        semilogy(time, chi.eps1(tind), 'displayname', name)
+        semilogy(time, moving_average(chi.eps1(tind), ww, ww), 'displayname', name)
     end
     ylabel('\epsilon')
-    ylim([10.^[-7, -3]])
+    ylim([10.^[-10, -3]])
     Common()
 
-    ax(3) = subplot(413);
+    ax(3) = subplot(514);
     try
         semilogy(time, moving_average(chi.Kt(tind), ww, ww), ...
                  'displayname', name)
@@ -46,10 +48,10 @@ function [] = DebugPlots(hfig, t0, t1, chi, name, ww)
                  'displayname', name)
     end
     ylabel('K_t')
-    ylim([10.^[-7, 0]])
+    ylim([10.^[-6.5, 0]])
     Common()
 
-    ax(4) = subplot(414);
+    ax(4) = subplot(515);
     try
         plot(time, ...
              moving_average(chi.Jq(tind), ww, ww), 'displayname', name)

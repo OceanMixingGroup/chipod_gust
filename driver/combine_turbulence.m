@@ -23,7 +23,7 @@ addpath(genpath('./chipod_gust/software/'));% include  path to preocessing routi
    savedir =   [basedir 'proc/'];  % directory directory to save data
 
 %_____________________get all parameters used for combine______________________
-   [CP] = default_parameters_combine_turbulence(basedir)
+   [CP] = default_parameters_combine_turbulence(basedir);
    %_____________________change as much as you like in CP______________________
       % i.e. 
       %CP.time_range        = [ datenum(2000, 1, 1, 0, 0, 0) datenum(2060, 1, 1, 0, 0, 0)];
@@ -31,6 +31,7 @@ addpath(genpath('./chipod_gust/software/'));% include  path to preocessing routi
 
 
 %_____________________do everything______________________
+CP
 do_combine_turb(basedir, savedir, CP, do_combine, do_plot, do_mask, save_fig, is_visible)
 
 

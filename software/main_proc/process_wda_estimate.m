@@ -48,8 +48,10 @@ function [wda] = process_wda_estimate(chi, wda)
         Tbins = Tbins(~isnan(Tbins));
 
         if length(Tbins) > 1
-            chiavg = isoscalar_average(chi.chi(chit0:chit1), Tchi, Tbins);
-            epsavg = isoscalar_average(chi.eps(chit0:chit1), Tchi, Tbins);
+            avg = isoscalar_average([chi.chi(chit0:chit1); chi.eps(chit0:chit1)], ...
+                                    Tchi, Tbins);
+            chiavg = avg(1, :);
+            epsavg = avg(2, :);
 
             dz = wda.dz(1:length(Tbins)-1, tt);
             dTdz = wda.dTdz_bins(1:length(Tbins)-1, tt);

@@ -101,8 +101,11 @@ end
    % find fields in avg
    Favg = fields(avg);
    for i =  1:length(Favg)
-      %eval([char(Favg(i)) ' = avg.' char(Favg(i))]);
-      eval([char(Favg(i)) ' =  time_lim_fields(avg.' char(Favg(i)) ', time_lim);']);
+       if isfield(avg, 'time')
+           eval([char(Favg(i)) ' =  time_lim_fields(avg.' char(Favg(i)) ', time_lim);']);
+       else
+           eval([char(Favg(i)) ' = avg.' char(Favg(i)) ';']);
+       end
    end
 
    % save all fields in avg

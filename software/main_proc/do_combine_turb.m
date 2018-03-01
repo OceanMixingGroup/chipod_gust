@@ -81,6 +81,10 @@ if(do_combine)
 
          CP = process_estimate_ID(CP, ID);
 
+         % convert averaging window from seconds to points
+         ww = round(CP.avgwindow/(diff(chi.time(1:2))*3600*24));
+         dw = round(CP.deglitch_window/(diff(chi.time(1:2))*3600*24));
+
          % find desired time range
          iiTrange = find( chi.time >= CP.time_range(1) & chi.time<= CP.time_range(2) );
 
@@ -151,11 +155,6 @@ if(do_combine)
                  if do_plot, Histograms(chi, hfig, CP.normstr, (ID), 'volume flushed'); end
              end
 
-             [chi, percentage] = ApplyMask(chi, abs(chi.dTdz), '<', CP.min_dTdz, 'Tz');
-             chi.stats.dTdz_mask_percentage = percentage;
-             perlabel = [' -' num2str(percentage, '%.1f') '%'];
-             if do_plot, Histograms(chi, hfig, CP.normstr, (ID), ['|Tz| > ' num2str(CP.min_dTdz, '%.1e') perlabel]); end
-
              [chi, percentage] = ApplyMask(chi, chi.N2, '<', CP.min_N2, 'N2');
              chi.stats.N2_mask_percentage = percentage;
              if percentage > 0.5
@@ -173,6 +172,27 @@ if(do_combine)
                  chi.stats.additional_background_flow_mask_percentage = percentage;
              end
 
+             % remove values greater than thresholds
+             [chi, chi.stats.max_chi_percentage] = ApplyMask(chi, chi.chi, '>', CP.max_chi, 'max_chi');
+             [chi, chi.stats.max_eps_percentage] = ApplyMask(chi, chi.eps, '>', CP.max_eps, 'max_eps');
+
+             % filter out bad fits
+
+             % obtain Kt, Jq using Winters & D'Asaro methodology
+             if isfield(chi, 'wda')
+                 chi.wda = process_wda_estimate(chi, chi.wda);
+                 chi.wda.Kt = chi.wda.Kt + sw_tdif(interp1(chi.time, chi.S, chi.wda.time), ...
+                                                   interp1(chi.time, chi.T, chi.wda.time), ...
+                                                   CP.ChipodDepth);
+             end
+
+             % dT/dz has to happen after I use chi to get Winters & D'Asaro
+             % estimates of Kt, Jq!
+             [chi, percentage] = ApplyMask(chi, abs(chi.dTdz), '<', CP.min_dTdz, 'Tz');
+             chi.stats.dTdz_mask_percentage = percentage;
+             perlabel = [' -' num2str(percentage, '%.1f') '%'];
+             if do_plot, Histograms(chi, hfig, CP.normstr, (ID), ['|Tz| > ' num2str(CP.min_dTdz, '%.1e') perlabel]); end
+
              % additional Tz masking?
              if ~isempty(Tz)
                  if CP.additional_mask_dTdz == 'i'
@@ -189,12 +209,7 @@ if(do_combine)
                                         ['Additional Tz_' CP.additional_mask_dTdz perlabel]); end
              end
 
-             % remove values greater than thresholds
-             [chi, chi.stats.max_chi_percentage] = ApplyMask(chi, chi.chi, '>', CP.max_chi, 'max_chi');
-             [chi, chi.stats.max_eps_percentage] = ApplyMask(chi, chi.eps, '>', CP.max_eps, 'max_eps');
-
              if do_plot
-                 %figure(hfig)
                  set(0, 'currentfigure', hfig);
                  set(hfig, 'DefaultLegendBox', 'off');
                  subplot(221); legend(gca, 'show'); title((ID));
@@ -207,19 +222,16 @@ if(do_combine)
              end
          end
 
-         % convert averaging window from seconds to points
-         ww = round(CP.avgwindow/(diff(chi.time(1:2))*3600*24));
-         dw = round(CP.deglitch_window/(diff(chi.time(1:2))*3600*24));
-
          if isempty(ic_test)
-             % deglitch chi and eps before
-             % calculating Jq and Kt
+             % deglitch chi and eps before calculating Jq and Kt
              % not required for IC estimate because that is already
              % an averaged estimate
              disp('Deglitch... itch... tch... ch')
              tic;
              chi.chi = 10.^deglitch(log10(chi.chi), dw, CP.deglitch_nstd, 'b');
+             chi.eps(isnan(chi.chi)) = nan;
              chi.eps = 10.^deglitch(log10(chi.eps), dw, CP.deglitch_nstd, 'b');
+             chi.chi(isnan(chi.eps)) = nan;
              toc;
 
              % get list of all fields to average
@@ -261,9 +273,19 @@ if(do_combine)
          [Turb.(ID), Turb.(ID).stats.max_Kt_percentage] = ApplyMask(Turb.(ID), Turb.(ID).Kt, '>', CP.max_Kt, 'max_Kt');
          [Turb.(ID), Turb.(ID).stats.max_Jq_percentage] = ApplyMask(Turb.(ID), abs(Turb.(ID).Jq), '>', CP.max_Jq, 'max_Jq');
 
+         Turb.(ID).wda = chi.wda;
+
          if do_plot
              if ~exist('hfig2', 'var'), hfig2 = CreateFigure(is_visible); end
              Histograms(Turb.(ID), hfig2, 'pdf', ID, ID);
+             Histograms(Turb.(ID).wda, hfig2, 'pdf', ID, [ID 'W&DA']);
+
+             if isfield(Turb.(ID), 'wda')
+                 hwda = CreateFigure(is_visible);
+                 DebugPlots([], [], [], Turb.(ID), 'wda', 86400/600);
+                 DebugPlots([], [], [], Turb.(ID).wda, [ID 'wda'], 86400/Turb.(ID).wda.dt(1));
+             end
+
          end
          
          % include statistics (means and medians for each quantity)

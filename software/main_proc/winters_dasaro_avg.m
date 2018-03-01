@@ -54,7 +54,7 @@ function [wda] = winters_dasaro_avg(t0, t1, data, chi, T, plotflag)
     wda.Tbins = (nan(nquantiles+2, 1));
     wda.tstart = tstart;
     wda.tstop = tstop;
-    wda.dTdz = (nan(nquantiles+2, 1));
+    wda.dTdz_bins = (nan(nquantiles+2, 1));
     wda.dz = (nan(nquantiles+2, 1));
 
     % if no long enough profiles are found
@@ -134,7 +134,7 @@ function [wda] = winters_dasaro_avg(t0, t1, data, chi, T, plotflag)
     dzdT = dz./dT;
 
     wda.Tbins(1:length(Tbins), 1) = Tbins;
-    wda.dTdz(1:length(Tbins)-1, 1) = 1./dzdT;
+    wda.dTdz_bins(1:length(Tbins)-1, 1) = 1./dzdT;
     wda.dz(1:length(Tbins)-1, 1) = dz;
 
     % test that we can recover the value

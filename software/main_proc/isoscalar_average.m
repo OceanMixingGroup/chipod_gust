@@ -6,12 +6,14 @@ function [avg, bins] = isoscalar_average(data, scalar, bins)
         bins = bins;
     end
 
-    Y = discretize(scalar, bins, 'IncludedEdge', 'left');
-
+    Y = discretize(scalar, bins);
     avg = nan(1, length(bins)-1);
+
     for binindex=1:length(bins)-1
-        if sum(~isnan(data(Y == binindex))) > 2
-            avg(binindex) = nanmean(data(Y == binindex));
+        databin = data(Y == binindex);
+        numvalid = sum(~isnan(databin));
+        if numvalid > 2
+            avg(binindex) = sum(databin, 'omitnan')/numvalid;
         end
     end
 end

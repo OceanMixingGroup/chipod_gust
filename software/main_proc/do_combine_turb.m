@@ -177,6 +177,7 @@ if(do_combine)
              if exist(statsname, 'file')
                  load(statsname);
                  stats = truncate_time(stats, CP.time_range);
+                 assert(isequal(stats.time, chi.time));
 
                  [chi, chi.stats.nfreq_percentage] = ...
                      ApplyMask(chi, stats.n_freq, '<', CP.min_n_freq, 'min n_freq');

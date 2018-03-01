@@ -15,6 +15,10 @@ if nargin < 4
    runname = NaN;
 end
 
+if nargin < 3
+    is_visible = 'on';
+end
+
 if nargin <2
 % PROCESSING MODES TO PLOT
 % There are up to 24 processing modes, which would you like to plot?

@@ -198,6 +198,26 @@ if(do_combine)
                  chi.wda.Kt = chi.wda.Kt + sw_tdif(interp1(chi.time, chi.S, chi.wda.time), ...
                                                    interp1(chi.time, chi.T, chi.wda.time), ...
                                                    CP.ChipodDepth);
+
+                 % determine sign of /vertical/ heat flux using mooring gradient
+                 load ../input/dTdz_m
+                 dt = round((Tz_m.time(2)-Tz_m.time(1))*86400);
+
+                 Tzi = interp1(Tz_m.time, Tz_m.Tz, chi.wda.time);
+
+                 % sign of hourly moving median
+                 sgn = sign(movmedian(Tzi, 60*60/dt, 'omitnan'));
+                 sgn2h = sign(movmedian(Tzi, 2*60*60/dt, 'omitnan'));
+
+                 % If T_z is crossing CP.min_dTdz, we shouldn't take it too seriously
+                 Tz_min_cross = generate_min_dTdz_crossing_mask(Tzi, CP.min_dTdz, 0);
+                 sgn(Tz_min_cross) = nan;
+                 sgn = fillmissing(sgn, 'nearest'); % nearest-neighbour filling only works for tiny gaps
+                 sgn(abs(Tzi) < CP.min_dTdz) = nan;
+                 sgn(isnan(sgn)) = sgn2h(isnan(sgn));
+
+                 chi.wda.sgn = sgn;
+                 chi.wda.Jq = -abs(chi.wda.Jq) .* sgn;
              end
 
              % dT/dz has to happen after I use chi to get Winters & D'Asaro

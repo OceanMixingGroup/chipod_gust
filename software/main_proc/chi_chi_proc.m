@@ -112,6 +112,7 @@ thermistor_cutoff_frequency  = 32;
    %---------------------initialize----------------------
    chi.chi     = nan(1,Ni); 
    chi.eps     = nan(1,Ni);
+   chi.spec_area = nan(1,Ni);
    stats = cell(1, Ni);
 
    nanstats.k_start = nan;
@@ -120,6 +121,9 @@ thermistor_cutoff_frequency  = 32;
    nanstats.f_stop = nan;
    nanstats.n_freq = nan;
    nanstats.ki = nan;
+
+   chi.spec_floor = Tp.spec_floor;
+   chi.nfft = nfft;
 
    %-------loop through all 1 sec seqments---------------
    for i = 1:Ni
@@ -133,6 +137,8 @@ thermistor_cutoff_frequency  = 32;
           tp_power = invert_filt( freq, ...
                                  invert_filt( freq, tp_power, thermistor_filter_order, thermistor_cutoff_frequency), ...
                                  analog_filter_order, analog_filter_freq);
+
+          chi.spec_area(i) = trapz(freq, tp_power);
 
           % compare variance against noise floor variance
           % if we are close enough, there is almost no turbulence

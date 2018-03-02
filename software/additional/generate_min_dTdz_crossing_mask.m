@@ -10,6 +10,13 @@ function [Tz_min_cross] = generate_min_dTdz_crossing_mask(dTdz, min_dTdz, debug_
 %     min_dTdz - threshold
 %   debug_plot - if 1, make debugging plot
 
+    if size(dTdz, 1) > 1
+        transpose = 1;
+        dTdz = dTdz';
+    else
+        transpose = 0;
+    end
+
     sgn = sign(abs(dTdz) - min_dTdz) .* sign(dTdz);
     sgnflip = flip(sgn, 2);
     sTz = [1 sgn(1:end-1) .* sgn(2:end)];
@@ -17,15 +24,17 @@ function [Tz_min_cross] = generate_min_dTdz_crossing_mask(dTdz, min_dTdz, debug_
 
     % debugging plots
     if debug_plot
-        Tzmcross = ((sTz == -1) | (sTz1 == -1) | (abs(Turb.(ID).dTdz) < min_dTdz));
-        Tz2 = Turb.(ID).dTdz; Tz2(Tzmcross) = nan;
+        Tzmcross = ((sTz == -1) | (sTz1 == -1) | (abs(dTdz) < min_dTdz));
+        Tz2 = dTdz; Tz2(Tzmcross) = nan;
 
         figure;
-        plot(Turb.(ID).time, Turb.(ID).dTdz);
+        plot(dTdz);
         hold on;
-        plot(Turb.(ID).time, Tz2, 'b-')
+        plot(Tz2, 'b-')
         liney([-min_dTdz, min_dTdz, 0])
     end
 
     Tz_min_cross = ((sTz == -1) | (sTz1 == -1));
+
+    if transpose, Tz_min_cross = Tz_min_cross'; end
 end

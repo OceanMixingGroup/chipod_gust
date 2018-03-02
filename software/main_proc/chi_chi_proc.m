@@ -134,6 +134,10 @@ thermistor_cutoff_frequency  = 32;
                                  invert_filt( freq, tp_power, thermistor_filter_order, thermistor_cutoff_frequency), ...
                                  analog_filter_order, analog_filter_freq);
 
+          chi.spec_area(i) = trapz(freq, tp_power);
+          chi.spec_floor = Tp.spec_floor;
+          chi.nfft = nfft;
+
           % compare variance against noise floor variance
           % if we are close enough, there is almost no turbulence
           % the spectrum (if any) is outside our resolved range and the fit would fail

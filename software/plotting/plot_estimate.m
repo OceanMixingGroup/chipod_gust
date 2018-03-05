@@ -15,8 +15,8 @@ function [ax] = plot_estimate(chi, name, window, hfig, t0, t1)
 
     if ~exist('name', 'var'), name = 'chi'; end
     if ~exist('window', 'var'), window = 0; end
-    if ~exist('t0', 'var') | isempty(t0), t0 = chi.time(1); end
-    if ~exist('t1', 'var') | isempty(t1), t1 = chi.time(end); end
+    if ~exist('t0', 'var') | isempty(t0), t0 = nanmin(chi.time); end
+    if ~exist('t1', 'var') | isempty(t1), t1 = nanmax(chi.time); end
     if ~exist('hfig', 'var') | isempty(hfig), hfig = gcf(); end
 
     i0 = find_approx(chi.time, t0, 1);

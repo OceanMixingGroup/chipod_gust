@@ -60,6 +60,9 @@ function [wda] = winters_dasaro_avg(t0, t1, data, chi, T, plotflag)
     % if no long enough profiles are found
     if isempty(Tprof), return; end
 
+    % accelerometer has crapped out and thinks we've covered >15m in a minute
+    if max(zfull) - min(zfull) > 15, return; end
+
     zthorpe = linspace(min(zfull), max(zfull), 1000);
     if optional
         Tj = linspace(min(Tfull), max(Tfull), 1000);

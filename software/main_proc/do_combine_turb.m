@@ -306,18 +306,21 @@ if(do_combine)
 
          [Turb.(ID), Turb.(ID).stats.max_Kt_percentage] = ApplyMask(Turb.(ID), Turb.(ID).Kt, '>', CP.max_Kt, 'max_Kt');
          [Turb.(ID), Turb.(ID).stats.max_Jq_percentage] = ApplyMask(Turb.(ID), abs(Turb.(ID).Jq), '>', CP.max_Jq, 'max_Jq');
+            
+         if isfield(chi, 'wda')
+            Turb.(ID).wda = chi.wda;
+         end
 
-         Turb.(ID).wda = chi.wda;
-
+         
          if do_plot
              if ~exist('hfig2', 'var')
                  hfig2 = CreateFigure(is_visible);
                  hfig2.Name = ['Histograms: all final processed estimates'];
              end
              Histograms(Turb.(ID), hfig2, 'pdf', ID, ID);
-             Histograms(Turb.(ID).wda, hfig2, 'pdf', ID, [ID 'W&DA']);
-
+      
              if isfield(Turb.(ID), 'wda')
+                 Histograms(Turb.(ID).wda, hfig2, 'pdf', ID, [ID 'W&DA']);
                  hwda = CreateFigure(is_visible);
                  hwda.Name = ['Compare Osborn-Cox vs. Winters-D''Asaro : ' ID];
                  tavg = 3600;

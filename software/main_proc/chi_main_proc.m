@@ -202,8 +202,9 @@ for i = 1:length(pflag.id)
            end
 
          %--------------------- Chi Processing----------------------
+           stats = [];
            if id([-1:0]+end) == 'ic'
-               [chi, stats] = chi_chi_proc_ic(Tp, S, Tz, T) ;
+               [chi] = chi_chi_proc_ic(Tp, S, Tz, T) ;
            else
                [chi, stats] = chi_chi_proc(Tp, S, Tz, T);
            end
@@ -231,7 +232,9 @@ for i = 1:length(pflag.id)
            end
          %---------------------save data----------------------
           save([sdir_chi filesep  'chi' savestamp], 'chi');
-          save([sdir_stats filesep  'stats' savestamp], 'stats');
+          if ~isempty(stats)
+            save([sdir_stats filesep  'stats' savestamp], 'stats');
+          end 
 
       end
 end

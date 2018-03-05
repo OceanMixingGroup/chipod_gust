@@ -59,7 +59,8 @@ end
    end
 
    %_____________________merge all days______________________
-   disp('merge all days')
+   disp('merge all days and estimates.')
+   ticmerge = tic;
       %_loop through all processing flags for chi processing
       % keep averaging window 0 here.
       % Only merge, average later in combine_turbulene.m
@@ -80,6 +81,8 @@ end
                end
             end
       end
+   disp('Finished merging all estimates.')
+   toc(ticmerge);
 
    %_____________merge eps data______________________
    if pflag.master.epsp

@@ -227,7 +227,7 @@ for i = 1:length(pflag.id)
                chi.wda.dt = pflag.master.wda_dt;
                chi.wda.nbins = chi.wda.nbins(1);
 
-               % wda = process_wda_estimate(chi, chi.wda);
+               % wda_proc = process_wda_estimate(chi, chi.wda);
                % wda_compare_plot; % script to make comparison plots
            end
          %---------------------save data----------------------

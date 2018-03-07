@@ -347,7 +347,9 @@ if(do_combine)
                  end
              end
 
-             Turb.(ID).wda.N2 = interp1(Turb.(ID).time, Turb.(ID).N2, Turb.(ID).wda.time);
+             Turb.(ID).wda.N2 = interp1(Turb.(ID).time(~isnan(Turb.(ID).time)), ...
+                                        Turb.(ID).N2(~isnan(Turb.(ID).time)), ...
+                                        Turb.(ID).wda.time);
          end
 
          if do_plot

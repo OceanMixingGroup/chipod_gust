@@ -219,7 +219,7 @@ for i = 1:length(pflag.id)
                wda = cell(Nt, 1);
                for t0=1:ndt:length(data.a_dis_z)
                    wda{idx} = winters_dasaro_avg(t0, min(t0 + ndt, length(data.a_dis_z)), ...
-                                                 data, chi, T, plotflag);
+                                                 data, chi, T, Tp, plotflag);
                    idx = idx+1;
                end
 

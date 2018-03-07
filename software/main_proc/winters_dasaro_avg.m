@@ -1,15 +1,15 @@
-% [wda] = winters_dasaro_avg(t0, t1, data, chi, T, plotflag)
+% [wda] = winters_dasaro_avg(t0, t1, data, chi, T, Tp, plotflag)
 % Treats the chipod as a profiler and applies the method of Winters & D'Asaro to estimate heat flux.
 % Inputs:
 %        t0, t1 - time indices for accelerometer data (usually 50Hz)
-%        data, chi, T - structures passed in from chi_main_driver
+%        data, chi, T, Tp - structures passed in from chi_main_driver
 %        plotflag - if 1, make informative plot showing resorted profile.
 % Outputs:
 %        wda - structure with fields
 %           tstart, tstop - start,end of time chunk
 %
 
-function [wda] = winters_dasaro_avg(t0, t1, data, chi, T, plotflag)
+function [wda] = winters_dasaro_avg(t0, t1, data, chi, T, Tp, plotflag)
 
     optional = 0;
 
@@ -72,13 +72,14 @@ function [wda] = winters_dasaro_avg(t0, t1, data, chi, T, plotflag)
 
     if plotflag
         CreateFigure;
-        htemp = subplot(2,4,[1, 5]); hold on; xlabel('Temp'); ylabel('z (accel)')
-        hsort = subplot(2,4,[4, 8]); hold on; xlabel('Temp (sorted)'); ylabel('z (interp)')
+        htemp = subplot(3,4,[1, 5, 9]); hold on; xlabel('Temp'); ylabel('z (accel)')
+        hsort = subplot(3,4,[4, 8, 12]); hold on; xlabel('Temp (sorted)'); ylabel('z (interp)')
         hsort.XGrid = 'on'; hsort.XTick = Tbins; hsort.XAxis.TickLabelRotation = 30;
-        hdisp = subplot(2,4,[2, 3]); hold on; xlabel('time'); ylabel('Displacement')
-        hchi = subplot(2,4,[6,7]); hold on; xlabel('time'); ylabel(['\chi (1 sec)'])
-        htemp2 = axes('Position', hdisp.Position, 'Color', 'none'); hold on;
+        hdisp = subplot(3,4,[2, 3]); hold on; xlabel('time'); ylabel('Displacement')
         hdisp.Color = 'none';
+        hchi = subplot(3,4,[6,7]); hold on; xlabel('time'); ylabel(['\chi (1 sec, color)'])
+        htemp2 = axes('Position', hdisp.Position, 'Color', 'none'); hold on;
+        htp = subplot(3,4,[10, 11]); hold on; xlabel('time'); ylabel(['Tp'])
     end
 
     yloc = NaN;
@@ -120,19 +121,25 @@ function [wda] = winters_dasaro_avg(t0, t1, data, chi, T, plotflag)
             hl = plot(hdisp, data.time(l0:l1), zvec, '-', 'linewidth', 2);
             plot(hsort, Tsort, zthorpe, '-', 'HandleVisibility', 'off');
             plot(htemp2, data.time(l0:l1), Tvec, '-', 'linewidth', 0.5);
-            semilogy(hchi, chi.time(ct0:ct1), chi.chi(ct0:ct1), '-');
+            semilogy(hchi, chi.time(ct0:ct1), chi.chi(ct0:ct1), '-', ...
+                     'handlevisibility', 'off');
             if isnan(yloc)
                 yloc = 0.95*min(data.a_dis_z(t0:t1));
             end
             hsc = scatter(hsort, chi.T(ct0:ct1), yloc * ones(size(chi.T(ct0:ct1))), ...
                           200, hl.Color, 'HandleVisibility', 'off');
 
+            tpt0 = find_approx(Tp.time, data.time(l0));
+            tpt1 = find_approx(Tp.time, data.time(l1));
+            semilogy(htp, Tp.time(tpt0:tpt1), Tp.tp(tpt0:tpt1), 'color', ...
+                     hl.Color);
         end
     end
 
     % reconstruct profile from binned dz/dT
     dz = nanmean(dzmat, 2)';
     numgood = sum(~isnan(dzmat), 2);
+    % make sure the isotherm is present in at least three profiles
     dz(numgood < 3) = NaN;
     dzdT = dz./dT;
 
@@ -185,7 +192,7 @@ function [wda] = winters_dasaro_avg(t0, t1, data, chi, T, plotflag)
                       -(data.a_dis_z(t0:t1) - data.a_dis_z(t0)), ...
                       'color', [1 1 1]*0.75, 'linewidth', 2);
         hcfull = plot(hchi, chi.time(chit0:chit1), ...
-                      chi.chi(chit0:chit1), ...
+                      chi.chi(chit0:chit1), 'HandleVisibility', 'off', ...
                       'color', [1 1 1]*0.75, 'linewidth', 2);
         uistack(hzfull, 'bottom')
         uistack(hcfull, 'bottom')
@@ -198,11 +205,27 @@ function [wda] = winters_dasaro_avg(t0, t1, data, chi, T, plotflag)
                       'color', [1 1 1]*0.8, 'HandleVisibility', 'off');
         uistack(hcloud, 'bottom');
 
-        legend(hsort, '-dynamiclegend', 'Location', 'NorthWest');
+        tpt0 = find_approx(Tp.time, data.time(t0));
+        tpt1 = find_approx(Tp.time, data.time(t1));
+        htpfull = semilogy(htp, Tp.time(tpt0:tpt1), Tp.tp(tpt0:tpt1), 'color', ...
+                           [1 1 1]*0.6);
+        uistack(htpfull, 'bottom')
+        axes(htp); datetick('x', 'MM:SS', 'keeplimits');
+
+        semilogy(hchi, chi.time(chit0:chit1), chi.spec_area(chit0:chit1), ...
+                     'color', 'k', 'linewidth', 2, 'displayname', 'spec\_area')
+        legend(hchi, '-dynamiclegend')
+        plot(hchi, hchi.XLim, [1, 1]*chi.spec_floor * chi.nfft, 'k-', ...
+             'displayname', 'noise floor');
+        plot(hchi, hchi.XLim, 4*[1, 1]*chi.spec_floor * chi.nfft, 'k--', ...
+             'displayname', '4x noise floor');
+
+        hleg = legend(hsort, '-dynamiclegend');
+        hleg.Position = [0.7479    0.7733    0.1650    0.0800];
         axes(hchi); datetick('x', 'MM:SS', 'keeplimits');
         axes(hdisp); datetick('x', 'MM:SS', 'keeplimits');
         uistack(htemp2, 'bottom');
-        linkaxes([hchi hdisp htemp2], 'x');
+        linkaxes([hchi hdisp htp htemp2], 'x');
         hdisp.XLim = chi.time([chit0, chit1]);
         htemp2.YAxisLocation = 'right';
         htemp2.XTickLabels = [];

@@ -331,6 +331,8 @@ if(do_combine)
                      Turb.(ID).wda.(ff{f}) = chi.wda.(ff{f});
                  end
              end
+
+             Turb.(ID).wda.N2 = interp1(Turb.(ID).time, Turb.(ID).N2, Turb.(ID).wda.time);
          end
 
          if do_plot

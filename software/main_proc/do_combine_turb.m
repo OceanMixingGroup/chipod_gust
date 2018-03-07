@@ -195,15 +195,24 @@ if(do_combine)
              % obtain Kt, Jq using Winters & D'Asaro methodology
              if isfield(chi, 'wda')
                  chi.wda = process_wda_estimate(chi, chi.wda);
+
+                 % add in molecular diffusivity
                  chi.wda.Kt = chi.wda.Kt + sw_tdif(interp1(chi.time, chi.S, chi.wda.time), ...
                                                    interp1(chi.time, chi.T, chi.wda.time), ...
                                                    CP.ChipodDepth);
 
                  % determine sign of /vertical/ heat flux using mooring gradient
-                 load ../input/dTdz_m
-                 dt = round((Tz_m.time(2)-Tz_m.time(1))*86400);
+                 if CP.wda_Tz_sign == 'm'
+                     Tz = load('../input/dTdz_m.mat');
+                     Tz = Tz.Tz_m;
+                 elseif CP.wda_Tz_sign == 'i'
+                     Tz = load('../input/dTdz_i.mat');
+                     Tz = Tz.Tz_i;
+                     Tz.Tz = Tz.(['Tz' num2str(CP.sensor)]);
+                 end
 
-                 Tzi = interp1(Tz_m.time, Tz_m.Tz, chi.wda.time);
+                 dt = round((Tz.time(2)-Tz.time(1))*86400);
+                 Tzi = interp1(Tz.time, Tz.Tz, chi.wda.time);
 
                  % sign of hourly moving median
                  sgn = sign(movmedian(Tzi, 60*60/dt, 'omitnan'));
@@ -308,10 +317,22 @@ if(do_combine)
          [Turb.(ID), Turb.(ID).stats.max_Jq_percentage] = ApplyMask(Turb.(ID), abs(Turb.(ID).Jq), '>', CP.max_Jq, 'max_Jq');
             
          if isfield(chi, 'wda')
-            Turb.(ID).wda = chi.wda;
+             % get list of all fields to average
+             ff = fields(chi.wda);
+
+             %% average data
+             disp('WDA: Running moving average')
+             wwwda = round(CP.avgwindow/(diff(chi.wda.time(1:2))*24*3600));
+             tic;
+             for f = 1:length(ff)  % run through all fields in chi
+                 if ( length(chi.wda.(ff{f})) == length(chi.wda.time) )
+                     Turb.(ID).wda.(ff{f}) = moving_average( chi.wda.(ff{f}), wwwda, wwwda , CP.avgvalid);
+                 else
+                     Turb.(ID).wda.(ff{f}) = chi.wda.(ff{f});
+                 end
+             end
          end
 
-         
          if do_plot
              if ~exist('hfig2', 'var')
                  hfig2 = CreateFigure(is_visible);

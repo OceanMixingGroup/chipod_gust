@@ -18,6 +18,7 @@ function [wda] = process_wda_estimate(chi, wda)
     wda.chi = nan(1, length(wda.tstart));
     wda.dTdz = nan(1, length(wda.tstart));
 
+    nnan = 0;
     for tt=chunk0:length(wda.tstart)
         maxt = min(chit0+2*ndt, length(chi.time));
 
@@ -37,10 +38,23 @@ function [wda] = process_wda_estimate(chi, wda)
         % make sure the time chunks are lining up
         % disp(['Compare chit0 = ' datestr(chi.time(chit0)) ' vs tstart = ' datestr(wda.tstart(tt))]);
         % disp(['Compare chit1 = ' datestr(chi.time(chit1)) ' vs tstop = ' datestr(wda.tstop(tt))]);
-        assert(abs(chi.time(chit0) - wda.tstart(tt))*86400 < 0.9)
-        assert(abs(chi.time(chit1) - wda.tstop(tt))*86400 < 0.9)
+        assert(abs(chi.time(chit0) - wda.tstart(tt)) < 0.5/86400)
+        assert(abs(chi.time(chit1) - wda.tstop(tt)) < 0.5/86400)
 
-        if all(isnan(chi.chi(chit0:chit1))), continue; end
+        chisub = chi.chi(chit0:chit1);
+
+        chi_is_nan = isnan(chisub);
+        if all(chi_is_nan), continue; end
+
+        % if we have chi estimates for less than 30% of the time interval,
+        % note that and carry along
+        if sum(~chi_is_nan)/length(chisub) < 0.3
+            % if the valid estimates are all 0, then we keep that.
+            if ~all(chisub(~chi_is_nan) == 0)
+                nnan = nnan + 1;
+                continue;
+            end
+        end
 
         Tchi = chi.T(chit0:chit1);
 
@@ -66,6 +80,7 @@ function [wda] = process_wda_estimate(chi, wda)
         end
     end
 
+    disp(['WDA: ' num2str(nnan) ' = ' num2str(nnan/length(wda.chi)*100) ' % time intervals have chi=NaN: '])
     wda.time = (wda.tstart + wda.tstop)/2;
     toc(ticwda);
 end

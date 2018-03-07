@@ -63,6 +63,7 @@ function [data] = chi_calibrate_chipod(rfid, head)
    % tempertuare
       chi.T1=calibrate_polynomial(rdat.T1,head.coef.T1);
       chi.T2=calibrate_polynomial(rdat.T2,head.coef.T2);
+
          % remove glitches
          chi.T1(chi.T1==0) = nan;
          chi.T2(chi.T2==0) = nan;
@@ -154,18 +155,18 @@ function [data] = chi_calibrate_chipod(rfid, head)
       % generate bit noise time series, and figure out variance when
       % differentiator hits noise floor
       % 4.096 V / (16 bit quantization) + A2D error of 0-6 counts peak-peak == 3 counts amplitude
-      bit_noise_volts = randi([0, 6], length(rdat.T1P), 1) * (4.096/2^16);
+      % bit_noise_volts = randi([0, 6], length(rdat.T1P), 1) * (4.096/2^16);
 
-      t1pnoise = calibrate_tp(bit_noise_volts, head.coef.T1P, ...
-                              rdat.T1, head.coef.T1, 100*ones(size(rdat.T1P)) );
-      t2pnoise = calibrate_tp(bit_noise_volts, head.coef.T2P, ...
-                              rdat.T2, head.coef.T2, 100*ones(size(rdat.T1P)) );
+      % t1pnoise = calibrate_tp(bit_noise_volts, head.coef.T1P, ...
+      %                         rdat.T1, head.coef.T1, 100*ones(size(rdat.T1P)) );
+      % t2pnoise = calibrate_tp(bit_noise_volts, head.coef.T2P, ...
+      %                         rdat.T2, head.coef.T2, 100*ones(size(rdat.T1P)) );
 
-      ndt = 100;
-      floor1 = moving_var(t1pnoise, ndt, ndt);
-      floor2 = moving_var(t2pnoise, ndt, ndt);
-      T1Pfloor = sqrt(prctile(floor1, 95));
-      T2Pfloor = sqrt(prctile(floor2, 95));
+      % ndt = 100;
+      % floor1 = moving_var(t1pnoise, ndt, ndt);
+      % floor2 = moving_var(t2pnoise, ndt, ndt);
+      % T1Pfloor = sqrt(prctile(floor1, 95));
+      % T2Pfloor = sqrt(prctile(floor2, 95));
 
       % Becherer & Moum (2017) : eqns 27-31
       % We need to scale their CTp by TP gain i.e. head.coef.T1P(2)
@@ -193,6 +194,16 @@ function [data] = chi_calibrate_chipod(rfid, head)
       % ax(3) = subplot(313); plot(chi.time_tp, chi.T2Pt); hold on; ...
       %         plot(chi.time_tp(mask), chi.T2Pt(mask), '.')
       % linkaxes(ax, 'x')
+
+      chi.T1_floor = ctp1 * 4.096/2^16 * head.coef.T1P(2); % undo TP gain in ctp
+      chi.T2_floor = ctp2 * 4.096/2^16 * head.coef.T2P(2);
+
+      chi.floor_time = chi.time(1);
+
+      % d1 =  abs(diff(chi.T1)); nanmin(d1(d1 > 0))
+      % d2 =  abs(diff(chi.T2)); nanmin(d2(d2 > 0))
+      % figure; hist(d1, 1000); linex(T1floor)
+      % figure; hist(d2, 1000); linex(T2floor)
 
       % pitot_voltage
       % find pitot data W or WP

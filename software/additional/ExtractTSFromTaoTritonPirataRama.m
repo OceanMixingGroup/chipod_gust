@@ -16,9 +16,9 @@ function [T1, T2] = ExtractTSFromTaoTritonPirataRama(ChipodLon, ChipodLat, Chipo
     ChipodDepth = abs(ChipodDepth);
 
     Tname = GetPmelFileName('t', ChipodLon, ChipodLat, datadir, ...
-                            arrayName, Tres);
+                            arrayName, Tres)
     Sname = GetPmelFileName('s', ChipodLon, ChipodLat, datadir, ...
-                            arrayName, Sres);
+                            arrayName, Sres)
 
     Tdepth = ncread(Tname, 'depth');
     Ttime = ProcessPmelTime(Tname);
@@ -98,7 +98,7 @@ end
 % missing data checked over chipod deployment time
 function [index1, index2] = ChooseDepthLevels(var, depth, ChipodDepth)
 
-    index1 = find( (abs(-depth + ChipodDepth) <= 10) ...
+    index1 = find( (abs(-depth + ChipodDepth) <= 15) ...
                     & (ChipodDepth > depth));
     index1 = ChooseLeastNans(var, index1);
 

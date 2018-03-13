@@ -77,6 +77,7 @@ if(do_combine)
 
          disp(' ');
          disp(['----------> adding ' ID ]);
+         clear chi;
          load([dirname 'chi_' ID '.mat'])
 
          CP = process_estimate_ID(CP, ID);
@@ -193,18 +194,32 @@ if(do_combine)
              end
 
              % obtain Kt, Jq using Winters & D'Asaro methodology
-             if isfield(chi, 'wda')
+             if isfield(chi, 'wda') && ~contains(ID, 'ic')
                  chi.wda = process_wda_estimate(chi, chi.wda);
                  chi.wda.Kt = chi.wda.Kt + sw_tdif(interp1(chi.time, chi.S, chi.wda.time), ...
                                                    interp1(chi.time, chi.T, chi.wda.time), ...
                                                    CP.ChipodDepth);
 
                  % determine sign of /vertical/ heat flux using mooring gradient
-                 load ../input/dTdz_m
-                 dt = round((Tz_m.time(2)-Tz_m.time(1))*86400);
+                 if CP.pflag.master.Tzm
+                    load ../input/dTdz_m
+                     dt = round((Tz_m.time(2)-Tz_m.time(1))*86400);
+                     Tzi = interp1(Tz_m.time, Tz_m.Tz, chi.wda.time);
+                 elseif CP.pflag.master.Tzi
+                     load ../input/dTdz_i
+                     dt = round((Tz_i.time(2)-Tz_i.time(1))*86400);
+                     if contains(ID, '1')
+                         Tzi = interp1(Tz_i.time, Tz_i.Tz1, chi.wda.time);
+                     elseif contains(ID, '2')
+                         Tzi = interp1(Tz_i.time, Tz_i.Tz2, chi.wda.time);
+                     else % for gust
+                         Tzi = interp1(Tz_i.time, Tz_i.Tz, chi.wda.time);
+                     end
+                 else
+                     error('there is no external Tz estimate available to determin the sign of WDA Tz')
+                 end
 
-                 Tzi = interp1(Tz_m.time, Tz_m.Tz, chi.wda.time);
-
+                 
                  % sign of hourly moving median
                  sgn = sign(movmedian(Tzi, 60*60/dt, 'omitnan'));
                  sgn2h = sign(movmedian(Tzi, 2*60*60/dt, 'omitnan'));
@@ -307,7 +322,7 @@ if(do_combine)
          [Turb.(ID), Turb.(ID).stats.max_Kt_percentage] = ApplyMask(Turb.(ID), Turb.(ID).Kt, '>', CP.max_Kt, 'max_Kt');
          [Turb.(ID), Turb.(ID).stats.max_Jq_percentage] = ApplyMask(Turb.(ID), abs(Turb.(ID).Jq), '>', CP.max_Jq, 'max_Jq');
             
-         if isfield(chi, 'wda')
+         if isfield(chi, 'wda') && ~contains(ID, 'ic')
             Turb.(ID).wda = chi.wda;
          end
 
@@ -319,7 +334,7 @@ if(do_combine)
              end
              Histograms(Turb.(ID), hfig2, 'pdf', ID, ID);
       
-             if isfield(Turb.(ID), 'wda')
+             if isfield(Turb.(ID), 'wda') && ~contains(ID, 'ic')
                  Histograms(Turb.(ID).wda, hfig2, 'pdf', ID, [ID 'W&DA']);
                  hwda = CreateFigure(is_visible);
                  hwda.Name = ['Compare Osborn-Cox vs. Winters-D''Asaro : ' ID];

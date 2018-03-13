@@ -13,7 +13,9 @@ end
 N = length(v);
 
 if(N < ww)
-    error('window width is larger than vector length')
+    warning('window width is larger than vector length')
+    A = nanmean(v);
+    return;
 end
 
 A = nan(1,round((N)/ws));

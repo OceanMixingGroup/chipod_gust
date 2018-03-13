@@ -77,6 +77,7 @@ if(do_combine)
 
          disp(' ');
          disp(['----------> adding ' ID ]);
+         clear chi;
          load([dirname 'chi_' ID '.mat'])
 
          CP = process_estimate_ID(CP, ID);
@@ -193,7 +194,7 @@ if(do_combine)
              end
 
              % obtain Kt, Jq using Winters & D'Asaro methodology
-             if isfield(chi, 'wda')
+             if isfield(chi, 'wda') && ~contains(ID, 'ic')
                  chi.wda = process_wda_estimate(chi, chi.wda);
 
                  % add in molecular diffusivity
@@ -203,17 +204,29 @@ if(do_combine)
 
                  % determine sign of /vertical/ heat flux using mooring gradient
                  if CP.wda_Tz_sign == 'm'
-                     Tz = load('../input/dTdz_m.mat');
-                     Tz = Tz.Tz_m;
+                     fname = [basedir 'input' filesep 'dTdz_m.mat'];
+                     if exist(fname, 'file')
+                         Tz = load(fname);
+                         Tz = Tz.Tz_m;
+                     else
+                         error([fname 'does not exist. Specify CP.wda_Tz_sign ' ...
+                                'properly.'])
+                     end
                  elseif CP.wda_Tz_sign == 'i'
-                     Tz = load('../input/dTdz_i.mat');
-                     Tz = Tz.Tz_i;
-                     Tz.Tz = Tz.(['Tz' num2str(CP.sensor)]);
+                     fname = [basedir 'input' filesep 'dTdz_i.mat'];
+                     if exist(fname, 'file')
+                         Tz = load(fname);
+                         Tz = Tz.Tz_i;
+                         Tz.Tz = Tz.(['Tz' num2str(CP.sensor)]);
+                     else
+                         error([fname 'does not exist. Specify CP.wda_Tz_sign ' ...
+                                'properly.'])
+                     end
                  end
 
                  dt = round((Tz.time(2)-Tz.time(1))*86400);
                  Tzi = interp1(Tz.time, Tz.Tz, chi.wda.time);
-
+                 
                  % sign of hourly moving median
                  sgn = sign(movmedian(Tzi, 60*60/dt, 'omitnan'));
                  sgn2h = sign(movmedian(Tzi, 2*60*60/dt, 'omitnan'));
@@ -316,7 +329,7 @@ if(do_combine)
          [Turb.(ID), Turb.(ID).stats.max_Kt_percentage] = ApplyMask(Turb.(ID), Turb.(ID).Kt, '>', CP.max_Kt, 'max_Kt');
          [Turb.(ID), Turb.(ID).stats.max_Jq_percentage] = ApplyMask(Turb.(ID), abs(Turb.(ID).Jq), '>', CP.max_Jq, 'max_Jq');
             
-         if isfield(chi, 'wda')
+         if isfield(chi, 'wda') && ~contains(ID, 'ic')
              % get list of all fields to average
              ff = fields(chi.wda);
 
@@ -342,7 +355,7 @@ if(do_combine)
              end
              Histograms(Turb.(ID), hfig2, 'pdf', ID, ID);
       
-             if isfield(Turb.(ID), 'wda')
+             if isfield(Turb.(ID), 'wda') && ~contains(ID, 'ic')
                  Histograms(Turb.(ID).wda, hfig2, 'pdf', ID, [ID 'W&DA']);
                  hwda = CreateFigure(is_visible);
                  hwda.Name = ['Compare Osborn-Cox vs. Winters-D''Asaro : ' ID];

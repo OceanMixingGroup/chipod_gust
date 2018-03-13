@@ -52,6 +52,9 @@ function [ax] = plot_estimate(chi, name, window, hfig, t0, t1)
     Tzavg = moving_average(chi.dTdz(tind), ww, ww);
     plot(time, Tzavg, 'displayname', name)
     new_ylim = [0.98*min(Tzavg), 1.05*max(Tzavg)];
+    if diff(new_ylim) < 0  % for negative limits
+        new_ylim = fliplr(new_ylim);
+    end
     if isequal(old_ylim, [0, 1])
         ylim(new_ylim);
     else
@@ -102,7 +105,9 @@ function [ax] = plot_estimate(chi, name, window, hfig, t0, t1)
     legend('-DynamicLegend');
 
     linkaxes(ax, 'x')
-    xlim([t0, t1])
+    if t0 < t1
+        xlim([t0, t1])
+    end
     datetick('x', 'mmm-dd HH:MM', 'keeplimits')
 
     for aa=1:length(ax)-1

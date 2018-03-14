@@ -95,7 +95,7 @@ function [CP] = default_parameters_combine_turbulence( basedir)
        %CP.pflag = CP.pflag.c_T1(0);       % switch off T1 if bad
        %CP.pflag = CP.pflag.c_T2(0);       % switch off T2 if bad
 
-       %CP.pflag = CP.pflag.c_ic(1);       % switch on ic processing (default off)
+      CP.pflag = CP.pflag.c_ic(1);       % switch on ic processing (default off)
        %CP.pflag = CP.pflag.c_vc(0);       % switch off viscous convective processing (default on)
        %CP.pflag.master.epsp = 1;       % switch on eps calculation from pitot (default on)
      

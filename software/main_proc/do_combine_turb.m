@@ -202,8 +202,8 @@ if(do_combine)
                                                    interp1(chi.time, chi.T, chi.wda.time), ...
                                                    CP.ChipodDepth);
 
-                 % determine sign of /vertical/ heat flux using mooring gradient
                  if CP.wda_Tz_sign == 'm'
+                     % determine sign of /vertical/ heat flux using mooring gradient
                      fname = [basedir 'input' filesep 'dTdz_m.mat'];
                      if exist(fname, 'file')
                          Tz = load(fname);
@@ -224,22 +224,8 @@ if(do_combine)
                      end
                  end
 
-                 dt = round((Tz.time(2)-Tz.time(1))*86400);
-                 Tzi = interp1(Tz.time, Tz.Tz, chi.wda.time);
-                 
-                 % sign of hourly moving median
-                 sgn = sign(movmedian(Tzi, 60*60/dt, 'omitnan'));
-                 sgn2h = sign(movmedian(Tzi, 2*60*60/dt, 'omitnan'));
-
-                 % If T_z is crossing CP.min_dTdz, we shouldn't take it too seriously
-                 Tz_min_cross = generate_min_dTdz_crossing_mask(Tzi, CP.min_dTdz, 0);
-                 sgn(Tz_min_cross) = nan;
-                 sgn = fillmissing(sgn, 'nearest'); % nearest-neighbour filling only works for tiny gaps
-                 sgn(abs(Tzi) < CP.min_dTdz) = nan;
-                 sgn(isnan(sgn)) = sgn2h(isnan(sgn));
-
-                 chi.wda.sgn = sgn;
-                 chi.wda.Jq = -abs(chi.wda.Jq) .* sgn;
+                 chi.wda.sgn = get_wda_sign(chi, Tz, CP);
+                 chi.wda.Jq = -abs(chi.wda.Jq) .* chi.wda.sgn;
              end
 
              % dT/dz has to happen after I use chi to get Winters & D'Asaro
@@ -631,6 +617,23 @@ function [out] = truncate_time(in, time_range)
         end
     end
 
+end
+
+function [sgn] = get_wda_sign(chi, Tz, CP)
+
+    dt = round((Tz.time(2)-Tz.time(1))*86400);
+    Tzi = interp1(Tz.time, Tz.Tz, chi.wda.time);
+
+    % sign of hourly moving median
+    sgn = sign(movmedian(Tzi, 60*60/dt, 'omitnan'));
+    sgn2h = sign(movmedian(Tzi, 2*60*60/dt, 'omitnan'));
+
+    % If T_z is crossing CP.min_dTdz, we shouldn't take it too seriously
+    Tz_min_cross = generate_min_dTdz_crossing_mask(Tzi, CP.min_dTdz, 0);
+    sgn(Tz_min_cross) = nan;
+    sgn = fillmissing(sgn, 'nearest'); % nearest-neighbour filling only works for tiny gaps
+    sgn(abs(Tzi) < CP.min_dTdz) = nan;
+    sgn(isnan(sgn)) = sgn2h(isnan(sgn));
 end
 
 % Examples of using TestMask and plot_estimate to check masking

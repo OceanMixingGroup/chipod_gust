@@ -80,7 +80,7 @@ function [wda] = process_wda_estimate(chi, wda)
         end
     end
 
-    disp(['WDA: ' num2str(nnan) ' = ' num2str(nnan/length(wda.chi)*100) ' % time intervals have chi=NaN: '])
+    disp(['WDA: ' num2str(nnan) ' = ' num2str(nnan/length(wda.chi)*100) '% time intervals have chi=NaN: '])
     wda.time = (wda.tstart + wda.tstop)/2;
     toc(ticwda);
 end

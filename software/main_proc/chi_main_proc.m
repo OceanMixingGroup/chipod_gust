@@ -205,37 +205,36 @@ for i = 1:length(pflag.id)
            stats = [];
            if id([-1:0]+end) == 'ic'
                [chi] = chi_chi_proc_ic(Tp, S, Tz, T) ;
+
+               if pflag.master.winters_dasaro
+                   ndt = pflag.master.wda_dt * round(1/diff(data.time(1:2)*86400));
+                   idx = 1;
+                   plotflag = 0;
+                   Nt = length(1:ndt:length(data.a_dis_z));
+                   wda = cell(Nt, 1);
+                   for t0=1:ndt:length(data.a_dis_z)
+                       wda{idx} = winters_dasaro_avg(t0, min(t0 + ndt, length(data.a_dis_z)), ...
+                                                     data, chi, T, Tp, plotflag);
+                       idx = idx+1;
+                   end
+
+                   chi.wda = merge_cell_structs(wda);
+                   chi.wda.dt = pflag.master.wda_dt;
+                   chi.wda.nbins = chi.wda.nbins(1);
+
+                   % wda_proc = process_wda_estimate(chi, chi.wda);
+                   % wda_compare_plot; % script to make comparison plots
+               end
+
            else
                [chi, stats] = chi_chi_proc(Tp, S, Tz, T);
            end
 
-           %%
-
-           if pflag.master.winters_dasaro
-               ndt = pflag.master.wda_dt * round(1/diff(data.time(1:2)*86400));
-               idx = 1;
-               plotflag = 0;
-               Nt = length(1:ndt:length(data.a_dis_z));
-               wda = cell(Nt, 1);
-               for t0=1:ndt:length(data.a_dis_z)
-                   wda{idx} = winters_dasaro_avg(t0, min(t0 + ndt, length(data.a_dis_z)), ...
-                                                 data, chi, T, Tp, plotflag);
-                   idx = idx+1;
-               end
-
-               chi.wda = merge_cell_structs(wda);
-               chi.wda.dt = pflag.master.wda_dt;
-               chi.wda.nbins = chi.wda.nbins(1);
-
-               % wda_proc = process_wda_estimate(chi, chi.wda);
-               % wda_compare_plot; % script to make comparison plots
+           %---------------------save data----------------------
+           save([sdir_chi filesep  'chi' savestamp], 'chi');
+           if ~isempty(stats)
+               save([sdir_stats filesep  'stats' savestamp], 'stats');
            end
-         %---------------------save data----------------------
-          save([sdir_chi filesep  'chi' savestamp], 'chi');
-          if ~isempty(stats)
-            save([sdir_stats filesep  'stats' savestamp], 'stats');
-          end 
-
       end
 end
 

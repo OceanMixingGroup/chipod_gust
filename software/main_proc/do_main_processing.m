@@ -70,14 +70,16 @@ end
                ddir = ['chi' filesep 'chi_' id];
                chi_merge_and_avg(basedir, ddir, 0, time_lim );
 
-               try
-                   ddir = ['chi' filesep 'chi_' id filesep 'stats'];
-                   mkdir([basedir filesep 'proc' filesep 'chi' filesep 'stats' filesep]);
-                   statsname = ['chi' filesep 'stats/chi_' id '_stats'];
-                   chi_merge_and_avg(basedir, ddir, 0, [], statsname);
-               catch ME
-                   disp(ME)
-                   disp('Error! have the fitting stats been saved? Skipping...')
+               if ~contains(id, '_ic')
+                   try
+                       ddir = ['chi' filesep 'chi_' id filesep 'stats'];
+                       mkdir([basedir filesep 'proc' filesep 'chi' filesep 'stats' filesep]);
+                       statsname = ['chi' filesep 'stats/chi_' id '_stats'];
+                       chi_merge_and_avg(basedir, ddir, 0, [], statsname);
+                   catch ME
+                       disp(ME)
+                       disp('Error! have the fitting stats been saved? Skipping...')
+                   end
                end
             end
       end

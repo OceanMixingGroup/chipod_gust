@@ -175,7 +175,7 @@ if(do_combine)
              % filter out bad fits using fitting statistics
              statsname = [basedir filesep 'proc' filesep 'chi' filesep 'stats' ...
                          filesep 'chi_' ID '_stats.mat'];
-             if exist(statsname, 'file')
+             if exist(statsname, 'file') && ~contains(ID, 'ic')
                  load(statsname);
                  stats = truncate_time(stats, CP.time_range);
                  assert(isequal(stats.time, chi.time));

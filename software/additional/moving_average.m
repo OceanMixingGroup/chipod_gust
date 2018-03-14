@@ -18,7 +18,7 @@ if(N < ww)
     return;
 end
 
-A = nan(1,round((N)/ws));
+A = nan(1,round((N)/ws)-1);
 
 if ~exist('min_valid', 'var'), min_valid = 0; end
 if min_valid > 1, min_valid = min_valid/100; end

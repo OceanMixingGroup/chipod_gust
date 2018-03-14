@@ -187,24 +187,25 @@ if(do_combine)
              % filter out bad fits using fitting statistics
              statsname = [basedir filesep 'proc' filesep 'chi' filesep 'stats' ...
                          filesep 'chi_' ID '_stats.mat'];
-             if exist(statsname, 'file') && ~contains(ID, 'ic')
-                 load(statsname);
-                 stats = truncate_time(stats, CP.time_range);
-                 assert(isequal(stats.time, chi.time));
+             if ~contains(ID, '_ic')
+                 if exist(statsname, 'file')
+                     load(statsname);
+                     stats = truncate_time(stats, CP.time_range);
+                     assert(isequal(stats.time, chi.time));
 
-                 [chi, chi.stats.nfreq_percentage] = ...
-                     ApplyMask(chi, stats.n_freq, '<', CP.min_n_freq, 'min n_freq');
+                     [chi, chi.stats.nfreq_percentage] = ...
+                         ApplyMask(chi, stats.n_freq, '<', CP.min_n_freq, 'min n_freq');
 
-                 if CP.mask_ic_fits
-                     [chi, chi.stats.ic_fit_percentage] = ...
-                         ApplyMask(chi, stats.k_stop < stats.ki, '=', 1, 'fully IC fit');
+                     if CP.mask_ic_fits
+                         [chi, chi.stats.ic_fit_percentage] = ...
+                             ApplyMask(chi, stats.k_stop < stats.ki, '=', 1, 'fully IC fit');
+                     end
+                     perlabel = [' -' num2str(chi.stats.nfreq_percentage + chi.stats.ic_fit_percentage, '%.1f') '%'];
+                     if do_plot, Histograms(chi, hfig, CP.normstr, (ID), ['bad fits' perlabel]); end
+                 else
+                     disp(['Combined stats file does not exist. Cannot filter out bad fits.'])
                  end
-                 perlabel = [' -' num2str(chi.stats.nfreq_percentage + chi.stats.ic_fit_percentage, '%.1f') '%'];
-                 if do_plot, Histograms(chi, hfig, CP.normstr, (ID), ['bad fits' perlabel]); end
-             else
-                 disp(['Combined stats file does not exist. Cannot filter out bad fits.'])
              end
-
              % obtain Kt, Jq using Winters & D'Asaro methodology
              if isfield(chi, 'wda') && ~contains(ID, 'ic')
                  chi.wda = process_wda_estimate(chi, chi.wda);

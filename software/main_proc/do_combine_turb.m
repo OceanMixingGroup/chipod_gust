@@ -172,6 +172,18 @@ if(do_combine)
              [chi, chi.stats.max_chi_percentage] = ApplyMask(chi, chi.chi, '>', CP.max_chi, 'max_chi');
              [chi, chi.stats.max_eps_percentage] = ApplyMask(chi, chi.eps, '>', CP.max_eps, 'max_eps');
 
+             if isfield(chi, 'spec_area')
+                 if ~isfield(chi, 'time_floor')
+                     spec_floor = nanmedian(chi.spec_floor);
+                 else
+                     spec_floor = interp1(chi.time_floor, chi.spec_floor, chi.time);
+                 end
+
+                 [chi, chi.stats.spec_floor_percentage] = ApplyMask(chi, chi.spec_area, '<', ...
+                                                                   CP.factor_spec_floor * spec_floor * nanmean(chi.nfft), ...
+                                                                   'spec_floor', [], 0);
+             end
+
              % filter out bad fits using fitting statistics
              statsname = [basedir filesep 'proc' filesep 'chi' filesep 'stats' ...
                          filesep 'chi_' ID '_stats.mat'];
@@ -236,7 +248,7 @@ if(do_combine)
              if do_plot, Histograms(chi, hfig, CP.normstr, (ID), ['|Tz| > ' num2str(CP.min_dTdz, '%.1e') perlabel]); end
 
              % additional Tz masking?
-             if ~isempty(Tz)
+             if CP.additional_mask_dTdz ~= ''
                  if CP.additional_mask_dTdz == 'i'
                      % choose appropriate internal stratification for sensor
                      Tz.Tz = Tz.(['Tz' ID(3)']);

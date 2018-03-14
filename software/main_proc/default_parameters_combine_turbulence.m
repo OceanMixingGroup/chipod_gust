@@ -53,6 +53,10 @@ function [CP] = default_parameters_combine_turbulence( basedir)
    CP.mask_flushing = 0; % mask so that chipod is always sensing fresh fluid
                       % beta version! turned off by default
 
+   % Tolerance factor for near noise-floor Tp observations
+   % 4 is a good number based on EBOB observations
+   CP.factor_spec_floor = 4;
+
    CP.ChipodDepth = 0;
 
    % normalization for *masking* histograms

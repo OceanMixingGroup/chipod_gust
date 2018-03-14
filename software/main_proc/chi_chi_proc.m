@@ -123,6 +123,7 @@ thermistor_cutoff_frequency  = 32;
    nanstats.ki = nan;
 
    chi.spec_floor = Tp.spec_floor;
+   chi.time_floor = chi.time(1);
    chi.nfft = nfft;
 
    %-------loop through all 1 sec seqments---------------

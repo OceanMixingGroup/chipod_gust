@@ -141,18 +141,6 @@ thermistor_cutoff_frequency  = 32;
 
           chi.spec_area(i) = trapz(freq, tp_power);
 
-          % compare variance against noise floor variance
-          % if we are close enough, there is almost no turbulence
-          % the spectrum (if any) is outside our resolved range and the fit would fail
-          % Instead of obtaining nan from the fitting routine, we floor to 0 here
-          % Factor of 4 is empirical, seems to catch most instances
-          if trapz(freq, tp_power) < 4*Tp.spec_floor*nfft
-              chi.chi(i) = 0;
-              chi.eps(i) = 0;
-              stats{i} = nanstats;
-              continue;
-          end
-
           % fit spectrum
           [chi_tmp, eps_tmp , k,spec, k_kraich, spec_kraich, stats{i}] =...
                   get_chipod_chi_new( freq, tp_power, chi.spd(i), nu(i), tdif(i), chi.dTdz(i), chi.N2(i)); 

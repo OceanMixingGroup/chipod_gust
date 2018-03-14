@@ -205,6 +205,8 @@ for i = 1:length(pflag.id)
            stats = [];
            if id([-1:0]+end) == 'ic'
                [chi] = chi_chi_proc_ic(Tp, S, Tz, T) ;
+           else
+               [chi, stats] = chi_chi_proc(Tp, S, Tz, T);
 
                if pflag.master.winters_dasaro
                    ndt = pflag.master.wda_dt * round(1/diff(data.time(1:2)*86400));
@@ -226,8 +228,6 @@ for i = 1:length(pflag.id)
                    % wda_compare_plot; % script to make comparison plots
                end
 
-           else
-               [chi, stats] = chi_chi_proc(Tp, S, Tz, T);
            end
 
            %---------------------save data----------------------

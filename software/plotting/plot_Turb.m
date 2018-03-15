@@ -111,6 +111,10 @@ for a = 1:5
     for f = 1:length(ff)
         if ~isstruct(Turb.(ff{f})) | strcmp( ff{f}, 'parameters' ) , continue; end
           if pflag.proc.(ff{f}) == 1
+              if strcmpi(var, 'chi') | strcmpi(var, 'eps')
+                  values = Turb.(ff{f}).(var);
+                  Turb.(ff{f}).(var)(values == 0) = nan;
+              end
             pj = f; p(pj) = plot(ax(a), Turb.(ff{f}).time, Turb.(ff{f}).(var),...
                 'color', choose_color(ff{f},'color'), ...
                 'LineWidth', choose_color(ff{f},'width'), ...

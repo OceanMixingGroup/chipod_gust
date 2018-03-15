@@ -159,9 +159,11 @@ for i = 1:length(pflag.id)
             case 'T' % for gusT only
                Tp.tp   = data.TPt;
                Tp.time = data.time_tp;
+               Tp.spec_floor = data.TP_spec_floor;
                T.time  = data.time;
                T.T     = data.T;
                T.depth = data.depth;
+               T.floor = data.T_floor;
             case 'T1'
                Tp.tp   = data.T1Pt;
                Tp.time = data.time_tp;
@@ -169,6 +171,7 @@ for i = 1:length(pflag.id)
                T.time  = data.time;
                T.T     = data.T1;
                T.depth = data.depth;
+               T.floor = data.T1_floor;
            case 'T2'
                Tp.tp   = data.T2Pt;
                Tp.time = data.time_tp;
@@ -176,6 +179,7 @@ for i = 1:length(pflag.id)
                T.time  = data.time;
                T.T     = data.T2;
                T.depth = data.depth;
+               T.floor = data.T2_floor;
            end
 
            switch Tz_f

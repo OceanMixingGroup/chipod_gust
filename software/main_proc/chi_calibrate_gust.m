@@ -79,6 +79,12 @@ function [data] = chi_calibrate_gust(rfid, head)
       rdat.TP = rdat.TP - nanmean(rdat.TP);
       chi.TPt = calibrate_tp( rdat.TP, head.coef.TP, rdat.T, head.coef.T, 100*ones(size(rdat.T)) );
 
+      sampfreq = round(1/(diff(chi.time_tp(1:2))*86400));
+      [chi.TP_spec_floor, chi.T_floor] = ...
+          get_noise_floors(rdat.T, head.coef.T, head.coef.TP, sampfreq, ...
+                                   chi.T, chi.TPt);
+
+
    % find pitot data W or WP
          dV1 = abs(nanmean(rdat.W)-2.02);
          dV2 = abs(nanmean(rdat.WP)-2.02);

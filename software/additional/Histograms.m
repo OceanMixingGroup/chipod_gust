@@ -84,16 +84,23 @@ function myhist(var, bins, normstr, ID, legendtext)
         lw = choose_color(ID,'width');
     end
 
+    if ~isempty(strfind(legendtext, 'W&DA'))
+        lw = 2;
+        ls = '--';
+    else
+        ls = '-';
+    end
+
     if strcmpi(normstr, 'count')
         hh = histogram(log10(var), 'BinEdges', bins, 'normalization', normstr, ...
                        'displayname', str, 'displaystyle', 'stairs', ...
-                       'LineWidth', lw, 'EdgeColor', color);
+                       'LineWidth', lw, 'linestyle', ls, 'EdgeColor', color);
     end
 
     if strcmpi(normstr, 'pdf')
         hh = histogram(log10(var), 'normalization', normstr, ...
                        'displayname', str, 'displaystyle', 'stairs', ...
-                       'LineWidth', lw, 'EdgeColor', color);
+                       'LineWidth', lw, 'linestyle', ls, 'EdgeColor', color);
         ylim([0 max([0.5, ylim])])
     end
     hold on;

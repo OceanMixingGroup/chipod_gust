@@ -24,6 +24,10 @@ function [CP] = default_parameters_combine_turbulence( basedir)
    CP.wda_Tz_sign = 'm'; % which dTdz estimate do I use to put a sign on the
                          % Winters & D'Asaro estimate? 'm' for mooring; 'i'
                          % for internal
+   if CP.wda_Tz_sign == 'm' ...
+           & ~exist([basedir filesep 'input' filesep 'dTdz_m.mat'], 'file')
+       CP.wda_Tz_sign = 'i';
+   end
 
    % maximum values; anything greater is NaNed out
    CP.max_chi     = 1e-3;

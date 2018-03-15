@@ -37,7 +37,6 @@ end
 
    [fids, fdate] = chi_find_rawfiles(basedir);
 
-
    if(pflag.master.parallel)
       parpool;
       % parallel for-loop

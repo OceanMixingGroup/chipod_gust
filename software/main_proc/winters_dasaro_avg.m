@@ -1,46 +1,58 @@
-% [wda] = winters_dasaro_avg(t0, t1, data, chi, T, Tp, plotflag)
+% [wda] = winters_dasaro_avg(t0, t1, vdisp, chi, T, Tp, plotflag)
 % Treats the chipod as a profiler and applies the method of Winters & D'Asaro to estimate heat flux.
 % Inputs:
 %        t0, t1 - time indices for accelerometer data (usually 50Hz)
-%        data, chi, T, Tp - structures passed in from chi_main_driver
+%        vdisp, chi, T, Tp - structures passed in from do_wda_estimate
 %        plotflag - if 1, make informative plot showing resorted profile.
 % Outputs:
 %        wda - structure with fields
 %           tstart, tstop - start,end of time chunk
 %
 
-function [wda] = winters_dasaro_avg(t0, t1, data, chi, T, Tp, plotflag)
+function [wda] = winters_dasaro_avg(t0, t1, vdisp, chi, T, Tp, plotflag)
 
     optional = 0;
 
-    zfull = -(data.a_dis_z(t0:t1)-data.a_dis_z(t0));
-    Tfull = T.T(t0:t1);
+    MIN_DIS_Z = 0.1; % minimum length (in metres) of a single up- or down-cast
 
     % determine "profile" boundaries
-    [~, locs1] = findpeaks(data.a_dis_z(t0:t1));
-    [~, locs2] = findpeaks(-data.a_dis_z(t0:t1));
+    [~, locs1] = findpeaks(vdisp.dis_z(t0:t1));
+    [~, locs2] = findpeaks(-vdisp.dis_z(t0:t1));
     locs = sort([t0; locs1+t0-1; locs2+t0-1; t1]);
 
-    chit0 = find_approx(chi.time, data.time(t0));
-    chit1 = find_approx(chi.time, data.time(t1));
+    chit0 = find_approx(chi.time, vdisp.time(t0));
+    chit1 = find_approx(chi.time, vdisp.time(t1));
+
+    zfull = -(vdisp.dis_z(t0:t1)-vdisp.dis_z(t0));
+    Tfull = T.Tenh(t0:t1);
     Tchi = chi.T(chit0:chit1);
 
     tstart = chi.time(chit0);
     tstop = chi.time(chit1);
 
+    % loop over valid profiles and save 1 Hz temp observations in those profiles.
+    % these 1Hz observations are used to identify isothermal surfaces Tbins.
     il = 1; Tprof = [];
     for ll=1:length(locs)-1
         l0 = locs(ll); l1 = locs(ll+1);
-        if abs(data.a_dis_z(l0) - data.a_dis_z(l1)) > 0.1
+        if abs(vdisp.dis_z(l0) - vdisp.dis_z(l1)) > MIN_DIS_Z
             lstart(il) = locs(ll);
             lstop(il) = locs(ll+1);
             il = il+1;
 
-            ct0 = find_approx(chi.time(chit0:chit1), data.time(l0)) + chit0-1;
-            ct1 = find_approx(chi.time(chit0:chit1), data.time(l1)) + chit0-1;
+            ct0 = find_approx(chi.time(chit0:chit1), vdisp.time(l0)) + chit0-1;
+            ct1 = find_approx(chi.time(chit0:chit1), vdisp.time(l1)) + chit0-1;
 
-            % save 1sec avg temp in valid profiles. This is used to make bins
-            Tprof = [Tprof chi.T(ct0:ct1)];
+            Tsubset = chi.T(ct0:ct1);
+
+            % only look at those temperature measurements with valid chi estimates
+            % chisubset = chi.chi(ct0:ct1);
+            % chisubset(chi.spec_area(ct0:ct1) < 2 * chi.spec_floor * chi.nfft) = 0;
+            % Tsubset = Tsubset(~isnan(chisubset));
+
+            % save 1sec avg temp in valid profiles.
+            % This is *only* used to make bins
+            Tprof = [Tprof Tsubset];
         end
     end
 
@@ -60,8 +72,8 @@ function [wda] = winters_dasaro_avg(t0, t1, data, chi, T, Tp, plotflag)
     % if no long enough profiles are found
     if isempty(Tprof), return; end
 
-    % accelerometer has crapped out and thinks we've covered >15m in a minute
-    if max(zfull) - min(zfull) > 15, return; end
+    % accelerometer has crapped out and thinks we've covered >10m in a minute
+    if max(zfull) - min(zfull) > 10, return; end
 
     zthorpe = linspace(min(zfull), max(zfull), 1000);
     if optional
@@ -74,39 +86,47 @@ function [wda] = winters_dasaro_avg(t0, t1, data, chi, T, Tp, plotflag)
         CreateFigure;
         htemp = subplot(3,4,[1, 5, 9]); hold on; xlabel('Temp'); ylabel('z (accel)')
         hsort = subplot(3,4,[4, 8, 12]); hold on; xlabel('Temp (sorted)'); ylabel('z (interp)')
-        hsort.XGrid = 'on'; hsort.XTick = Tbins; hsort.XAxis.TickLabelRotation = 30;
+        hsort.XGrid = 'on'; hsort.XTick = Tbins;
+        hsort.XAxis.TickLabelRotation = 30; hsort.GridAlpha = 1;
         hdisp = subplot(3,4,[2, 3]); hold on; xlabel('time'); ylabel('Displacement')
         hdisp.Color = 'none';
         hchi = subplot(3,4,[6,7]); hold on; xlabel('time'); ylabel(['\chi (1 sec, color)'])
         htemp2 = axes('Position', hdisp.Position, 'Color', 'none'); hold on;
         htp = subplot(3,4,[10, 11]); hold on; xlabel('time'); ylabel(['Tp'])
+
+        yloc = NaN;
     end
 
-    yloc = NaN;
     for ll=1:length(lstart) % loop over "profiles"
         l0 = lstart(ll); l1 = lstop(ll);
 
-        zvec = -(data.a_dis_z(l0:l1) - data.a_dis_z(locs(1)));
-        Tvec = T.T(l0:l1);
+        if abs(vdisp.dis_z(l0) - vdisp.dis_z(l1)) < MIN_DIS_Z, continue; end
+
+        zvec = -(vdisp.dis_z(l0:l1) - vdisp.dis_z(locs(1)));
+        Tvec = T.Tenh(l0:l1); %T.T(l0:l1);
+
+        if all(isnan(Tvec)), continue; end
 
         % interpolate to uniform depths before sorting
-        % Tsort is on depth grid zthorpe
         Tinterp = interp1(zvec, Tvec, zthorpe);
-        [Tsort, inds] = thorpeSort(Tinterp);
+        if sum((~isnan(Tinterp))) < 5, continue; end
 
-        mask = ~isnan(inds);
-        % add some jitter so the interpolation works when gradients are low
-        % save these for averaging over profiles later
+        % Tsort is on depth grid zthorpe
+        Tsort = thorpeSort(Tinterp);
+
+        mask = ~isnan(Tsort);
+        Tmasked = Tsort(mask);
+        zmasked = zthorpe(mask);
+        [~,uinds] = unique(Tmasked);
+        if length(uinds) == 1, continue; end
+
+        % find location of chosen isotherms (Tbins) in sorted profiles
+        zbins = interp1(Tmasked(uinds), zthorpe(uinds), Tbins);
+
         if optional
-            zTj(:, ll) = interp1(jitter(Tsort(mask), 1e-5), zthorpe(mask), Tj);
+            zTj(:, ll) = interp1(Tmasked, zmasked, Tj);
         end
 
-        try
-            zbins = interp1(jitter(Tsort(mask), 1e-5), zthorpe(mask), Tbins);
-        catch ME
-            % if jitter didn't work by chance try again
-            zbins = interp1(jitter(Tsort(mask), 1e-5), zthorpe(mask), Tbins);
-        end
         % NaNs in zbins should only occur at the ends. If the profile didn't
         % contain some isotherms in Tbins then corresponding zbin is NaN...
         % We cannot use this profile to figure out distance between the
@@ -114,25 +134,26 @@ function [wda] = winters_dasaro_avg(t0, t1, data, chi, T, Tp, plotflag)
         dzmat(:, ll) = diff(zbins);
 
         if plotflag
-            ct0 = find_approx(chi.time(chit0:chit1), data.time(l0)) + chit0-1;
-            ct1 = find_approx(chi.time(chit0:chit1), data.time(l1)) + chit0-1;
+            ct0 = find_approx(chi.time(chit0:chit1), vdisp.time(l0)) + chit0-1;
+            ct1 = find_approx(chi.time(chit0:chit1), vdisp.time(l1)) + chit0-1;
 
             plot(htemp, Tvec, zvec, '-', 'linewidth', 0.5);
-            hl = plot(hdisp, data.time(l0:l1), zvec, '-', 'linewidth', 2);
+            hl = plot(hdisp, vdisp.time(l0:l1), zvec, '-', 'linewidth', 2);
             plot(hsort, Tsort, zthorpe, '-', 'HandleVisibility', 'off');
-            plot(htemp2, data.time(l0:l1), Tvec, '-', 'linewidth', 0.5);
+            plot(htemp2, vdisp.time(l0:l1), Tvec, '-', 'linewidth', 0.5);
             semilogy(hchi, chi.time(ct0:ct1), chi.chi(ct0:ct1), '-', ...
                      'handlevisibility', 'off');
             if isnan(yloc)
-                yloc = 0.95*min(data.a_dis_z(t0:t1));
+                yloc = 0.95*min(vdisp.dis_z(t0:t1));
             end
             hsc = scatter(hsort, chi.T(ct0:ct1), yloc * ones(size(chi.T(ct0:ct1))), ...
                           200, hl.Color, 'HandleVisibility', 'off');
 
-            tpt0 = find_approx(Tp.time, data.time(l0));
-            tpt1 = find_approx(Tp.time, data.time(l1));
-            semilogy(htp, Tp.time(tpt0:tpt1), Tp.tp(tpt0:tpt1), 'color', ...
-                     hl.Color);
+            tpt0 = find_approx(Tp.time, vdisp.time(l0));
+            tpt1 = find_approx(Tp.time, vdisp.time(l1));
+            tp_plot = Tp.tp(tpt0:tpt1);
+            tp_plot(isnan(T.Tenh(tpt0:tpt1))) = nan;
+            semilogy(htp, Tp.time(tpt0:tpt1), tp_plot, '-', 'color', hl.Color);
         end
     end
 
@@ -157,7 +178,7 @@ function [wda] = winters_dasaro_avg(t0, t1, data, chi, T, Tp, plotflag)
 
     if plotflag
         % fit T against z to get dT/dz
-        [poly, ~, mu] = polyfit(zfull, Tfull, 1);
+        [poly, ~, mu] = polyfit(zfull(~isnan(Tfull)), Tfull(~isnan(Tfull)), 1);
         Tzi = poly(1)/mu(2); % undo MATLAB scaling
         if plotflag
             hline = plot(hsort, polyval(poly, hsort.YLim, [], mu), hsort.YLim, ...
@@ -181,15 +202,15 @@ function [wda] = winters_dasaro_avg(t0, t1, data, chi, T, Tp, plotflag)
         dz(isnan(dz)) = 0;
         zprof = [mean(zthorpe)-std(zthorpe), mean(zthorpe)-std(zthorpe) + cumsum(dz)];
         hline4 = plot(hsort, Tbins, zprof, 'k-', 'linewidth', 2, ...
-                      'displayname', ['average \Delta z mdn=' ...
+                      'displayname', ['average \Delta z mean=' ...
                             num2str(nanmean(1./dzdT), '%.1e')]);
 
         hline5 = plot(hsort, Tbins(1) + [0, diff(hsort.YLim) * mean(chi.dTdz(chit0:chit1))], ...
                       hsort.YLim, 'r-', 'linewidth' ,2, 'DisplayName', ...
                       ['mean(chi.dTdz) = ' num2str(mean(chi.dTdz(chit0:chit1)), '%.1e')]);
 
-        hzfull = plot(hdisp, data.time(t0:t1), ...
-                      -(data.a_dis_z(t0:t1) - data.a_dis_z(t0)), ...
+        hzfull = plot(hdisp, vdisp.time(t0:t1), ...
+                      -(vdisp.dis_z(t0:t1) - vdisp.dis_z(t0)), ...
                       'color', [1 1 1]*0.75, 'linewidth', 2);
         hcfull = plot(hchi, chi.time(chit0:chit1), ...
                       chi.chi(chit0:chit1), 'HandleVisibility', 'off', ...
@@ -200,13 +221,16 @@ function [wda] = winters_dasaro_avg(t0, t1, data, chi, T, Tp, plotflag)
         hscfull = scatter(hsort, Tchi, yloc * ones(size(chi.T(chit0:chit1))), ...
                           200, 'k', 'HandleVisibility', 'off');
 
+        hfullT = plot(htemp2, T.time, T.T, 'color', [1 1 1]*0.5);
+        uistack(hfullT, 'bottom');
+
         hchi.YScale = 'log';
         hcloud = plot(hsort, Tfull, zfull, '.', ...
                       'color', [1 1 1]*0.8, 'HandleVisibility', 'off');
         uistack(hcloud, 'bottom');
 
-        tpt0 = find_approx(Tp.time, data.time(t0));
-        tpt1 = find_approx(Tp.time, data.time(t1));
+        tpt0 = find_approx(Tp.time, vdisp.time(t0));
+        tpt1 = find_approx(Tp.time, vdisp.time(t1));
         htpfull = semilogy(htp, Tp.time(tpt0:tpt1), Tp.tp(tpt0:tpt1), 'color', ...
                            [1 1 1]*0.6);
         uistack(htpfull, 'bottom')
@@ -217,8 +241,8 @@ function [wda] = winters_dasaro_avg(t0, t1, data, chi, T, Tp, plotflag)
         legend(hchi, '-dynamiclegend')
         plot(hchi, hchi.XLim, [1, 1]*chi.spec_floor * chi.nfft, 'k-', ...
              'displayname', 'noise floor');
-        plot(hchi, hchi.XLim, 4*[1, 1]*chi.spec_floor * chi.nfft, 'k--', ...
-             'displayname', '4x noise floor');
+        plot(hchi, hchi.XLim, 2*[1, 1]*chi.spec_floor * chi.nfft, 'k--', ...
+             'displayname', '2x noise floor');
 
         hleg = legend(hsort, '-dynamiclegend');
         hleg.Position = [0.7479    0.7733    0.1650    0.0800];
@@ -233,7 +257,7 @@ function [wda] = winters_dasaro_avg(t0, t1, data, chi, T, Tp, plotflag)
 
         hsort.PlotBoxAspectRatio = [1 2 1];
         htemp.PlotBoxAspectRatio = [1 2 1];
-        hsort.XLim = [min(T.T(t0:t1))-1e-3 max(T.T(t0:t1))+1e-3];
+        hsort.XLim = [min(T.Tenh(t0:t1))-1e-3 max(T.Tenh(t0:t1))+1e-3];
         % hsort.Title.String = ['Jq_{DA} = ' num2str(Jqda, '%.1f') ...
         %                     ' | Jq_{i} = ' num2str(Jqi, '%.1f') ...
         %                     ' | Jq_{m} = ' num2str(Jqm, '%.1f')];

@@ -164,10 +164,12 @@ for i = 1:length(pflag.id)
                T.T     = data.T;
                T.depth = data.depth;
                T.floor = data.T_floor;
+               Tp.gain = 1/head.coef.TP(1);
             case 'T1'
                Tp.tp   = data.T1Pt;
                Tp.time = data.time_tp;
                Tp.spec_floor = data.T1P_spec_floor;
+               Tp.gain = 1/head.coef.T1P(2);
                T.time  = data.time;
                T.T     = data.T1;
                T.depth = data.depth;
@@ -176,6 +178,7 @@ for i = 1:length(pflag.id)
                Tp.tp   = data.T2Pt;
                Tp.time = data.time_tp;
                Tp.spec_floor = data.T2P_spec_floor;
+               Tp.gain = 1/head.coef.T2P(2);
                T.time  = data.time;
                T.T     = data.T2;
                T.depth = data.depth;
@@ -213,25 +216,8 @@ for i = 1:length(pflag.id)
                [chi, stats] = chi_chi_proc(Tp, S, Tz, T);
 
                if pflag.master.winters_dasaro
-                   ndt = pflag.master.wda_dt * round(1/diff(data.time(1:2)*86400));
-                   idx = 1;
-                   plotflag = 0;
-                   Nt = length(1:ndt:length(data.a_dis_z));
-                   wda = cell(Nt, 1);
-                   for t0=1:ndt:length(data.a_dis_z)
-                       wda{idx} = winters_dasaro_avg(t0, min(t0 + ndt, length(data.a_dis_z)), ...
-                                                     data, chi, T, Tp, plotflag);
-                       idx = idx+1;
-                   end
-
-                   chi.wda = merge_cell_structs(wda);
-                   chi.wda.dt = pflag.master.wda_dt;
-                   chi.wda.nbins = chi.wda.nbins(1);
-
-                   % wda_proc = process_wda_estimate(chi, chi.wda);
-                   % wda_compare_plot; % script to make comparison plots
+                   chi.wda = do_wda_estimate(pflag, data, chi, T, Tp);
                end
-
            end
 
            %---------------------save data----------------------

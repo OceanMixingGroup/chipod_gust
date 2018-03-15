@@ -43,9 +43,6 @@ addpath(genpath('./chipod_gust/software/'));% include  path to preocessing routi
     %pflag = pflag.c_Tzi(0);      % use local (interal) stratification 
     %pflag = pflag.c_Tzm(0);      % use mooring stratification 
 
-
-    pflag = pflag.make_cons();   % make sub-flags consitent with master flags 
-
     %pflag.master.pumped = 1;    % do you use a surface pumped mooring (default = 0)
 
     pflag.master.use_compass = 1; % if 0, assume chipod vane moves it
@@ -60,6 +57,8 @@ addpath(genpath('./chipod_gust/software/'));% include  path to preocessing routi
                                      % ONLY for pumped chipods
     pflag.master.wda_dt = 60; % (in seconds) time-interval over which to
                               % apply Winters & D'Asaro methodology
+
+    pflag = pflag.make_cons();   % make sub-flags consitent with master flags
 
    %---------------------get flag status----------------------
    pflag.status();

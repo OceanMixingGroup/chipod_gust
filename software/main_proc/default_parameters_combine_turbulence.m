@@ -54,8 +54,7 @@ function [CP] = default_parameters_combine_turbulence( basedir)
                       % beta version! turned off by default
 
    % Tolerance factor for near noise-floor Tp observations
-   % 4 is a good number based on EBOB observations
-   CP.factor_spec_floor = 4;
+   CP.factor_spec_floor = 2;
 
    CP.ChipodDepth = 0;
 

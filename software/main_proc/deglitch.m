@@ -1,4 +1,4 @@
-function [xd]=deglitch(x,npts,nstd,side)
+function [xd]=deglitch(x,npts,nstd,side, quiet_flag)
 % function [xd]=deglitch(x,npts,nstd,side)
 % x is the series to be deglitched
 % npts - number of points to deglitch at a time 
@@ -15,6 +15,8 @@ if nargin<3
     nstd=2;
 elseif nargin<4
     side='b';
+elseif nargin<5
+    quiet_flag = 0;
 end
 
 np=npts; % no. of points to deglitch at a time
@@ -93,8 +95,10 @@ xs(id)=NaN;
 xd(np*nt+1:len)=xs;
 if size(xd,1)~=size(x,1); xd=xd'; end
 
-num_newnan = sum(isnan(xd));
-disp(['deglitch removed ' num2str(num_newnan-num_nan) ' points = ' ...
-     num2str((num_newnan-num_nan)/(length(x) - num_nan) * 100, '%.1f') ' % | ' ...
-     'avg(NaNed points) = ' num2str(nanmean(x(isnan(xd))), '%.1e') ' | ' ...
-     'median(NaNed points) = ' num2str(nanmedian(x(isnan(xd))), '%.1e') ])
+if ~quiet_flag
+    num_newnan = sum(isnan(xd));
+    disp(['deglitch removed ' num2str(num_newnan-num_nan) ' points = ' ...
+          num2str((num_newnan-num_nan)/(length(x) - num_nan) * 100, '%.1f') ' % | ' ...
+          'avg(NaNed points) = ' num2str(nanmean(x(isnan(xd))), '%.1e') ' | ' ...
+          'median(NaNed points) = ' num2str(nanmedian(x(isnan(xd))), '%.1e')])
+end

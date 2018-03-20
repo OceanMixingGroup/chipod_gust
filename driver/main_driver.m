@@ -8,7 +8,9 @@ clear all;
 close all;
 
 %_____________________check processing flags or process?______________________
-   do_dry_run = 0;
+   do_dry_run    = 0;
+   do_just_merge = 0;
+   time_lim      = [datenum(1900,1,1) datenum(2100,1,1)];
 
 %_____________________include path of processing flies______________________
 addpath(genpath('./chipod_gust/software/'));% include  path to preocessing routines
@@ -53,7 +55,7 @@ addpath(genpath('./chipod_gust/software/'));% include  path to preocessing routi
                                % pressure to get speed past sensor
     pflag.master.parallel = 1;
 
-    pflag.master.winters_dasaro = 1; % do winters & d'asaro estimate of Kt, Jq
+    pflag.master.winters_dasaro = 0; % do winters & d'asaro estimate of Kt, Jq
                                      % ONLY for pumped chipods
     pflag.master.wda_dt = 60; % (in seconds) time-interval over which to
                               % apply Winters & D'Asaro methodology
@@ -68,7 +70,7 @@ addpath(genpath('./chipod_gust/software/'));% include  path to preocessing routi
 %_____________main processing________________
 if ~do_dry_run   
 
-   do_main_processing( basedir, pflag)
+   do_main_processing( basedir, pflag, time_lim, do_just_merge)
 
    %_____________________combine all chi_data______________________
    combine_turbulence;

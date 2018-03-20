@@ -7,7 +7,7 @@ function A = moving_var_angle(v,ww,ws)
 
 N = length(v);
 
-A = nan(1,round((N)/ws));
+A = nan(1,round((N)/ws)-1);
 
 
 if(N > ww)

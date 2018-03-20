@@ -7,7 +7,7 @@ function A = moving_average_angle(v,ww,ws)
 
 N = length(v);
 
-A = nan(1,round((N)/ws));
+A = nan(1,round((N)/ws)-1);
 
 if(N > ww)
     for i = 1:length(A)

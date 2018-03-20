@@ -44,8 +44,10 @@ end
             disp(['processing day ' num2str(f) ' of ' num2str(length(fids))]);
          try % take care if script crashes that the parpoo is shut down
             chi_main_proc(basedir, fids{f}, pflag);
-         catch
-            disp(['!!!!!! ' fids{f} ' crashed while processing  !!!!!!' ]);
+         catch ME
+            disp(['!!!!!! ' fids{f} ' (f = ' num2str(f) ') crashed while ' ...
+                  'processing  !!!!!! \n\n' ...
+                 ME.message]);
          end
       end
       % close parpool

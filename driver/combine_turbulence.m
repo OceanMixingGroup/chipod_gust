@@ -25,8 +25,25 @@ addpath(genpath('./chipod_gust/software/'));% include  path to preocessing routi
 %_____________________get all parameters used for combine______________________
    [CP] = default_parameters_combine_turbulence(basedir);
    %_____________________change as much as you like in CP______________________
-      % i.e. 
-      %CP.time_range        = [ datenum(2000, 1, 1, 0, 0, 0) datenum(2060, 1, 1, 0, 0, 0)];
+      %CP.time_range        = [datenum(2000, 1, 1, 0, 0, 0) datenum(2060, 1, 1, 0, 0, 0)];
+      %CP.T1death           = datenum(2000, 1, 1, 0, 0, 0);
+      %CP.T2death           = datenum(2000, 1, 1, 0, 0, 0);
+      %CP.adcpdeath         = datenum(2000, 1, 1, 0, 0, 0);
+      %CP.nantimes          = {[] [] []};
+      %CP.avgwindow         = 600;
+      %CP.ChipodDepth       = 0;
+      %
+      %  switch of master pflags
+      %CP.pflag             = CP.pflag.c_ic(0);
+      %CP.pflag             = CP.pflag.c_vc(0);
+      %CP.pflag             = CP.pflag.c_T1(0);
+      %CP.pflag             = CP.pflag.c_T2(0);
+      %CP.pflag             = CP.pflag.c_Tzi(0);
+      %CP.pflag             = CP.pflag.c_Tzm(0);
+      %CP.pflag             = CP.pflag.c_vel_m(0);
+      %CP.pflag             = CP.pflag.c_vel_p(0);
+      %
+      %  or specific flags like
       %CP.pflag.proc.mmg_ic = 1;
 
 

@@ -34,9 +34,13 @@ function [Tp_floor, T_floor] = get_noise_floors(Tvolt, Tcoef, Tpcoef, Fs, ...
 
     dT = abs(diff(Tvec));
     dTmin = nanmin(dT(dT > 0));
-    if abs(T_floor - dTmin)/dTmin * 100 > 1
+
+    valid_temp = all(Tvec > 0) & all(Tvec < 35);
+    valid_tp = all(abs(Tpvec) < 5);
+
+    if valid_temp & abs(T_floor - dTmin)/dTmin * 100 > 5
         disp(['Warning: estimated temperature noise floor is different from ' ...
-              'min(abs(diff(T)) by more than 1% '])
+              'min(abs(diff(T)) by ' num2str(abs(T_floor - dTmin)/dTmin * 100) '%'])
     end
 
     % generate bit noise time series, and figure out variance when
@@ -52,9 +56,9 @@ function [Tp_floor, T_floor] = get_noise_floors(Tvolt, Tcoef, Tpcoef, Fs, ...
 
     % integral (noise_floor * df) = variance
     % noise_floor * integral_(0)^(50 Hz) (df) = variance
-    if abs(Tp_floor * Fs/2 - est_TP_floor)/est_TP_floor * 100 > 5
+    if valid_tp & abs(Tp_floor * Fs/2 - est_TP_floor)/est_TP_floor * 100 > 5
         disp(['Warning: estimated Tp noise floor is different from ' ...
-              'bit noise variance by more than 5% '])
+              'bit noise variance by ' num2str(abs(T_floor - dTmin)/dTmin * 100) '%'])
     end
 
     % noise floor debugging plots

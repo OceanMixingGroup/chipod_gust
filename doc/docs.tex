@@ -75,6 +75,10 @@
 \newcommand\ppy{\pp{}{y}}
 \newcommand\ppt{\pp{}{t}}
 
+% absolute value signs
+% https://tex.stackexchange.com/questions/43008/absolute-value-symbols#
+\DeclarePairedDelimiter\abs{\lvert}{\rvert}%
+\DeclarePairedDelimiter\norm{\lVert}{\rVert}%
 
 \title{The $\chi$pod and gusT processing package}
 \author{Johannes Becherer, Sally Warner, Deepak Cherian}
@@ -114,9 +118,9 @@
 
 \appendix
 \part{Appendix}
+\input{ktjq}
 \input{matlabserver}
 \input{references}
 \input{git}
 \input{sensors}
-\input{ktjq}
 \end{document}

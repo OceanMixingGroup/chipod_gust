@@ -16,7 +16,7 @@ if(N < ww)
     error('window width is larger than vector length')
 end
 
-A = nan(1,round((N)/ws));
+A = nan(1,round((N)/ws)-1);
 
 try
     AA = movmedian(v, ww, 'omitnan', 'endpoints', 'discard');

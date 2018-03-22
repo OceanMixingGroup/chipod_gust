@@ -45,24 +45,29 @@ end
    if ~do_just_merge
       [fids, fdate] = chi_find_rawfiles(basedir);
 
-
       if(pflag.master.parallel)
          parpool;
          % parallel for-loop
          parfor f=1:length(fids)
-               disp(['processing day ' num2str(f) ' of ' num2str(length(fids))]);
-            try % take care if script crashes that the parpoo is shut down
-               chi_main_proc(basedir, fids{f}, pflag);
-            catch
-               disp(['!!!!!! ' fids{f} ' crashed while processing  !!!!!!' ]);
-            end
+             disp(['processing day ' num2str(f) ' of ' num2str(length(fids))]);
+             try % take care if script crashes that the parpoo is shut down
+                 chi_main_proc(basedir, fids{f}, pflag);
+             catch ME
+                 disp(['!!!!!! ' fids{f} ' (f = ' num2str(f) ') crashed while ' ...
+                       'processing  !!!!!! \n\n' ME.message]);
+             end
          end
          % close parpool
          delete(gcp);
       else
          for f=1:length(fids)
-            disp(['processing day ' num2str(f) ' of ' num2str(length(fids))]);
-            chi_main_proc(basedir, fids{f}, pflag);
+             disp(['processing day ' num2str(f) ' of ' num2str(length(fids))]);
+             try
+                 chi_main_proc(basedir, fids{f}, pflag);
+             catch ME
+                 disp(['!!!!!! ' fids{f} ' (f = ' num2str(f) ') crashed while ' ...
+                       'processing  !!!!!! \n\n' ME.message]);
+             end
          end
       end
    end

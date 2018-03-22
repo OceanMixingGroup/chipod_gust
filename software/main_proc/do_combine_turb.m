@@ -82,6 +82,9 @@ if(do_combine)
 
          CP = process_estimate_ID(CP, ID);
 
+         % do winters dasaro estimate?
+         do_wda = isfield(chi, 'wda') && ~contains(ID, 'ic') &&  CP.pflag.master.winters_dasaro;
+
          % convert averaging window from seconds to points
          ww = round(CP.avgwindow/(diff(chi.time(1:2))*3600*24));
          dw = round(CP.deglitch_window/(diff(chi.time(1:2))*3600*24));
@@ -207,8 +210,12 @@ if(do_combine)
                  end
              end
              % obtain Kt, Jq using Winters & D'Asaro methodology
-             if isfield(chi, 'wda') && ~contains(ID, 'ic')
+             if do_wda
                  chi.wda = process_wda_estimate(chi, chi.wda);
+
+                 chi.wda.N2 = interp1(chi.time(~isnan(chi.time)), chi.N2(~isnan(chi.time)), chi.wda.time);
+                 chi.wda.eps_Kt = chi.wda.N2 .* chi.wda.Kt/0.2;
+                 chi.wda.eps_Kt(chi.wda.N2 < 0) = nan;
 
                  % add in molecular diffusivity
                  chi.wda.Kt = chi.wda.Kt + sw_tdif(interp1(chi.time, chi.S, chi.wda.time), ...
@@ -328,7 +335,7 @@ if(do_combine)
          [Turb.(ID), Turb.(ID).stats.max_Kt_percentage] = ApplyMask(Turb.(ID), Turb.(ID).Kt, '>', CP.max_Kt, 'max_Kt');
          [Turb.(ID), Turb.(ID).stats.max_Jq_percentage] = ApplyMask(Turb.(ID), abs(Turb.(ID).Jq), '>', CP.max_Jq, 'max_Jq');
             
-         if isfield(chi, 'wda') && ~contains(ID, 'ic')
+         if do_wda
              % get list of all fields to average
              ff = fields(chi.wda);
 
@@ -343,8 +350,6 @@ if(do_combine)
                      Turb.(ID).wda.(ff{f}) = chi.wda.(ff{f});
                  end
              end
-
-             Turb.(ID).wda.N2 = interp1(Turb.(ID).time, Turb.(ID).N2, Turb.(ID).wda.time);
          end
 
          if do_plot
@@ -354,13 +359,19 @@ if(do_combine)
              end
              Histograms(Turb.(ID), hfig2, 'pdf', ID, ID);
       
-             if isfield(Turb.(ID), 'wda') && ~contains(ID, 'ic')
+             if do_wda
                  Histograms(Turb.(ID).wda, hfig2, 'pdf', ID, [ID 'W&DA']);
                  hwda = CreateFigure(is_visible);
                  hwda.Name = ['Compare Osborn-Cox vs. Winters-D''Asaro : ' ID];
                  tavg = 3600;
                  ax = plot_estimate(Turb.(ID), ID, tavg);
-                 ax = plot_estimate(Turb.(ID).wda, [ID 'wda'], tavg);
+                 % I want to plot eps calcluated from Kt without
+                 % over-complicating plot_estimat; which is set to plot the
+                 % eps field.
+                 wda_temp = Turb.(ID).wda;
+                 wda_temp.eps = wda_temp.eps_Kt;
+                 ax = plot_estimate(wda_temp, [ID 'wda'], tavg);
+                 legend(ax(3), '\epsilon_\chi', '\epsilon = N^2/\Gamma wda.Kt')
                  % symmetric-log axes for dT/dz and Jq
                  set(ax(5), 'ylim', [-1 1]*2000)
                  symlog(ax(2), 'y', -3);

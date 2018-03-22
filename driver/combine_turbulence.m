@@ -47,6 +47,7 @@ addpath(genpath('./chipod_gust/software/'));% include  path to preocessing routi
       %
       %  or specific flags like
       %CP.pflag.proc.mmg_ic = 1;
+   CP.pflag.master.winters_dasaro = 1;
 
 
 %_____________________do everything______________________

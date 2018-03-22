@@ -44,7 +44,7 @@ function [ax] = plot_estimate(chi, name, window, hfig, t0, t1)
     ylabel('\chi')
     set(ax(1), 'yscale', 'log');
     Common()
-    ylim([1e-10, 1e-3]);
+    ylim([1e-12, 1e-3]);
     grid on;
 
     set(hfig, 'currentaxes', ax(2))
@@ -74,7 +74,7 @@ function [ax] = plot_estimate(chi, name, window, hfig, t0, t1)
     end
     ylabel('\epsilon')
     set(ax(3), 'yscale', 'log');
-    ylim([10.^[-10, -3]])
+    ylim([10.^[-12, -3]])
     grid on;
     Common()
 
@@ -88,7 +88,7 @@ function [ax] = plot_estimate(chi, name, window, hfig, t0, t1)
     end
     ylabel('K_t')
     set(ax(4), 'yscale', 'log');
-    ylim([10.^[-6.5, 0]])
+    ylim([10.^[-7.5, 0]])
     grid on;
     Common()
 

@@ -23,11 +23,11 @@ if nargin>1
   end
 end
 
-gd=find(~isnan(in));
+gd=find(~isnan(in)) ;
 [srt ind]=sort(in(gd));
 ind=gd(ind);
 
-order=in*NaN;
+order=nan(size(in));
 order(gd)=srt;
 
 if nargout>1

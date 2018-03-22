@@ -82,6 +82,9 @@ if(do_combine)
 
          CP = process_estimate_ID(CP, ID);
 
+         % do winters dasaro estimate?
+         do_wda = isfield(chi, 'wda') && ~contains(ID, 'ic') &&  CP.pflag.master.winters_dasaro;
+
          % convert averaging window from seconds to points
          ww = round(CP.avgwindow/(diff(chi.time(1:2))*3600*24));
          dw = round(CP.deglitch_window/(diff(chi.time(1:2))*3600*24));
@@ -207,7 +210,7 @@ if(do_combine)
                  end
              end
              % obtain Kt, Jq using Winters & D'Asaro methodology
-             if isfield(chi, 'wda') && ~contains(ID, 'ic')
+             if do_wda
                  chi.wda = process_wda_estimate(chi, chi.wda);
 
                  % add in molecular diffusivity
@@ -328,7 +331,7 @@ if(do_combine)
          [Turb.(ID), Turb.(ID).stats.max_Kt_percentage] = ApplyMask(Turb.(ID), Turb.(ID).Kt, '>', CP.max_Kt, 'max_Kt');
          [Turb.(ID), Turb.(ID).stats.max_Jq_percentage] = ApplyMask(Turb.(ID), abs(Turb.(ID).Jq), '>', CP.max_Jq, 'max_Jq');
             
-         if isfield(chi, 'wda') && ~contains(ID, 'ic')
+         if do_wda
              % get list of all fields to average
              ff = fields(chi.wda);
 
@@ -354,7 +357,7 @@ if(do_combine)
              end
              Histograms(Turb.(ID), hfig2, 'pdf', ID, ID);
       
-             if isfield(Turb.(ID), 'wda') && ~contains(ID, 'ic')
+             if do_wda
                  Histograms(Turb.(ID).wda, hfig2, 'pdf', ID, [ID 'W&DA']);
                  hwda = CreateFigure(is_visible);
                  hwda.Name = ['Compare Osborn-Cox vs. Winters-D''Asaro : ' ID];

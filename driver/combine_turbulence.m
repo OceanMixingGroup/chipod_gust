@@ -28,6 +28,7 @@ addpath(genpath('./chipod_gust/software/'));% include  path to preocessing routi
       % i.e. 
       %CP.time_range        = [ datenum(2000, 1, 1, 0, 0, 0) datenum(2060, 1, 1, 0, 0, 0)];
       %CP.pflag.proc.mmg_ic = 1;
+   CP.pflag.master.winters_dasaro = 1;
 
 
 %_____________________do everything______________________

@@ -51,8 +51,8 @@ function [Tz_m] = chi_generate_dTdz_m(t1, z1, T1, S1, t2, z2, T2, ...
    time = ts:dt:tf;     % time array
 
    % find delta time for the CTD series
-   dt1 = diff(t1(1:2));
-   dt2 = diff(t2(1:2));
+   dt1 = nanmean(diff(t1));
+   dt2 = nanmean(diff(t2));
 
    % vertical distance of both sensors in meter
    dz = nanmean(abs(z1-z2));

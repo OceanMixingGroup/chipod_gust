@@ -1,5 +1,27 @@
 \chapter{Winters \& D'Asaro (1996): $K_T$, $J_q^t$ from $χ$}
 
+\section{Usage}
+
+\texttt{main\_driver} options:
+\begin{itemize}
+\item
+  \texttt{pflag.master.winters\_dasaro} : switch on (1) or off (0)
+\item
+  \texttt{pflag.master.wda\_dt} : (seconds) length of time chunk that is processed at a time. Default is 60 seconds which works OK in the top 30m or so. For deeper χpods you can go longer (3 minutes?)
+\end{itemize}
+
+\texttt{combine\_turbulence} options:
+\begin{itemize}
+\item
+  \texttt{CP.wda\_Tz\_sign} : (\texttt{'m'} or \texttt{'i'}) - gradient time series used to assign sign to heat flux.
+\end{itemize}
+
+
+The output \texttt{Turb.mat} file will contain \texttt{wda} substructure under each estimate i.e. for estimate \texttt{mm1} the fields \texttt{mm1.wda.Jq, mm1.wda.Kt} are estimates computed using the sorted temperature field. \emph{These are different from \texttt{mm1.Jq, mm1.Kt} which are set using the old way of doing things i.e. dividing by mooring gradient in this case.}
+
+Because we are using the sorted $T_z$ field, there is no reason to mask using \texttt{min\_dTdz}.
+All other masking is applied.
+
 \section{Theory}
 \newcommand{\Tbins}{T_\text{bins}}
 \newcommand{\zs}{z_{*}}
@@ -68,7 +90,7 @@ In low stratification, estimating the spacing requires high-resolution temperatu
 \end{figure}
 
 \section{Algorithm}
-Consider a 1 minute (configurable parameter) chunk of data.
+Consider a 1 minute (configurable parameter \texttt{pflag.master.wda\_dt}) chunk of data.
 \begin{itemize}
 \item
   Once $χ$ has been estimated, we have $χ ≡ χ(t) ≡ χ(T_1)$, $T_1$ is the 1-second averaged temperature time series.
@@ -112,13 +134,16 @@ Note that $χ$ will be set to 0 for the same time instants in \texttt{do\_combin
 
 The mean temperature gradient time series in \texttt{chi.().wda.dTdz} will \emph{never recover a zero gradient} i.e. there is a lower bound to detectable mean gradients.
 The easy way to see this is that in homogeneous fluid there are no temperature surfaces to form bins and so we cannot infer a gradient (also $J_q^t = 0$ which we recover by setting $χ=0$ when $T'$ is at noise floor).
-As long as we choose a long enough time chunk within which to sort profiles, the χpod will sense some temperature fluctuations which can then be sorted to yield finite gradients (the sensed ΔT is a function of time chunk Δt for smallish Δt).
+As long as we choose a long enough time chunk within which to sort profiles, the χpod will sense some temperature fluctuations which can then be sorted to yield finite gradients (the sensed $ΔT$ is a function of time chunk $Δt$ for smallish $Δt$).
 The lower bound on detectable gradient seems to be around \SI{2e-3}{\celsius\per\metre}.
 
 \subsection{Sign of vertical heat flux}
 When salinity controls density, it is possible that $dT/dz < 0$ for extended periods of time.
 Thorpe sorting cannot preserve this sign (unless there are coincident measurements of salinity, in which case you would sort density).
 The only sensible thing to do is to determine the sign of the mean (or ``large-scale'') gradient from other sources such as nearby CTDs on the mooring, if available.
+Currently \texttt{combine\_turbulence} uses the sign of the hourly running median of mooring $T_z$ (can be switched to internal $T_z$ using \texttt{CP.wda\_Tz\_sign}).
+During times of low gradients ($T_z < $ \texttt{CP.min\_dTdz}), it uses the sign of the 2-hour running median since we want some sort of ``stable'' sign.
+
 
 %%% Local Variables:
 %%% mode: latex

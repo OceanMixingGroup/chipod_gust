@@ -4,6 +4,7 @@
 %        t0, t1 - time indices for accelerometer data (usually 50Hz)
 %        vdisp, chi, T, Tp - structures passed in from do_wda_estimate
 %        plotflag - if 1, make informative plot showing resorted profile.
+%        dt - pflag.master.wda_dt (time chunk over which to sort and average)
 % Outputs:
 %        wda - structure with fields
 %           tstart, tstop - start,end of time chunk
@@ -14,6 +15,7 @@ function [wda] = winters_dasaro_avg(t0, t1, vdisp, chi, T, Tp, dt, plotflag)
     optional = 0;
 
     MIN_DIS_Z = 0.1; % minimum length (in metres) of a single up- or down-cast
+    nquantiles = round(5/60 * dt); % effectively number of bins
 
     % determine "profile" boundaries
     [~, locs1] = findpeaks(vdisp.dis_z(t0:t1));
@@ -57,7 +59,6 @@ function [wda] = winters_dasaro_avg(t0, t1, vdisp, chi, T, Tp, dt, plotflag)
     end
 
     % Lets make some T bins by splitting into quantiles so that each bin has equal number of observations
-    nquantiles = 5;
     Tbins = generate_wda_bins(Tprof, nquantiles);
     dT = diff(Tbins);
 

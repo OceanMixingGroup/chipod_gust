@@ -134,8 +134,15 @@ Note that $χ$ will be set to 0 for the same time instants in \texttt{do\_combin
 
 The mean temperature gradient time series in \texttt{chi.().wda.dTdz} will \emph{never recover a zero gradient} i.e. there is a lower bound to detectable mean gradients.
 The easy way to see this is that in homogeneous fluid there are no temperature surfaces to form bins and so we cannot infer a gradient (also $J_q^t = 0$ which we recover by setting $χ=0$ when $T'$ is at noise floor).
-As long as we choose a long enough time chunk within which to sort profiles, the χpod will sense some temperature fluctuations which can then be sorted to yield finite gradients (the sensed $ΔT$ is a function of time chunk $Δt$ for smallish $Δt$).
+As long as we choose a long enough time chunk within which to sort profiles, the χpod will sense some temperature fluctuations which can then be sorted to yield finite gradients (the sensed $ΔT$ is a function of time chunk $Δt$ for smallish $Δt$ --- see Figure \ref{fig:dTdz-dt}).
 The lower bound on detectable gradient seems to be around \SI{2e-3}{\celsius\per\metre}.
+
+\begin{figure}
+  \centering
+  \includegraphics[width=0.9\textwidth]{figs/wda-sorted-dTdz-dt-variation.png}
+  \caption{Variation of sorted mean gradient with time interval \texttt{wda\_dt}. Larger time intervals result in smoother gradient. This is for a time period with high stratification.}
+  \label{fig:dTdz-dt}
+\end{figure}
 
 \subsection{Sign of vertical heat flux}
 When salinity controls density, it is possible that $dT/dz < 0$ for extended periods of time.
@@ -144,6 +151,9 @@ The only sensible thing to do is to determine the sign of the mean (or ``large-s
 Currently \texttt{combine\_turbulence} uses the sign of the hourly running median of mooring $T_z$ (can be switched to internal $T_z$ using \texttt{CP.wda\_Tz\_sign}).
 During times of low gradients ($T_z < $ \texttt{CP.min\_dTdz}), it uses the sign of the 2-hour running median since we want some sort of ``stable'' sign.
 
+\subsection{Number of bins}
+
+Currently the code uses 5 bins per minute of data and scales that according to \texttt{pflag.master.wda\_dt}. The nunmber of bins is set by setting \texttt{nquantiles} in \texttt{do\_wda\_estimate}. More bins mean better use of data but fewer $χ$ measurements to average in each bin. Few bins will result in the inability to determine gradients well because the temperature profiles could be too short to intersect 2 bin edges.
 
 %%% Local Variables:
 %%% mode: latex

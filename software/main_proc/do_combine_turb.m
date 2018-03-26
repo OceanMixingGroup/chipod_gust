@@ -175,6 +175,19 @@ if(do_combine)
              [chi, chi.stats.max_chi_percentage] = ApplyMask(chi, chi.chi, '>', CP.max_chi, 'max_chi');
              [chi, chi.stats.max_eps_percentage] = ApplyMask(chi, chi.eps, '>', CP.max_eps, 'max_eps');
 
+             if isempty(ic_test)
+                 % deglitch chi and eps before calculating Jq and Kt
+                 % not required for IC estimate because that is already
+                 % an averaged estimate
+                 disp('Deglitch... itch... tch... ch')
+                 tic;
+                 chi.chi = 10.^deglitch(log10(chi.chi), dw, CP.deglitch_nstd, 'b');
+                 chi.eps(isnan(chi.chi)) = nan;
+                 chi.eps = 10.^deglitch(log10(chi.eps), dw, CP.deglitch_nstd, 'b');
+                 chi.chi(isnan(chi.eps)) = nan;
+                 toc;
+             end
+
              if isfield(chi, 'spec_area')
                  if ~isfield(chi, 'time_floor')
                      spec_floor = nanmedian(chi.spec_floor);
@@ -285,17 +298,6 @@ if(do_combine)
          end
 
          if isempty(ic_test)
-             % deglitch chi and eps before calculating Jq and Kt
-             % not required for IC estimate because that is already
-             % an averaged estimate
-             disp('Deglitch... itch... tch... ch')
-             tic;
-             chi.chi = 10.^deglitch(log10(chi.chi), dw, CP.deglitch_nstd, 'b');
-             chi.eps(isnan(chi.chi)) = nan;
-             chi.eps = 10.^deglitch(log10(chi.eps), dw, CP.deglitch_nstd, 'b');
-             chi.chi(isnan(chi.eps)) = nan;
-             toc;
-
              % get list of all fields to average
              ff = fields(chi);
 

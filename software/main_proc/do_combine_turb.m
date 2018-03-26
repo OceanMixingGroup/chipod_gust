@@ -197,7 +197,7 @@ if(do_combine)
 
                  [chi, chi.stats.spec_floor_percentage] = ApplyMask(chi, chi.spec_area, '<', ...
                                                                    CP.factor_spec_floor * spec_floor * nanmean(chi.nfft), ...
-                                                                   'spec_floor', [], 0);
+                                                                   'spec_floor', [], CP.noise_floor_fill_value);
              end
 
              % filter out bad fits using fitting statistics

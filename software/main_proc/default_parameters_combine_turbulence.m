@@ -59,6 +59,8 @@ function [CP] = default_parameters_combine_turbulence( basedir)
 
    % Tolerance factor for near noise-floor Tp observations
    CP.factor_spec_floor = 2;
+   % Fill value for when instrument is at noise floor.
+   CP.noise_floor_fill_value = nan;
 
    CP.ChipodDepth = 0;
 

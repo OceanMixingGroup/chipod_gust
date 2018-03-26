@@ -342,16 +342,16 @@ if(do_combine)
              ff = fields(chi.wda);
 
              %% average data
-             disp('WDA: Running moving average')
-             wwwda = round(CP.avgwindow/(diff(chi.wda.time(1:2))*24*3600));
-             tic;
-             for f = 1:length(ff)  % run through all fields in chi
-                 if ( length(chi.wda.(ff{f})) == length(chi.wda.time) )
-                     Turb.(ID).wda.(ff{f}) = moving_average( chi.wda.(ff{f}), wwwda, wwwda , CP.avgvalid);
-                 else
-                     Turb.(ID).wda.(ff{f}) = chi.wda.(ff{f});
-                 end
-             end
+             % disp('WDA: Running moving average')
+             % wwwda = round(CP.avgwindow/(diff(chi.wda.time(1:2))*24*3600));
+             % tic;
+             % for f = 1:length(ff)  % run through all fields in chi
+             %     if ( length(chi.wda.(ff{f})) == length(chi.wda.time) )
+             %         Turb.(ID).wda.(ff{f}) = moving_average( chi.wda.(ff{f}), wwwda, wwwda , CP.avgvalid);
+             %     else
+             %         Turb.(ID).wda.(ff{f}) = chi.wda.(ff{f});
+             %     end
+             % end
          end
 
          if do_plot

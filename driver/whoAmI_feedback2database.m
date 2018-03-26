@@ -6,6 +6,7 @@ close all;
 here = pwd;
 i_ganges = strfind(here, '/ganges/');
 path2ganges =  here(1:i_ganges);
+path2database  =  [path2ganges 'ganges/work/database/omg.sqlite'];
 
 
 addpath(genpath('./chipod_gust/software/'));
@@ -15,7 +16,7 @@ DB       = whoAmI();
 inst_id  = DB.instruments.id;
 
 %_____________________find difference______________________
-create_whoAmI([pwd '/db_test.m'], path2ganges, inst_id );
+create_whoAmI([pwd '/db_test.m'], path2database, inst_id );
 
 %disp the following changes would be written to the data base
 !diff whoAmI.m db_test.m
@@ -34,7 +35,7 @@ create_whoAmI([pwd '/db_test.m'], path2ganges, inst_id );
 tables = fields(DB);
 
 % open db
-omg_db = sqlite([path2ganges 'ganges/work/database/omg.sqlite']);
+omg_db = sqlite(path2database);
 
 for t = 1:length(tables)
    columns  =  fields(DB.(tables{t}));

@@ -1,0 +1,29 @@
+\chapter{\texttt{data base}}
+This chapter describes how to use the database functionality whoAmI?
+
+At the beginning, there can be found two functions in the mfile directory of your unit directory:
+\begin{itemize}
+   \item \textit{whoAmI\_generate.m}
+   \item \textit{whoAmI\_feedback2database.m}
+\end{itemize}
+Then you can use \textit{whoAmI\_generate.m} to generate a third m-file, which
+is called \textit{whoAmI.m}.  \textit{whoAmI.m} is the function that contains
+a complete list of all parameters that are saved in the data base that refer to
+your particular unit. 
+
+You may access these parameters by calling \textit{whoAmI.m}, which outputs
+a structure containing all these parameters.  This structure can then be used
+by the processing routines to get unit specific information.
+
+If you want to change any of the parameters, you may go to \textit{whoAmI.m} and
+change the corresponding parameter in the matlab code. Note that these changes are only 
+local and do not immediately affect the corresponding data base entries. 
+If you want to write your local changes permanently to the data base you can use
+\textit{whoAmI\_feedback2database.m}. 
+
+
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "docs"
+%%% End:

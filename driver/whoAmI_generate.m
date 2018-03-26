@@ -6,7 +6,8 @@ close all;
 %   if you are not on ganges set path2ganges manually
 here = pwd;
 i_ganges = strfind(here, '/ganges/');
-path2ganges =  here(1:i_ganges);
+path2ganges    =  here(1:i_ganges);
+path2database  =  [path2ganges 'ganges/work/database/omg.sqlite'];
 
 addpath(genpath('./chipod_gust/software/'));
 
@@ -20,7 +21,7 @@ addpath(genpath('./chipod_gust/software/'));
 
 %_____________________Ask the data base______________________
 % open omg database
-omg_db = sqlite([path2ganges 'ganges/work/database/omg.sqlite']);
+omg_db = sqlite(path2database);
 
 % find all instruments in database that belong to mooring
 sql_string = ['SELECT inst_name, inst_id,  datapath, inst_type, platform_name ' ...
@@ -89,7 +90,7 @@ if inkey == 0
 
 
    % open db
-   omg_db = sqlite([path2ganges 'ganges/work/database/omg.sqlite']);
+   omg_db = sqlite(path2database);
 
 
       % create new entry in instruments table
@@ -129,7 +130,7 @@ else
 end
 
 
-create_whoAmI( [basedir '/mfiles/whoAmI.m'],  path2ganges, db_index);
+create_whoAmI( [basedir '/mfiles/whoAmI.m'],  path2database, db_index);
 
 disp(' whoAmI.m sucessfully generated !')
 

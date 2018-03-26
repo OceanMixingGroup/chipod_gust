@@ -1,4 +1,4 @@
-function [] = create_whoAmI( fname,  path2ganges, db_index)
+function [] = create_whoAmI( fname,  path2database, db_index)
 %% [] = create_whoAmI( fname,  path2ganges, db_index)
 %  
 %     This function generate the whoAmI.m files
@@ -31,7 +31,7 @@ I.fields{11}   = 'Owner_id';
 I.fields{12}   = 'mab';
 
      % open db
-     omg_db = sqlite([path2ganges 'ganges/work/database/omg.sqlite']);
+     omg_db = sqlite(path2database);
         % instruments table
        for i = 1:length(I.fields)
            try 
@@ -134,7 +134,7 @@ else     % gust
 end
 
      % open db
-     omg_db = sqlite([path2ganges 'ganges/work/database/omg.sqlite']);
+     omg_db = sqlite(path2database);
         % instruments table
        for i = 1:length(X.fields)
            try 

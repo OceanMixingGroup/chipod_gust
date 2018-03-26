@@ -47,6 +47,10 @@ addpath(genpath('./chipod_gust/software/'));% include  path to preocessing routi
       %
       %  or specific flags like
       %CP.pflag.proc.mmg_ic = 1;
+
+   % Fill value for when instrument is at noise floor.
+   CP.noise_floor_fill_value = nan;
+
    CP.pflag.master.winters_dasaro = 1;
 
 

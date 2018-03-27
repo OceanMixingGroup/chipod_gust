@@ -28,7 +28,7 @@ All other masking is applied.
 
 Osborn \& Cox:
 \begin{equation}
-  J_q^t \sim \frac{\langle χ \rangle}{⟨\pp Tz⟩}
+  J_q^t \sim \frac{\langle χ \rangle}{2⟨\pp Tz⟩}
 \end{equation}
 These angle brackets are interpreted as a time average for χpods and a depth-bin average for profilers like Chameleon.
 
@@ -39,7 +39,7 @@ In these cases, getting ``reasonable'' values for $K_T$ and $J_q^t$ requires mas
 
 Winters \& D'Asaro derive the continuous form:
 \begin{equation}
-  J_q^t =  \dd{z^*}{T} \langle χ \rangle_{z^*}
+  J_q^t =  \frac 12 \dd{z^*}{T} \langle χ \rangle_{z^*}
 \end{equation}
 
 $z^*$ being the ``reference'' state — usually a fully sorted 3D scalar field.
@@ -69,12 +69,12 @@ $J_q^t$ is the diffusive flux normal to the warped surface $S$ i.e. $κ∇T⋅\h
 \begin{align}
   A J_q^t &= κ \int_S ∇T⋅\hat{n} \dr S \\
   J_q^t &= \frac{1}{A} \int_S κ \abs{∇T} \frac{ΔT}{Δn} \frac{Δn}{ΔT} \frac{Δ\zs}{Δ\zs} \dr S\\
-        &= \frac{1}{AΔ\zs} \int_S χ \frac{Δ\zs}{ΔT} Δn \dr S
+        &= \frac{1}{AΔ\zs} \int_S \frac{χ}{2} \frac{Δ\zs}{ΔT} Δn \dr S
 \end{align}
 
 $Δ\zs/ΔT$, a property of the sorted background state, is independent of the instantaneous shape of the isothermal surface $S$. So we can write
 \begin{equation}
- J_q^t = \frac{Δ\zs}{ΔT} \frac{1}{AΔ\zs} \int_S χ Δn \dr S = \frac{Δ\zs}{ΔT} \frac{1}{ΔV} \int_{ΔV} χ \dr V,
+ J_q^t = \frac{Δ\zs}{ΔT} \frac{1}{AΔ\zs} \int_S \frac{χ}{2} Δn \dr S = \frac{Δ\zs}{ΔT} \frac{1}{ΔV} \int_{ΔV} \frac{χ}{2} \dr V,
 \end{equation}
 since $\zs$ is \emph{defined} such that
 \begin{equation}

@@ -10,7 +10,7 @@ close all;
 %_____________________check processing flags or process?______________________
    do_dry_run    = 0;
    do_just_merge = 0;
-   time_lim      = [datenum(1900,1,1) datenum(2100,1,1)];
+
 
 %_____________________include path of processing flies______________________
 addpath(genpath('./chipod_gust/software/'));% include  path to preocessing routines
@@ -21,6 +21,12 @@ addpath(genpath('./chipod_gust/software/'));% include  path to preocessing routi
    basedir =   here(1:(end-6));    % substract the mfile folder
    savedir =   [basedir 'proc/'];  % directory directory to save data
    unit    = chi_get_unit_name(basedir); % get unit name
+
+
+%_____________________set time limits______________________
+ % get time limits from whoAmI;
+   [TL] =   whoAmI_timeLimits(basedir);
+   time_lim      = TL.master;
 
 %_____________________get list of all raw data______________________
    [fids, fdate] = chi_find_rawfiles(basedir);

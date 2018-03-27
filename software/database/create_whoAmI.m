@@ -94,7 +94,7 @@ if contains(I.values{3}, 'hipod')
    X.fields{cnt}  = 'Ax_cal'; cnt=cnt+1;
    X.fields{cnt}  = 'Ay_cal'; cnt=cnt+1;
    X.fields{cnt}  = 'Az_cal'; cnt=cnt+1;
-   X.fields{cnt}  = 'cap_cal'; cnt=cnt+1;
+   X.fields{cnt}  = 'cmp_cal'; cnt=cnt+1;
    X.fields{cnt}  = 'id'; cnt=cnt+1;
 
 else     % gust

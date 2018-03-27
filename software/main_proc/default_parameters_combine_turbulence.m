@@ -13,6 +13,10 @@ function [CP] = default_parameters_combine_turbulence( basedir)
 %        Thu Dec 28 16:59:04 PST 2017
 %
 
+%_____________________get time limits from whoAmI______________________
+   [TL] =   whoAmI_timeLimits(basedir);
+
+
    % set thresholds for masking
    CP.min_N2         = 1e-6;
    CP.min_dTdz       = 1e-3;
@@ -69,12 +73,11 @@ function [CP] = default_parameters_combine_turbulence( basedir)
    % if you want to restrict the time range that should be combined
    % use the following
    % This restricts time range for BOTH sensors on chipods
-   CP.time_range(1)  = datenum(2000, 1, 1, 0, 0, 0);
-   CP.time_range(2)  = datenum(2060, 1, 1, 0, 0, 0);
+   CP.time_range  = TL.master;
 
    % if one sensor dies earlier, specify that time here.
-   CP.T1death = datenum(2060, 1, 1, 0, 0, 0); % chipod T1 or gustT T sensor
-   CP.T2death = datenum(2060, 1, 1, 0, 0, 0); % T2 sensor
+   CP.T1death = TL.Tp1(2); % chipod T1 or gustT T sensor
+   CP.T2death = TL.Tp2(2); % T2 sensor
 
    % mooring velocity measurement death
    CP.adcpdeath = datenum(2060, 1, 1, 0, 0, 0); % current meter dies here
@@ -86,7 +89,7 @@ function [CP] = default_parameters_combine_turbulence( basedir)
    % start_time & end_time must be datenum
    CP.nantimes{1} = []; % sensor T1 for chipod or T sensor on gusT
    CP.nantimes{2} = []; % sensor T2 for chipod
-   CP.nantimes{3} = []; % pitot sensor
+   CP.nantimes{3} = [TL.pitot(2) TL.master(2)]; % pitot sensor
 
 
 %_________ which estimates should I process?_______________________
@@ -95,14 +98,20 @@ function [CP] = default_parameters_combine_turbulence( basedir)
       %---------------------gust or chipod----------------------
        CP.pflag = CP.pflag.auto_set(basedir);
       %---------------------add manual flags----------------------
-       %CP.pflag = CP.pflag.c_T1(0);       % switch off T1 if bad
-       %CP.pflag = CP.pflag.c_T2(0);       % switch off T2 if bad
+      if diff(TL.Tp1) == 0
+        CP.pflag = CP.pflag.c_T1(0);       % switch off T1 if bad
+      end
+      if diff(TL.Tp2) == 0
+        CP.pflag = CP.pflag.c_T2(0);       % switch off T2 if bad
+      end
 
       CP.pflag = CP.pflag.c_ic(1);       % switch on ic processing (default off)
        %CP.pflag = CP.pflag.c_vc(0);       % switch off viscous convective processing (default on)
        %CP.pflag.master.epsp = 1;       % switch on eps calculation from pitot (default on)
      
-       %CP.pflag = CP.pflag.c_vel_p(0);    % use pitot velocities 
+       if diff(TL.pitot) == 0
+         CP.pflag = CP.pflag.c_vel_p(0);    % use pitot velocities 
+       end
        %CP.pflag = CP.pflag.c_vel_m(0);    % use mooring velocities 
        %CP.pflag = CP.pflag.c_Tzi(0);      % use local (interal) stratification 
        %CP.pflag = CP.pflag.c_Tzm(0);      % use mooring stratification 

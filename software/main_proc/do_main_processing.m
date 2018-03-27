@@ -50,8 +50,11 @@ end
          % parallel for-loop
          parfor f=1:length(fids)
              disp(['processing day ' num2str(f) ' of ' num2str(length(fids))]);
-             try % take care if script crashes that the parpoo is shut down
-                 chi_main_proc(basedir, fids{f}, pflag);
+             try % take care if script crashes that the parpoo is shut 
+                filedate = datenum(fdate{f}(1:8), 'yymmddhh');
+                if (filedate)>= floor(time_lim(1)) & (filedate) <= ceil(time_lim(2))
+                  chi_main_proc(basedir, fids{f}, pflag);
+                end
              catch ME
                  disp(['!!!!!! ' fids{f} ' (f = ' num2str(f) ') crashed while ' ...
                        'processing  !!!!!! \n\n' ME.message]);
@@ -63,7 +66,10 @@ end
          for f=1:length(fids)
              disp(['processing day ' num2str(f) ' of ' num2str(length(fids))]);
              try
-                 chi_main_proc(basedir, fids{f}, pflag);
+                filedate = datenum(fdate{f}(1:8), 'yymmddhh');
+                if (filedate)>= floor(time_lim(1)) & (filedate) <= ceil(time_lim(2))
+                      chi_main_proc(basedir, fids{f}, pflag);
+                 end
              catch ME
                  disp(['!!!!!! ' fids{f} ' (f = ' num2str(f) ') crashed while ' ...
                        'processing  !!!!!! \n\n' ME.message]);

@@ -127,7 +127,7 @@ for a = 1:5
     end
     t = text_corner(ax(a), labelstr, 1);
     set(ax(a), 'Yscale', 'log');    
-    ylim(ax(a), yl);
+    ylim(ax(a), sort(yl));
     set(ax(a),'tickdir','out')
     datetick(ax(a), 'keeplimits');
     
@@ -191,7 +191,7 @@ for f = 1:length(ff)
                 'LineStyle', choose_color(ff{f},'style'),'markersize',ms);
     end
 end
-ylim(axh(a), yl);
+ylim(axh(a), sort(yl));
 set(axh(a), 'Xticklabel', {},'tickdir','out','YAxisLocation','right',...
     'YTick',-10:1:0)
 xl = get(axh(a),'XLim');
@@ -228,7 +228,7 @@ for f = 1:length(ff)
                 'LineStyle', choose_color(ff{f},'style'),'markersize',ms);
     end
 end
-ylim(axh(a), yl);
+ylim(axh(a), sort(yl));
 % set(axh, 'Yticklabel', {}, 'Xticklabel', {},'tickdir','out')
 set(axh(a), 'Xticklabel', {},'tickdir','out','YAxisLocation','right',...
     'YTick',-10:1:0)

@@ -42,6 +42,9 @@ if exist(fname)
   TL.master(1)       =  convert_timeStr2datenum( DB.instruments.start, tl_default(1));
   TL.master(2)       =  convert_timeStr2datenum( DB.instruments.stop, tl_default(2));
 
+  tl_default = TL.master;
+
+
   %_____________________set all sub flags to master______________________
    TL.T1       =  TL.master;
    TL.Tp1      =  TL.master;

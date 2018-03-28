@@ -94,7 +94,7 @@ if inkey == 0
 
 
       % create new entry in instruments table
-      genStr_inst = ['insert into instruments (name, type, datapath) values ("' newSN '","' InstTyps{type_id} '","' datapath  '")'];
+      genStr_inst = ['insert into instruments (name, id_platform,  type, datapath) values ("' newSN '", 138, "' InstTyps{type_id} '","' datapath  '")'];
 	   exec(omg_db, genStr_inst);
 
       %get the last entry in instruments table

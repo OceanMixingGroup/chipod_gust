@@ -7,7 +7,8 @@ function [merged] = merge_cell_structs(in)
         if isstruct(in{1}.(F{f}))
             merged.(F{f}) = merge_struct_array([mat.(F{f})]);
         else
-            merged.(F{f}) = [mat.(F{f})];
+            [~,i_max] = max(size(mat(1).(F{f})));
+            merged.(F{f}) = cat( i_max, mat.(F{f}));
         end
     end
 end

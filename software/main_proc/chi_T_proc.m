@@ -39,17 +39,21 @@ function [] = chi_T_proc(basedir, rfid, varargin)
 %_____________________average on 1 sec intervalls______________________
    T = average_fields(data, 1);
 
-   % cal temperature variance separatly
-   dt_p        = median(diff(data.time_tp));
-   Np          = round(1/(dt_p*36000*24))*10; % how many valus a second; 
-   Np_half     = round(Np/2);
 
    if isfield(data, 'T1Pt') % chipod
+      % cal temperature variance separatly
+      dt_p        = median(diff(data.time_tp));
+      Np          = round(1/(dt_p*36000*24))*10; % how many valus a second; 
+      Np_half     = round(Np/2);
       varT1_tmp   =  movvar( data.T1Pt, Np, 'omitnan');
       T.varT1p    =  varT1_tmp(Np_half:Np:end-Np_half);
       varT2_tmp   =  movvar( data.T2Pt, Np, 'omitnan');
       T.varT2p    =  varT2_tmp(Np_half:Np:end-Np_half);
    else   % gusT
+      % cal temperature variance separatly
+      dt_p        = median(diff(data.time));
+      Np          = round(1/(dt_p*36000*24))*10; % how many valus a second; 
+      Np_half     = round(Np/2);
       varT_tmp   =  movvar( data.TPt, Np, 'omitnan');
       T.varTp    =  varT_tmp(Np_half:Np:end-Np_half);
    end

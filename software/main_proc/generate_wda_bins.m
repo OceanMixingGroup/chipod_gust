@@ -8,7 +8,7 @@ function [Tbins] = generate_wda_bins(Tchi, nquantiles)
     dTres = 0; 5e-5; % 1mK precision
 
     % adjust min/max edges so that we use as much data as possible
-    Tbins = sort([min(Tchi)+dTres/2, quantile(Tchi, nquantiles), max(Tchi)-dTres/2]);
+    Tbins = sort([prctile(Tchi, 5), quantile(Tchi, nquantiles), prctile(Tchi, 95)]);
 
     % % make sure bin widths are > dTres
     % bins2 = Tbins;

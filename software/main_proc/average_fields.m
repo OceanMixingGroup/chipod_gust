@@ -8,6 +8,11 @@ function [avg] = average_fields(data, dt)
 %        INPUT
 %           avg.time  = matlab time 
 %           dt        = time interval in [s] 
+%
+%
+%   remodeled: 
+%        Johannes Becherer
+%        Wed Mar 28 15:41:54 PDT 2018
 
 
 if ~isfield(data, 'time')
@@ -35,81 +40,71 @@ end
 
 %_____________________create new time vector______________________
 sec_d = 3600*24; % factor sec to day
-avg.time = (data.time(1)+.5*dt/sec_d):dt/sec_d:(data.time(end)-.5*dt/sec_d);
+
+%_____________________time steps______________________
+dt_time  =  median(diff(data.time));
+dt_tp    =  median(diff(data.time_tp));
+dt_cmp   =  median(diff(data.time_cmp));
+
+%_____________________length______________________
+N_time   =  length(data.time);
+N_tp     =  length(data.time_tp);
+N_cmp    =  length(data.time_cmp);
+
+%_____________________average_window_width______________________
+WW_time      = round(dt/(dt_time*sec_d));  
+   if WW_time < 1; WW_time = 1; end;
+   WW_time_half = round(WW_time/2);
+
+WW_tp        = round(dt/(dt_tp*sec_d));  
+   if WW_tp < 1; WW_tp = 1; end;
+   WW_tp_half = round(WW_tp/2);
+
+WW_cmp       = round(dt/(dt_cmp*sec_d));  
+   if WW_cmp < 1; WW_cmp = 1; end;
+   WW_cmp_half = round(WW_cmp/2);
+
 
 
 %_____________________get all fields______________________
 fs = fields(data);
    %---------------------initialize fileds fields----------------------
-   for f = 1:length(fs)
-      % ignor time vectors
-      if ~( strcmp(fs{f}, 'time') |  strcmp(fs{f}, 'time_cmp') |  strcmp(fs{f}, 'time_tp'))
-         avg.(fs{f}) = nan(size(avg.time));
-      end
-   end
+for f = 1:length(fs)
+ N_field = length( data.(fs{f}) ); % field length
+   if N_field ~= 1 % check if vector
+      % ignor extra time vectors
+      if ~(  strcmp(fs{f}, 'time_cmp') |  strcmp(fs{f}, 'time_tp'))
 
-
-%_____________________loop through every time step______________________
-   %---------------------find indezes----------------------
-   ii       =  find( (data.time<=(avg.time(1)+.5*dt/sec_d) ) ...
-                   & (data.time>=(avg.time(1)-.5*dt/sec_d) ) );
-   
-   ii_tp    =  find( (data.time_tp<=(avg.time(1)+.5*dt/sec_d) ) ...
-                   & (data.time_tp>=(avg.time(1)-.5*dt/sec_d) ) );
-   
-   ii_cmp   =  find( (data.time_cmp<=(avg.time(1)+.5*dt/sec_d) ) ...
-                   & (data.time_cmp>=(avg.time(1)-.5*dt/sec_d) ) );
-
-   D_ii     = round( (dt/sec_d)/nanmean(diff(data.time)) );
-   D_ii_tp  = round((dt/sec_d)/nanmean(diff(data.time_tp)));                
-   D_ii_cmp = round((dt/sec_d)/nanmean(diff(data.time_cmp))); 
- % if ((dt/sec_d)/nanmean(diff(data.time))- round( (dt/sec_d)/nanmean(diff(data.time)) ) ) ~=0
- %      warning('the total length of the file is not a divisible by the intened timestep intended time step')
- %      D_ii     = floor(D_ii);
- %      D_ii_tp  = floor(D_ii_tp);
- %      D_ii_cmp = floor(D_ii_cmp);
- %  end
-
-for t = 1:length(avg.time)
-
-
-
-   %---------------------loop through fields----------------------
-   for f = 1:length(fs)
-      % ignor time vectors
-      if ~(   strcmp(fs{f}, 'time_cmp')...
-         |  strcmp(fs{f}, 'time_tp'))
-         
-         % check if length time 
-         if( strcmp(fs{f}, 'compass') | strcmp(fs{f}, 'cmp') | strcmp(fs{f}, 'pitch') | strcmp(fs{f}, 'roll') )
+         if( strcmp(fs{f}, 'compass') | strcmp(fs{f}, 'cmp') | ...
+             strcmp(fs{f}, 'pitch') | strcmp(fs{f}, 'roll') )
             % compass stuff is in deg and must be treated differently
-            tmp = data.(fs{f})(ii_cmp)/180*pi; % transfor into rad
-            tmp = exp(1i * tmp);  % convert to complex plain
-            avg.(fs{f})(t) = angle(nanmean(tmp))/pi*180;
-         elseif(length(data.(fs{f})) == length(data.time))
-            avg.(fs{f})(t) = nanmean(data.(fs{f})(ii));
-         elseif(length(data.(fs{f})) == length(data.time_tp))
-            avg.(fs{f})(t) = nanmean(data.(fs{f})(ii_tp));
-         else
-            if(t==1)
-%              warning([fs{f} ' is not a field that can be averaged, '...
- %                         ' because there is no corresponding time vector'])
-               % if it contains a structure
-               if( isstruct( data.(fs{f}) ) )
-                  avg.(fs{f}) = data.(fs{f});
-               end
+            tmp         = data.(fs{f})/180*pi; % transfor into rad
+            tmp         = exp(1i * tmp);  % convert to complex plain
+            tmp         =  movmean( tmp, WW_cmp, 'omitnan');
+            tmp         =  tmp( (1+WW_cmp_half):WW_cmp:(end-WW_cmp_half) );
+            tmp         =  angle(tmp)*180/pi;
+            tmp(tmp>360)=  tmp(tmp>360) - 360;
+            tmp(tmp<0)  =  tmp(tmp<0)   + 360;
+            avg.(fs{f}) = tmp;  
+
+         else % normal fields
+            if round(N_field/10) == round(N_time/10) % approx length time
+               tmp         =  movmean( data.(fs{f}), WW_time, 'omitnan');
+               avg.(fs{f}) =  tmp( (1+WW_time_half):WW_time:(end-WW_time_half) );
+            elseif round(N_field/10) == round(N_tp/10) % approx length of time_tp
+               tmp         =  movmean( data.(fs{f}), WW_tp, 'omitnan');
+               avg.(fs{f}) =  tmp( (1+WW_tp_half):WW_tp:(end-WW_tp_half) );
+            else % if there is no mtching time vector
+               avg.(fs{f}) = data.(fs{f});
             end
          end
-
+       
 
       end
+   else % if scalar or structure
+      avg.(fs{f}) = data.(fs{f});
    end
-
-   ii     = ii       + D_ii;
-   ii_tp  = ii_tp    + D_ii_tp;
-   ii_cmp = ii_cmp   + D_ii_cmp;
-end
+end  % for loop
 
 
-
-
+end % function

@@ -1,4 +1,4 @@
-% [wda] = winters_dasaro_avg(t0, t1, vdisp, chi, T, Tp, plotflag)
+% [wda] = winters_dasaro_avg(t0, t1, vdisp, chi, T, Tp, dt, plotflag)
 % Treats the chipod as a profiler and applies the method of Winters & D'Asaro to estimate heat flux.
 % Inputs:
 %        t0, t1 - time indices for accelerometer data (usually 50Hz)
@@ -9,7 +9,7 @@
 %           tstart, tstop - start,end of time chunk
 %
 
-function [wda] = winters_dasaro_avg(t0, t1, vdisp, chi, T, Tp, plotflag)
+function [wda] = winters_dasaro_avg(t0, t1, vdisp, chi, T, Tp, dt, plotflag)
 
     optional = 0;
 
@@ -109,10 +109,18 @@ function [wda] = winters_dasaro_avg(t0, t1, vdisp, chi, T, Tp, plotflag)
 
         % interpolate to uniform depths before sorting
         Tinterp = interp1(zvec, Tvec, zthorpe);
+
         if sum((~isnan(Tinterp))) < 5, continue; end
 
         % Tsort is on depth grid zthorpe
         Tsort = thorpeSort(Tinterp);
+
+        % remove the tails that might have spuriously high gradients
+        % If we have an anomalously low or anomalously high value in profiles
+        % they will result in high gradient but these might not be indicative
+        % of background state
+        Tsort(Tsort < prctile(Tvec, 5)) = nan;
+        Tsort(Tsort > prctile(Tvec, 95)) = nan;
 
         mask = ~isnan(Tsort);
         Tmasked = Tsort(mask);
@@ -168,15 +176,18 @@ function [wda] = winters_dasaro_avg(t0, t1, vdisp, chi, T, Tp, plotflag)
     wda.dTdz_bins(1:length(Tbins)-1, 1) = 1./dzdT;
     wda.dz(1:length(Tbins)-1, 1) = dz;
 
-    % test that we can recover the value
-    % wda = process_wda_estimate(chi, wda);
-    % chiavg = isoscalar_average(chi.chi(chit0:chit1), chi.T(chit0:chit1), Tbins);
-    % Jqavg = -chiavg .* dzdT * 4200 * 1025 * 0.5;
-    % Ktavg = chiavg .* dzdT.^2 * 0.5;
-    % Jqda = nansum(dz .* Jqavg)./nansum(dz);
-    % if ~isnan(Jqda), assert(abs(Jqda - wda.Jq) < 1e-2), end
-
     if plotflag
+        wda.dt = dt;
+        % test that we can recover the value
+        wda_proc = process_wda_estimate(chi, wda);
+        % chiavg = isoscalar_average(chi.chi(chit0:chit1), chi.T(chit0:chit1), Tbins);
+        % Jqavg = -chiavg .* dzdT * 4200 * 1025 * 0.5;
+        % Ktavg = chiavg .* dzdT.^2 * 0.5;
+        % Jqda = nansum(dz .* Jqavg)./nansum(dz);
+        % if ~isnan(Jqda), assert(abs(Jqda - wda.Jq) < 1e-2), end
+        title(hdisp, ['K_T = ' num2str(wda_proc.Kt, '%.1e') ...
+                      ' | Jq = ' num2str(wda_proc.Jq)])
+
         % fit T against z to get dT/dz
         [poly, ~, mu] = polyfit(zfull(~isnan(Tfull)), Tfull(~isnan(Tfull)), 1);
         Tzi = poly(1)/mu(2); % undo MATLAB scaling

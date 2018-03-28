@@ -49,7 +49,8 @@ function [chi_wda] = do_wda_estimate(pflag, data, chi, T, Tp)
     wda = cell(Nt, 1);
     for t0=1:ndt:length(vdisp.dis_z)
         wda{idx} = winters_dasaro_avg(t0, min(t0 + ndt, length(vdisp.dis_z)), ...
-                                      vdisp, chi, T, Tp, plotflag);
+                                      vdisp, chi, T, Tp, pflag.master.wda_dt, ...
+                                      plotflag);
         idx = idx+1;
     end
 

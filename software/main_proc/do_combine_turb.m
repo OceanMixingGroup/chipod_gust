@@ -195,8 +195,26 @@ if(do_combine)
                      spec_floor = interp1(chi.time_floor, chi.spec_floor, chi.time);
                  end
 
-                 [chi, chi.stats.spec_floor_percentage] = ApplyMask(chi, chi.spec_area, '<', ...
-                                                                   CP.factor_spec_floor * spec_floor * nanmean(chi.nfft), ...
+                 if ~exist('hspecfig', 'var')
+                     hspecfig = CreateFigure(is_visible);
+                     hspecfig.Position(3) = 2000;
+                     hspecfig.Position(4) = 1065;
+                     hspec1 = subplot(2,2,[1,2]); hold on;
+                     hspec2 = subplot(223); hold on;
+                     hspec3 = subplot(224); hold on;
+
+                     shown_sensors_noise_floor = [];
+                 end
+
+                 spec_floor_mask = chi.spec_area < CP.factor_spec_floor * spec_floor * nanmean(chi.nfft);
+
+                 do_spec_area = ~any(shown_sensors_noise_floor == CP.sensor);
+                 make_noise_floor_histograms(ID, chi, hspec1, hspec2, hspec3, ...
+                                             spec_floor, spec_floor_mask, do_spec_area)
+                 if do_spec_area, shown_sensors_noise_floor = [shown_sensors_noise_floor, CP.sensor]; end
+
+                 [chi, chi.stats.spec_floor_percentage] = ApplyMask(chi, ...
+                                                                   spec_floor_mask & isnan(chi.chi), '=', 1, ...
                                                                    'spec_floor', [], CP.noise_floor_fill_value);
              end
 
@@ -409,8 +427,11 @@ if(do_combine)
        subplot(222); title(['raw 1s estimates']);
        print(gcf,[basedir '/pics/histograms-raw.png'],'-dpng','-r200','-painters')
 
-       set(0, 'currentfigure', hfstrat);
-       print(gcf,[basedir '/pics/histograms-stratification.png'],'-dpng','-r200','-painters')
+       print(hfstrat,[basedir '/pics/histograms-stratification.png'],'-dpng','-r200','-painters')
+
+       if exist('hspecfig', 'var')
+           print(hspecfig, [basedir '/pics/histograms-noise-floor.png'],'-dpng','-r200','-painters')
+       end
    end
 
    Turb.hash = githash('driver/combine_turbulence.m');
@@ -493,6 +514,12 @@ function [chi] = add_nans(CP, chi)
            chi.eps(death:end) = NaN;
            chi.T(death:end) = NaN;
        end
+       if isfield(chi, 'time_floor')
+           deathf = find(chi.time_floor > CP.T1death, 1, 'first');
+           if ~isempty(deathf)
+               chi.spec_floor(deathf:end) = NaN;
+           end
+       end
    end
 
    if CP.isChipod
@@ -503,6 +530,12 @@ function [chi] = add_nans(CP, chi)
                chi.chi(death:end) = NaN;
                chi.eps(death:end) = NaN;
                chi.T(death:end) = NaN;
+           end
+       end
+       if isfield(chi, 'time_floor')
+           deathf = find(chi.time_floor > CP.T2death, 1, 'first');
+           if ~isempty(deathf)
+               chi.spec_floor(deathf:end) = NaN;
            end
        end
    end
@@ -667,6 +700,48 @@ function [sgn] = get_wda_sign(chi, Tz, CP)
     sgn = fillmissing(sgn, 'nearest'); % nearest-neighbour filling only works for tiny gaps
     sgn(abs(Tzi) < CP.min_dTdz) = nan;
     sgn(isnan(sgn)) = sgn2h(isnan(sgn));
+end
+
+function [] = make_noise_floor_histograms(ID, chi, hspec1, hspec2, hspec3, ...
+                                          spec_floor, spec_floor_mask, do_spec_area)
+
+    clr = choose_color(ID, 'color');
+
+    if do_spec_area
+        histogram(hspec1, log10(chi.spec_area), 'EdgeColor', clr, ...
+                  'displaystyle', 'stairs', 'DisplayName', ID);
+        plot(hspec1, [1 1]* log10(nanmedian(spec_floor) * nanmean(chi.nfft)), hspec1.YLim, ...
+             '--', 'color', clr, 'displayname', [ID ' noise floor'])
+        legend(hspec1, '-dynamiclegend');
+        xlabel(hspec1, 'log_{10} area under Tp spectrum')
+        ylabel(hspec1, 'count')
+    end
+
+    histogram(hspec2, log10(chi.chi(~spec_floor_mask)), 'EdgeColor', clr, ...
+              'normalization', 'count', 'displaystyle', 'stairs', ...
+              'HandleVisibility', 'off')
+    histogram(hspec2, log10(chi.chi(spec_floor_mask)), 'linestyle', '--', ...
+              'EdgeColor', clr, 'normalization', 'count', 'displaystyle', 'stairs', ...
+              'HandleVisibility', 'off')
+    histogram(hspec2, log10(chi.chi), 'EdgeColor', clr, 'linewidth', 2, ...
+              'normalization', 'count', 'displaystyle', 'stairs', 'displayname', ['\chi_{' ID '}'])
+    legend(hspec2, '-dynamiclegend')
+    xlabel(hspec2, 'log_{10} \chi')
+    ylabel(hspec2, 'count')
+    title(hspec2, 'thin dashed, solid = (below, above) noise floor | thick = all values')
+
+    histogram(hspec3, log10(chi.eps(~spec_floor_mask)), 'EdgeColor', clr, ...
+              'normalization', 'count', 'displaystyle', 'stairs', ...
+              'HandleVisibility', 'off')
+    histogram(hspec3, log10(chi.eps(spec_floor_mask)), 'linestyle', '--', ...
+              'EdgeColor', clr, 'normalization', 'count', 'displaystyle', 'stairs', ...
+              'HandleVisibility', 'off')
+    histogram(hspec3, log10(chi.eps), 'EdgeColor', clr, 'linewidth', 2, ...
+              'normalization', 'count', 'displaystyle', 'stairs', 'displayname', ['\epsilon_{' ID '}'])
+    legend(hspec3, '-dynamiclegend')
+    xlabel(hspec3, 'log_{10} \epsilon')
+    ylabel(hspec3, 'count')
+
 end
 
 % Examples of using TestMask and plot_estimate to check masking

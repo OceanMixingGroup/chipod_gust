@@ -46,9 +46,10 @@ function [] = chi_T_proc(basedir, rfid, varargin)
       Np          = round(1/(dt_p*36000*24))*10; % how many valus a second; 
       Np_half     = round(Np/2);
       varT1_tmp   =  movvar( data.T1Pt, Np, 'omitnan');
-      T.varT1p    =  varT1_tmp(Np_half:Np:end-Np_half);
+      T.varT1p    =  varT1_tmp((1+Np_half):Np:(end-Np_half));
       varT2_tmp   =  movvar( data.T2Pt, Np, 'omitnan');
-      T.varT2p    =  varT2_tmp(Np_half:Np:end-Np_half);
+      T.varT2p    =  varT2_tmp((1+Np_half):Np:(end-Np_half));
+
    else   % gusT
       % cal temperature variance separatly
       dt_p        = median(diff(data.time));

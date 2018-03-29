@@ -69,9 +69,10 @@ function [wda] = winters_dasaro_avg(t0, t1, vdisp, chi, T, Tp, dt, plotflag)
     wda.tstop = tstop;
     wda.dTdz_bins = (nan(nquantiles+2, 1));
     wda.dz = (nan(nquantiles+2, 1));
+    wda.no_min_dz = NaN;
 
     % if no long enough profiles are found
-    if isempty(Tprof), return; end
+    if isempty(Tprof), wda.no_min_dz = 1; return; end
 
     % accelerometer has crapped out and thinks we've covered >10m in a minute
     if max(zfull) - min(zfull) > 10, return; end

@@ -59,6 +59,7 @@ function [chi_wda] = do_wda_estimate(pflag, data, chi, T, Tp)
     chi_wda.nbins = chi_wda.nbins(1);
 
     % wda_proc = process_wda_estimate(chi, chi_wda);
+    % plot_estimate(wda_proc)
 
     % old 50Hz style inference
     % acc50hz.time = data.time;

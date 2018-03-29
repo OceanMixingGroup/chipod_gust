@@ -96,7 +96,10 @@ if do_plot
         tic; disp('Calculating PSD')
         if isfield(T, 'T1')
            [p1,f1] = fast_psd(T.T1(trange), nfft, fs);
+           [p1p,~] = fast_psd(T.T1Pt(trange), nfft, fs);
            [p2,f2] = fast_psd(T.T2(trange), nfft, fs);
+           [p2p,~] = fast_psd(T.T2Pt(trange), nfft, fs);
+
 
            % frequency band smoothing
            f = moving_average(f1, nbandsmooth, nbandsmooth);
@@ -104,6 +107,7 @@ if do_plot
            p2a = moving_average(p2, nbandsmooth, nbandsmooth);
         else
            [p1,f1] = fast_psd(T.T(trange), nfft, fs);
+           [p1p,~] = fast_psd(T.TPt(trange), nfft, fs);
            f = moving_average(f1, nbandsmooth, nbandsmooth);
            p1a = moving_average(p1, nbandsmooth, nbandsmooth);
         end
@@ -112,11 +116,13 @@ if do_plot
         tscale = 1; %in seconds
         CreateFigure;
         loglog(1./f/tscale, p1a); hold on;
+        loglog(1./f/tscale, p1p./(f*2*pi).^2);
         if isfield(T, 'T1')
            loglog(1./f/tscale, p2a);
-           legend('T1', 'T2');
+           loglog(1./f/tscale, p2p./(f*2*pi).^2);
+           legend('T1', 'T1P','T2', 'T2P');
         else
-           legend('T');
+           legend('T', 'T1P');
         end
         set(gca, 'XDir', 'reverse')
         xlabel('Period (s)')

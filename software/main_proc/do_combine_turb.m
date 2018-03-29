@@ -261,6 +261,11 @@ if(do_combine)
 
                  chi.wda.sgn = get_wda_sign(chi, Tz, CP);
                  chi.wda.Jq = -abs(chi.wda.Jq) .* chi.wda.sgn;
+
+                 if isfield(chi.wda, 'no_min_dz')
+                     disp([num2str(sum(chi.wda.no_min_dz)/length(chi.wda.no_min_dz), '%.2f') ...
+                          '% of WDA estimates are NaN because the chipod wasn''t pumped enough.']);
+                 end
              end
 
              % dT/dz has to happen after I use chi to get Winters & D'Asaro

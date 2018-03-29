@@ -109,11 +109,19 @@ end
                %ylim(ax(a), 2*[prctile([T.T1Pt, T.T2Pt], 2), prctile([T.T1Pt, T.T2Pt], 98)]);
               end
             else
-               pj = 1; p(pj) = plot(ax(a), T.time(1:dtind:end), T.TPt(1:dtind:end), 'color', [col(pj,:) 1], 'Linewidth', 1);
-                  xlim(ax(a), tl);
-                  t1 = text_corner(ax(a), ['TP [volt]'], 1);  
-                  t1.Color = [col(1,:)];
-                ylim(ax(a), 2*[prctile(T.TPt, 2), prctile(T.TPt, 98)]);
+              if isfield(T, 'varT1p')              
+                  pj = 1; p(pj) = plot(ax(a), T.time(1:dtind:end), T.varTp(1:dtind:end), 'color', [col(pj,:) 1], 'Linewidth', 1);
+                     xlim(ax(a), tl);
+                     t1 = text_corner(ax(a), ['varTP [K^2/s^2]'], 1);  
+                     t1.Color = [col(1,:)];
+                     set(ax(a), 'yscale', 'log')
+              else
+                  pj = 1; p(pj) = plot(ax(a), T.time(1:dtind:end), T.TPt(1:dtind:end), 'color', [col(pj,:) 1], 'Linewidth', 1);
+                     xlim(ax(a), tl);
+                     t1 = text_corner(ax(a), ['TP [K/s]'], 1);  
+                     t1.Color = [col(1,:)];
+                   ylim(ax(a), 2*[prctile(T.TPt, 2), prctile(T.TPt, 98)]);
+              end
             end
                
             linkaxes(ax, 'x');   

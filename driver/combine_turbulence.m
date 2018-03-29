@@ -24,7 +24,14 @@ addpath(genpath('./chipod_gust/software/'));% include  path to preocessing routi
 
 %_____________________get all parameters used for combine______________________
    [CP] = default_parameters_combine_turbulence(basedir);
+
+   %========================================================================
+   % Check default_parameters_combine_turbulence.m for all available options
+   % and comments on how to use them
+   %========================================================================
+
    %_____________________change as much as you like in CP______________________
+
       %CP.time_range        = [datenum(2000, 1, 1, 0, 0, 0) datenum(2060, 1, 1, 0, 0, 0)];
       %CP.T1death           = datenum(2000, 1, 1, 0, 0, 0);
       %CP.T2death           = datenum(2000, 1, 1, 0, 0, 0);
@@ -48,9 +55,20 @@ addpath(genpath('./chipod_gust/software/'));% include  path to preocessing routi
       %  or specific flags like
       %CP.pflag.proc.mmg_ic = 1;
 
-   % Fill value for when instrument is at noise floor.
-   CP.noise_floor_fill_value = nan;
+   % Tolerance factor for near noise-floor Tp observations
+   % CP.factor_spec_floor = 1.5;
 
+   % Fill value for when instrument is at noise floor.
+   % think about setting this to 0. NaN recovers previous behaviour
+   % CP.noise_floor_fill_value = nan;
+
+   % mask out fits in the IC range with 1 sec data?
+   % this tends to happen when dTdz -> 0.
+   % Removes a bunch of high values that are suspicious.
+   % CP.mask_ic_fits = 1;
+
+   % This still checks for whether the wda substructure exists.
+   % So can be safely enabled even if turned off in main_driver.m
    CP.pflag.master.winters_dasaro = 1;
 
 

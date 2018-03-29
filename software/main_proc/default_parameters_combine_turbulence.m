@@ -21,6 +21,9 @@ function [CP] = default_parameters_combine_turbulence( basedir)
    CP.mask_inst_spd  = 1; % estimates are crappy if sensor isn't moving enough.
                           % screws the spectrum calculation...
 
+   % This still checks for whether the wda substructure exists.
+   % So can be safely enabled even if turned off in main_driver.m
+   CP.pflag.winters_dasaro = 1;
    CP.wda_Tz_sign = 'm'; % which dTdz estimate do I use to put a sign on the
                          % Winters & D'Asaro estimate? 'm' for mooring; 'i'
                          % for internal
@@ -41,8 +44,11 @@ function [CP] = default_parameters_combine_turbulence( basedir)
 
    % checking for bad fits
    CP.min_n_freq = 3; % require at least 3 points in fitting range [k_start, k_stop]
-   CP.mask_ic_fits = 1; % mask fits in the inertial convective range with 1
-                        % second data?
+
+   % mask out fits in the IC range with 1 sec data?
+   % this tends to happen when dTdz -> 0.
+   % Removes a bunch of high values that are suspicious.
+   CP.mask_ic_fits = 0;
 
    % deglitching parameters
    CP.deglitch_window   = 180; % in seconds
@@ -58,8 +64,12 @@ function [CP] = default_parameters_combine_turbulence( basedir)
                       % beta version! turned off by default
 
    % Tolerance factor for near noise-floor Tp observations
-   CP.factor_spec_floor = 2;
+   % Needs to be greater than 1 because we are measuring
+   % variance as area under spectrum.
+   % In some records (EBOB) this might be set to as high as 4.
+   CP.factor_spec_floor = 1.5;
    % Fill value for when instrument is at noise floor.
+   % Think about setting this to 0. NaN recovers previous behaviour
    CP.noise_floor_fill_value = nan;
 
    CP.ChipodDepth = 0;

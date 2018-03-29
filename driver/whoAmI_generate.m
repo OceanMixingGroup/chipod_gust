@@ -6,8 +6,8 @@ close all;
 %   if you are not on ganges set path2ganges manually
 here = pwd;
 i_ganges = strfind(here, '/ganges/');
-path2ganges    =  here(1:i_ganges);
-path2database  =  [path2ganges 'ganges/work/database/omg.sqlite'];
+path2ganges    =  here(1:(i_ganges+6));
+path2database  =  [path2ganges '/work/database/omg.sqlite'];
 
 addpath(genpath('./chipod_gust/software/'));
 
@@ -94,7 +94,7 @@ if inkey == 0
 
 
       % create new entry in instruments table
-      genStr_inst = ['insert into instruments (name, type, datapath) values ("' newSN '","' InstTyps{type_id} '","' datapath  '")'];
+      genStr_inst = ['insert into instruments (name, id_platform,  type, datapath) values ("' newSN '", 138, "' InstTyps{type_id} '","' datapath  '")'];
 	   exec(omg_db, genStr_inst);
 
       %get the last entry in instruments table

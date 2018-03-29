@@ -11,8 +11,6 @@ do_parallel = 1;     % use paralelle computing
 do_raw_proc = 1;     % do the raw data processing 
 do_plot     = 0;     % generate a over view plot 
 
-time_range = [datenum(2000, 1, 1, 0, 0, 0) ...
-              datenum(2060, 1, 1, 0, 0, 0)];
 
 dtind = 600; % every 10 minutes, assuming 1 second estimates
 
@@ -31,6 +29,11 @@ addpath(genpath('./chipod_gust/software/'));% include  path to preocessing routi
    unit    = chi_get_unit_name(basedir); % get unit name
    rawdir       = [basedir filesep 'raw' filesep]; % raw files location
 
+% get time limits from whoAmI;
+   [TL] =   whoAmI_timeLimits(basedir);
+   time_range      = TL.master;
+  % time_range = [datenum(2000, 1, 1, 0, 0, 0) ...
+  %            datenum(2060, 1, 1, 0, 0, 0)];
 
 if do_raw_proc
    

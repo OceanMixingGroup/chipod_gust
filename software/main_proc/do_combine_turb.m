@@ -214,10 +214,12 @@ if(do_combine)
 
                      if CP.mask_ic_fits
                          [chi, chi.stats.ic_fit_percentage] = ...
-                             ApplyMask(chi, stats.k_stop < stats.ki, '=', 1, 'fully IC fit');
+                             ApplyMask(chi, stats.k_stop < stats.ki, '=', 1, ...
+                                       'fully IC fit');
+                         perlabel = [' -' num2str(chi.stats.nfreq_percentage + chi.stats.ic_fit_percentage, '%.1f') '%'];
+                         if do_plot, Histograms(chi, hfig, CP.normstr, (ID), ['bad fits' perlabel]); end
                      end
-                     perlabel = [' -' num2str(chi.stats.nfreq_percentage + chi.stats.ic_fit_percentage, '%.1f') '%'];
-                     if do_plot, Histograms(chi, hfig, CP.normstr, (ID), ['bad fits' perlabel]); end
+
                  else
                      disp(['Combined stats file does not exist. Cannot filter out bad fits.'])
                  end

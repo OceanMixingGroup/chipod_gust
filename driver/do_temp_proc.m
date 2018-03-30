@@ -91,19 +91,25 @@ if do_plot
         %% spectra of T1 and T2
         fs = 1/(diff(T.time(1:2))*86400);
 
-        trange = [find_approx(T.time, time_range(1)):find_approx(T.time, time_range(2))];
+        t1range = [find_approx(T.time, TL.T1(1)):find_approx(T.time, TL.T1(2))];
+        t2range = [find_approx(T.time, TL.T2(1)):find_approx(T.time, TL.T2(2))];
+
 
         tic; disp('Calculating PSD')
         if isfield(T, 'T1')
-           [p1,f1] = fast_psd(T.T1(trange), nfft, fs);
-           [p2,f2] = fast_psd(T.T2(trange), nfft, fs);
+           [p1,f1] = fast_psd(T.T1(t1range), nfft, fs);
+           [p1p,~] = fast_psd(T.T1Pt(t1range), nfft, fs);
+           [p2,f2] = fast_psd(T.T2(t2range), nfft, fs);
+           [p2p,~] = fast_psd(T.T2Pt(t2range), nfft, fs);
+
 
            % frequency band smoothing
            f = moving_average(f1, nbandsmooth, nbandsmooth);
            p1a = moving_average(p1, nbandsmooth, nbandsmooth);
            p2a = moving_average(p2, nbandsmooth, nbandsmooth);
         else
-           [p1,f1] = fast_psd(T.T(trange), nfft, fs);
+           [p1,f1] = fast_psd(T.T(t1range), nfft, fs);
+           [p1p,~] = fast_psd(T.TPt(t1range), nfft, fs);
            f = moving_average(f1, nbandsmooth, nbandsmooth);
            p1a = moving_average(p1, nbandsmooth, nbandsmooth);
         end
@@ -112,11 +118,13 @@ if do_plot
         tscale = 1; %in seconds
         CreateFigure;
         loglog(1./f/tscale, p1a); hold on;
+        loglog(1./f/tscale, p1p./(f*2*pi).^2);
         if isfield(T, 'T1')
            loglog(1./f/tscale, p2a);
-           legend('T1', 'T2');
+           loglog(1./f/tscale, p2p./(f*2*pi).^2);
+           legend('T1', 'T1P','T2', 'T2P');
         else
-           legend('T');
+           legend('T', 'T1P');
         end
         set(gca, 'XDir', 'reverse')
         xlabel('Period (s)')

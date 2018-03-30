@@ -211,7 +211,7 @@ for i = 1:length(pflag.id)
          %--------------------- Chi Processing----------------------
            stats = [];
            if id([-1:0]+end) == 'ic'
-               [chi] = chi_chi_proc_ic(Tp, S, Tz, T) ;
+               [chi] = chi_chi_proc_ic(T, S, Tz) ;
            else
                [chi, stats] = chi_chi_proc(Tp, S, Tz, T);
 

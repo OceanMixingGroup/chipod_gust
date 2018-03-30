@@ -14,7 +14,7 @@ function [wda] = winters_dasaro_avg(t0, t1, vdisp, chi, T, Tp, dt, plotflag)
 
     optional = 0;
 
-    MIN_DIS_Z = 0.1; % minimum length (in metres) of a single up- or down-cast
+    MIN_DIS_Z = 0.05; % minimum length (in metres) of a single up- or down-cast
     nquantiles = round(5/60 * dt); % effectively number of bins
 
     % determine "profile" boundaries
@@ -59,7 +59,7 @@ function [wda] = winters_dasaro_avg(t0, t1, vdisp, chi, T, Tp, dt, plotflag)
     end
 
     % Lets make some T bins by splitting into quantiles so that each bin has equal number of observations
-    Tbins = generate_wda_bins(Tprof, nquantiles);
+    Tbins = generate_wda_bins(unique(round(Tprof, 5)), nquantiles);
     dT = diff(Tbins);
 
     % initialized returned structure
@@ -69,7 +69,7 @@ function [wda] = winters_dasaro_avg(t0, t1, vdisp, chi, T, Tp, dt, plotflag)
     wda.tstop = tstop;
     wda.dTdz_bins = (nan(nquantiles+2, 1));
     wda.dz = (nan(nquantiles+2, 1));
-    wda.no_min_dz = NaN;
+    wda.no_min_dz = 0;
 
     % if no long enough profiles are found
     if isempty(Tprof), wda.no_min_dz = 1; return; end
@@ -94,7 +94,7 @@ function [wda] = winters_dasaro_avg(t0, t1, vdisp, chi, T, Tp, dt, plotflag)
         hdisp.Color = 'none';
         hchi = subplot(3,4,[6,7]); hold on; xlabel('time'); ylabel(['\chi (1 sec, color)'])
         htemp2 = axes('Position', hdisp.Position, 'Color', 'none'); hold on;
-        htp = subplot(3,4,[10, 11]); hold on; xlabel('time'); ylabel(['Tp'])
+        htp = subplot(3,4,[10, 11]); hold on; xlabel(['time ' datestr(chi.time(chit0))]); ylabel(['Tp'])
 
         yloc = NaN;
     end
@@ -108,6 +108,10 @@ function [wda] = winters_dasaro_avg(t0, t1, vdisp, chi, T, Tp, dt, plotflag)
         Tvec = T.Tenh(l0:l1); %T.T(l0:l1);
 
         if all(isnan(Tvec)), continue; end
+
+        tpt0 = find_approx(Tp.time, vdisp.time(l0));
+        tpt1 = find_approx(Tp.time, vdisp.time(l1));
+        if any(Tp.tp(tpt0:tpt1) > 15), continue; end
 
         % interpolate to uniform depths before sorting
         Tinterp = interp1(zvec, Tvec, zthorpe);
@@ -128,6 +132,7 @@ function [wda] = winters_dasaro_avg(t0, t1, vdisp, chi, T, Tp, dt, plotflag)
         Tmasked = Tsort(mask);
         zmasked = zthorpe(mask);
         [~,uinds] = unique(Tmasked);
+        % uniform temperature!
         if length(uinds) == 1, continue; end
 
         % find location of chosen isotherms (Tbins) in sorted profiles
@@ -159,8 +164,6 @@ function [wda] = winters_dasaro_avg(t0, t1, vdisp, chi, T, Tp, dt, plotflag)
             hsc = scatter(hsort, chi.T(ct0:ct1), yloc * ones(size(chi.T(ct0:ct1))), ...
                           200, hl.Color, 'HandleVisibility', 'off');
 
-            tpt0 = find_approx(Tp.time, vdisp.time(l0));
-            tpt1 = find_approx(Tp.time, vdisp.time(l1));
             tp_plot = Tp.tp(tpt0:tpt1);
             tp_plot(isnan(T.Tenh(tpt0:tpt1))) = nan;
             semilogy(htp, Tp.time(tpt0:tpt1), tp_plot, '-', 'color', hl.Color);
@@ -235,6 +238,7 @@ function [wda] = winters_dasaro_avg(t0, t1, vdisp, chi, T, Tp, dt, plotflag)
                           200, 'k', 'HandleVisibility', 'off');
 
         hfullT = plot(htemp2, T.time, T.T, 'color', [1 1 1]*0.5);
+        ylim(htemp2, robust_lim(chi.T(chit0:chit1)))
         uistack(hfullT, 'bottom');
 
         hchi.YScale = 'log';
@@ -246,6 +250,7 @@ function [wda] = winters_dasaro_avg(t0, t1, vdisp, chi, T, Tp, dt, plotflag)
         tpt1 = find_approx(Tp.time, vdisp.time(t1));
         htpfull = semilogy(htp, Tp.time(tpt0:tpt1), Tp.tp(tpt0:tpt1), 'color', ...
                            [1 1 1]*0.6);
+        ylim(htp, robust_lim(Tp.tp(tpt0:tpt1)))
         uistack(htpfull, 'bottom')
         axes(htp); datetick('x', 'MM:SS', 'keeplimits');
 
@@ -279,4 +284,12 @@ end
 
 function [data] = jitter(data, magnitude)
     data = data + magnitude * rand(size(data));
+end
+
+function [lims] = robust_lim(data)
+    if max(abs(data)) > 3 * std(data)
+        lims = [prctile(data, 2), prctile(data, 98)];
+    else
+        lims = [0.9 * min(data), 1.1 * max(data)];
+    end
 end

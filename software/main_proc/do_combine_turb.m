@@ -80,6 +80,13 @@ if(do_combine)
          clear chi;
          load([dirname 'chi_' ID '.mat'])
 
+         fds = fields(chi);
+         for f = 1:length(fds)
+            if size(chi.(fds{f}),1) ~= 1
+               chi.(fds{f}) = chi.(fds{f})';
+            end
+         end
+
          CP = process_estimate_ID(CP, ID);
 
          % do winters dasaro estimate?
@@ -94,7 +101,6 @@ if(do_combine)
          try
              load([basedir '/proc/T_m.mat']);
              chi.S = interp1(T1.time, (T1.S + T2.S)/2, chi.time);
-
              compare_min_dTdz_N2_against_SBE_specs(abs(T1.z - T2.z), CP, ID);
          catch ME
              chi.S = 35*ones(size(chi.time));

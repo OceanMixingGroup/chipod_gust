@@ -81,6 +81,13 @@ fstart = f_range(1); fstop = f_range(2);  % integration range
    chi.S       = clever_interp( T.time, T.S, chi.time);
    chi.depth   = clever_interp( T.time, T.depth, chi.time);
 
+   % fix demensions
+   fds = fields(chi);
+   for f = 1:length(fds)
+      if size(chi.(fds{f}),1) ~= 1
+         chi.(fds{f}) = chi.(fds{f})';
+      end
+   end
 
    %----------calculate viscosity and diffusivity-------------
       nu   = nan(Ni, 1);

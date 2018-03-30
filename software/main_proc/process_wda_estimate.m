@@ -1,45 +1,54 @@
 % Given appropriate temperature gradients in wda, estimate volume avg Kt, Jq
-function [wda] = process_wda_estimate(chi, wda)
+function [wda] = process_wda_estimate(chi, chi_wda)
     ticwda = tic;
     disp('Processing Winters & D''Asaro estimate. Takes 120s for 1 year.');
 
-    ndt = round(wda.dt(1) / diff(chi.time(1:2)*86400));
+    ndt = round(chi_wda.dt(1) / diff(chi.time(1:2)*86400));
+
+    wda.Jq = nan(1, length(chi_wda.tstart));
+    wda.Kt = nan(1, length(chi_wda.tstart));
+    wda.eps = nan(1, length(chi_wda.tstart));
+    wda.chi = nan(1, length(chi_wda.tstart));
+    wda.dTdz = nan(1, length(chi_wda.tstart));
+    wda.dzdT = nan(1, length(chi_wda.tstart));
+    if isfield(chi_wda, 'no_min_dz')
+        chi_wda.no_min_dz(isnan(chi_wda.no_min_dz)) = 0;
+        wda.no_min_dz = chi_wda.no_min_dz';
+    end
 
     % at this point, chi might have been trimmed (it is trimmed in
     % combine_turbulence); so we need to find the right time chunks in wda so
     % that things line up right.
     % chunk0 is the wda index of the time chunk that is closest to the first good chi observation
-    chunk0 = find(wda.tstart > chi.time(1), 1, 'first');
-    chit0 = find_approx(chi.time, wda.tstart(chunk0));
-
-    wda.Jq = nan(1, length(wda.tstart));
-    wda.Kt = nan(1, length(wda.tstart));
-    wda.eps = nan(1, length(wda.tstart));
-    wda.chi = nan(1, length(wda.tstart));
-    wda.dTdz = nan(1, length(wda.tstart));
+    chunk0 = find(chi_wda.tstart >= chi.time(1), 1, 'first');
+    chit0 = find_approx(chi.time, chi_wda.tstart(chunk0));
 
     nnan = 0;
-    for tt=chunk0:length(wda.tstart)
+    for tt=chunk0:length(chi_wda.tstart)
         maxt = min(chit0+2*ndt, length(chi.time));
 
         % narrow the search space for speed using ndt
-        chit0 = find_approx(chi.time(chit0:maxt), wda.tstart(tt)) + chit0-1;
-        chit1 = find_approx(chi.time(chit0+1:maxt), wda.tstop(tt), 2) + chit0;
+        chit0 = find_approx(chi.time(chit0:maxt), chi_wda.tstart(tt)) + chit0-1;
+        chit1 = find_approx(chi.time(chit0+1:maxt), chi_wda.tstop(tt), 2) + chit0;
+
+        % I can only start exiting early here because this loop depends on
+        % chit0 from the previous iteration
+        if isfield(wda, 'no_min_dz') & wda.no_min_dz(tt), continue; end
 
         % if at the end, they probably don't line up; discard this one point
         if chit1(1) == length(chi.chi), break; end
 
-        if abs(chi.time(chit1(1)) - wda.tstop(tt))*86400 > 0.5
+        if abs(chi.time(chit1(1)) - chi_wda.tstop(tt))*86400 > 0.5
             chit1 = chit1(2);
         else
             chit1 = chit1(1);
         end
 
         % make sure the time chunks are lining up
-        % disp(['Compare chit0 = ' datestr(chi.time(chit0)) ' vs tstart = ' datestr(wda.tstart(tt))]);
-        % disp(['Compare chit1 = ' datestr(chi.time(chit1)) ' vs tstop = ' datestr(wda.tstop(tt))]);
-        assert(abs(chi.time(chit0) - wda.tstart(tt)) < 0.5/86400)
-        assert(abs(chi.time(chit1) - wda.tstop(tt)) < 0.5/86400)
+        % disp(['Compare chit0 = ' datestr(chi.time(chit0)) ' vs tstart = ' datestr(chi_wda.tstart(tt))]);
+        % disp(['Compare chit1 = ' datestr(chi.time(chit1)) ' vs tstop = ' datestr(chi_wda.tstop(tt))]);
+        assert(abs(chi.time(chit0) - chi_wda.tstart(tt)) < 0.5/86400)
+        assert(abs(chi.time(chit1) - chi_wda.tstop(tt)) < 0.5/86400)
 
         chisub = chi.chi(chit0:chit1);
 
@@ -47,7 +56,7 @@ function [wda] = process_wda_estimate(chi, wda)
         if all(chi_is_nan), continue; end
 
         % if we have chi estimates for less than 30% of the time interval,
-        % note that and carry along
+        % note that and carry along, result is NaN
         if sum(~chi_is_nan)/length(chisub) < 0.3
             % if the valid estimates are all 0, then we keep that.
             if ~all(chisub(~chi_is_nan) == 0)
@@ -58,7 +67,7 @@ function [wda] = process_wda_estimate(chi, wda)
 
         Tchi = chi.T(chit0:chit1);
 
-        Tbins = wda.Tbins(:, tt);
+        Tbins = chi_wda.Tbins(:, tt);
         Tbins = Tbins(~isnan(Tbins));
 
         if length(Tbins) > 1
@@ -67,8 +76,8 @@ function [wda] = process_wda_estimate(chi, wda)
             chiavg = avg(1, :);
             epsavg = avg(2, :);
 
-            dz = wda.dz(1:length(Tbins)-1, tt);
-            dTdz = wda.dTdz_bins(1:length(Tbins)-1, tt);
+            dz = chi_wda.dz(1:length(Tbins)-1, tt);
+            dTdz = chi_wda.dTdz_bins(1:length(Tbins)-1, tt);
             Jqvec = -chiavg' ./ dTdz * 4200 * 1025 * 0.5;
             Ktvec = chiavg' ./ dTdz.^2 * 0.5;
 
@@ -77,10 +86,11 @@ function [wda] = process_wda_estimate(chi, wda)
             wda.Jq(tt) = sum(dz .* Jqvec, 'omitnan')./sum(dz, 'omitnan');
             wda.Kt(tt) = sum(dz .* Ktvec, 'omitnan')./sum(dz, 'omitnan');
             wda.dTdz(tt) = sum(dz .* dTdz, 'omitnan')./sum(dz, 'omitnan');
+            wda.dzdT(tt) = 1./(sum(dz .* 1./dTdz, 'omitnan')./sum(dz, 'omitnan'));
         end
     end
 
     disp(['WDA: ' num2str(nnan) ' = ' num2str(nnan/length(wda.chi)*100) '% time intervals have chi=NaN: '])
-    wda.time = (wda.tstart + wda.tstop)/2;
+    wda.time = (chi_wda.tstart + chi_wda.tstop)/2;
     toc(ticwda);
 end

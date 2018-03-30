@@ -12,6 +12,7 @@ function [wda] = process_wda_estimate(chi, chi_wda)
     wda.dTdz = nan(1, length(chi_wda.tstart));
     wda.dzdT = nan(1, length(chi_wda.tstart));
     if isfield(chi_wda, 'no_min_dz')
+        chi_wda.no_min_dz(isnan(chi_wda.no_min_dz)) = 0;
         wda.no_min_dz = chi_wda.no_min_dz';
     end
 

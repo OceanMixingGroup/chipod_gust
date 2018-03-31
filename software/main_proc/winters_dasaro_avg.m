@@ -109,9 +109,7 @@ function [wda] = winters_dasaro_avg(t0, t1, vdisp, chi, T, Tp, dt, plotflag)
 
         if all(isnan(Tvec)), continue; end
 
-        tpt0 = find_approx(Tp.time, vdisp.time(l0));
-        tpt1 = find_approx(Tp.time, vdisp.time(l1));
-        if any(Tp.tp(tpt0:tpt1) > 15), continue; end
+        if any(Tp.tp(l0:l1) > 15), continue; end
 
         % interpolate to uniform depths before sorting
         Tinterp = interp1(zvec, Tvec, zthorpe);

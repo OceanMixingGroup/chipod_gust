@@ -9,7 +9,7 @@ function [merged] = merge_struct_array(in, concat_2d)
 
     FF = fields(in);
     for ff=1:length(FF)
-        [~, concat_dim] = max(size(in(1).(F{f})));
+        [~, concat_dim] = max(size(in(1).(FF{ff})));
         if concat_2d
             if concat_dim == 1
                 concat_dim = 2;

@@ -74,7 +74,7 @@ if exist(fname)
    else  % gust
 
       TL.T1(2) =  convert_timeStr2datenum( DB.gust.T_stop, tl_default(2));
-      TL.Tp1(2) =  convert_timeStr2datenum( DB.gust.Tp1_stop, tl_default(2));
+      TL.Tp1(2) =  convert_timeStr2datenum( DB.gust.Tp_stop, tl_default(2));
 
       TL.P(2)     =  convert_timeStr2datenum( DB.gust.P_stop, tl_default(2));
       TL.pitot(2) =  convert_timeStr2datenum( DB.gust.pitot_stop, tl_default(2));

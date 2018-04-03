@@ -27,7 +27,7 @@ function [wda] = winters_dasaro_avg(t0, t1, vdisp, chi, T, Tp, dt, plotflag)
     chit0 = find_approx(chi.time, vdisp.time(t0));
     chit1 = find_approx(chi.time, vdisp.time(t1));
 
-    zfull = -(vdisp.dis_z(t0:t1)-vdisp.dis_z(t0));
+    zfull = -(vdisp.dis_z(t0:t1)-nanmean(vdisp.dis_z(t0:t1))); % t0 element can be nan?
     Tfull = T.Tenh(t0:t1);
     Tchi = chi.T(chit0:chit1);
 
@@ -111,7 +111,7 @@ function [wda] = winters_dasaro_avg(t0, t1, vdisp, chi, T, Tp, dt, plotflag)
 
         if abs(vdisp.dis_z(l0) - vdisp.dis_z(l1)) < MIN_DIS_Z, continue; end
 
-        zvec = -(vdisp.dis_z(l0:l1) - vdisp.dis_z(locs(1)));
+        zvec = -vdisp.dis_z(l0:l1);
         Tvec = T.Tenh(l0:l1); %T.T(l0:l1);
 
         if all(isnan(Tvec)), continue; end

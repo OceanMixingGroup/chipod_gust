@@ -63,6 +63,11 @@ function [] = chi_generate_dTdz_i(basedir, rfid, varargin)
    head = chi_get_calibration_coefs(basedir);
    data = chi_calibrate_all([basedir filesep 'raw' filesep rfid], head);
 
+%_____________________time lims______________________
+   [TL] = whoAmI_timeLimits(basedir);
+   time_lim = TL.master;
+   data = apply_time_lims_raw_data(data, TL);
+
 %_____________________pick depth (acc or pressure)______________________
    if do_P % pressure
       data.z = -data.depth;
@@ -87,8 +92,9 @@ function [] = chi_generate_dTdz_i(basedir, rfid, varargin)
          Tz_i.z(i)    = nanmean(data.z(I{i}));
 
          
-         if std(data.z(I{i}))>min_dz % check if there is enough vertical variability
-            p          = polyfit( data.z(I{i}), data.T(I{i}),1);
+         if std(data.z(I{i}))>min_dz ... % check if there is enough vertical variability
+                 && ~any(isnan(data.z(I{i}))) && ~any(isnan(data.T(I{i})))
+            p = polyfit( data.z(I{i}), data.T(I{i}), 1);
             Tz_i.Tz(i) = p(1);
          else % if there is to lee vertical variation set nan
             Tz_i.Tz(i) = nan;
@@ -98,7 +104,6 @@ function [] = chi_generate_dTdz_i(basedir, rfid, varargin)
       Tz_i.S         = ones(length(I),1)*35;
       data.S         = ones(length(data.time),1)*35;
       [Tz_i.N2,Tz_i.Sz,~]  = cal_N2_from_TS(data.time, data.T,  data.S, data.depth, Tz_i.time, Tz_i.Tz, 600);
-
 
       %---------------------save data----------------------
       [~,~,~] =  mkdir(savedir);
@@ -152,14 +157,20 @@ function [] = chi_generate_dTdz_i(basedir, rfid, varargin)
          Tz_i.T2(i)  = nanmean(data.T2(I{i}));
          % combo T1 and T2
          Tz_i.T12(i)  = nanmean( .5*(data.T2(I{i}) + data.T1(I{i})) );
-         if std(data.z(I{i}))>min_dz;
-            p          = polyfit( data.z(I{i}), data.T1(I{i}),1);
-            Tz_i.Tz1(i) = p(1);
-            p          = polyfit( data.z(I{i}), data.T2(I{i}),1);
-            Tz_i.Tz2(i) = p(1);
-            p          = polyfit( data.z(I{i}), .5*(data.T2(I{i}) + data.T1(I{i})) , 1);
-            Tz_i.Tz12(i) = p(1);
-         else % if there is to lee vertical variation set nan
+         if nanstd(data.z(I{i})) > min_dz && ~any(isnan(data.z(I{i})))
+             if ~any(isnan(data.T1(I{i})))
+                 p          = polyfit( data.z(I{i}), data.T1(I{i}),1);
+                 Tz_i.Tz1(i) = p(1);
+             end
+             if ~any(isnan(data.T2(I{i})))
+                 p          = polyfit( data.z(I{i}), data.T2(I{i}),1);
+                 Tz_i.Tz2(i) = p(1);
+             end
+             if ~any(isnan(data.T1(I{i}))) && ~any(isnan(data.T2(I{i})))
+                 p          = polyfit( data.z(I{i}), .5*(data.T2(I{i}) + data.T1(I{i})) , 1);
+                 Tz_i.Tz12(i) = p(1);
+             end
+         else % if there is to lee vertical variation, or nans in data, set nan
             Tz_i.Tz1(i) = nan;
             Tz_i.Tz2(i) = nan;
             Tz_i.Tz12(i) = nan;

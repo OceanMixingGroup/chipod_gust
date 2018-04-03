@@ -3,9 +3,14 @@ function [chi_wda] = do_wda_estimate(params, data, chi, T, Tp)
     % ENHANCE! T and Tp to get higher resolution time series
     % Mudge & Lueck (1994)
     % cross-over frequency at 10Hz
-    T.T = fillmissing(deglitch(T.T, 100, 5, 'b', 1), 'linear');
+
+    nanT = isnan(T.T);
+    nanTp = isnan(Tp.tp);
+
+    T.T(~nanT) = fillmissing(deglitch(T.T(~nanT), 100, 5, 'b', 1), 'linear');
     Tinterp = fillmissing(interp1(T.time, T.T, Tp.time, 'nearest'), 'nearest');
-    Tenh = combine_ttc(Tinterp, Tp.tp, 2*pi*10, 100, 0)';
+    Tenh = nan(size(Tp.tp));
+    Tenh(~nanTp) = combine_ttc(Tinterp(~nanTp), Tp.tp(~nanTp), 2*pi*10, 100, 0)';
 
     % % find out when T sensor is at noise floor
     % mask = movvar(T.T, 50*2.5) < T.floor^2 * 9/7;

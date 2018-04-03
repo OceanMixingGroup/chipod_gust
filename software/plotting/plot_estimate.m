@@ -80,12 +80,9 @@ function [ax] = plot_estimate(chi, name, window, hfig, t0, t1)
     Common()
 
     set(hfig, 'currentaxes', ax(4))
-    try
+    if isfield(chi, 'Kt')
         semilogy(time, moving_average(chi.Kt(tind), ww, ww), ...
-                 'displayname', name)
-    catch ME
-        semilogy(time, moving_average(chi.Kt1(tind), ww, ww), ...
-                 'displayname', name)
+                 'displayname', name);
     end
     ylabel('K_t')
     set(ax(4), 'yscale', 'log');
@@ -94,12 +91,9 @@ function [ax] = plot_estimate(chi, name, window, hfig, t0, t1)
     Common()
 
     set(hfig, 'currentaxes', ax(5))
-    try
+    if isfield(chi, 'Jq')
         plot(time, ...
              moving_average(chi.Jq(tind), ww, ww), 'displayname', name)
-    catch ME
-        plot(time, ...
-             moving_average(-chi.Jq1(tind), ww, ww), 'displayname', name)
     end
     ylabel('J_q^t')
     Common()

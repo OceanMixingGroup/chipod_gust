@@ -25,26 +25,25 @@ I.fields{5}    = 'start';
 I.fields{6}    = 'stop';
 I.fields{7}    = 'depth';
 I.fields{8}    = 'datapath';
-I.fields{9}    = 'comment';
-I.fields{10}   = 'status';
-I.fields{11}   = 'Owner_id';
-I.fields{12}   = 'mab';
+I.fields{9}    = 'status';
+I.fields{10}   = 'Owner_id';
+I.fields{11}   = 'mab';
 
      % open db
      omg_db = sqlite(path2database);
         % instruments table
        for i = 1:length(I.fields)
-           try 
-               db_data = fetch(omg_db, ['select ' I.fields{i}  ' from instruments where id = ' num2str(db_index)] );
-            catch me
-               if contains(me.message, 'NULL')  % if null error
-                  db_data = cell(1,1);
-                  db_data{1,1} = '';
-               else
-                  error(me.message);
-               end
+              try 
+                  db_data = fetch(omg_db, ['select ' I.fields{i}  ' from instruments where id = ' num2str(db_index)] );
+               catch me
+                  if contains(me.message, 'NULL')  % if null error
+                     db_data = cell(1,1);
+                     db_data{1,1} = '';
+                  else
+                     error(me.message);
+                  end
 
-            end
+               end
            if isnumeric((db_data{1,1}))
             I.values{i}   =  num2str(db_data{1,1});
            else

@@ -16,36 +16,54 @@ close all;
    do_plot     = 0;     % generate some figures in ../pics/ to compare the different velocity estimates
    do_vel_p    = 0;     % which calibration should be used for vel_p (0 none (default), 1: adcp, 2: self)
 
-   % This is the time range where the pitot sensor is returning
-   % good data
-   time_range(1)  = datenum(2000, 1, 1, 0, 0, 0);
-   time_range(2)  = datenum(2030, 1, 1, 0, 0, 0);
+%_____________________include path of processing flies______________________
+addpath(genpath('./chipod_gust/software/'));% include  path to preocessing routines
+
+
+%_____________________set directories______________________    
+   here    =   pwd;                % mfiles folder
+   basedir =   here(1:(end-6));    % substract the mfile folder
+   savedir =   [basedir 'proc/'];  % directory directory to save data
+   unit    = chi_get_unit_name(basedir); % get unit name
+
+%_____________________set time limits______________________
+ % get time limits from whoAmI;
+   [TL] =   whoAmI_timeLimits(basedir);
+   time_range      = TL.pitot;
+ % set manually
+   %time_range(1)  = datenum(2000, 1, 1, 0, 0, 0);
+   %time_range(2)  = datenum(2030, 1, 1, 0, 0, 0);
 
    % calibrate in time range different from valid data time range?
    % if so set limits here just as for time_range.
    % by default, both time ranges are equal.
    cal_time_range = time_range;
 
+
+
    % which temperature sensor to use T1 (1) or if T1 is broken T2 (2) ;  
    % for gusTs (0)
-   use_T = 1;  
+   
+   if isfield(TL, 'T1')     % chipod
+      % check which sensor longer survives
+      if TL.T1(2) < TL.pitot(2) & TL.T2(2)>TL.T1(2)
+         use_T = 2;
+      else
+         use_T = 1;
+      end
+   
+   else  % gust
+     use_T = 0; 
+   end
 
+   % manually
+   % use_T = 1;
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%% DO NOT CHANGE BELOW %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-
-%_____________________include path of processing files______________________
-addpath(genpath('./chipod_gust/software/'));% include  path to preocessing routines
-
-
-%____________________set directories______________________    
-   here    =   pwd;                % mfiles folder
-   basedir =   here(1:(end-6));    % substract the mfile folder
-   savedir =   [basedir 'proc/'];  % directory to save data
-   unit    = chi_get_unit_name(basedir); % get unit name
 
 %_____________________do raw data processing______________________
    if do_raw_data

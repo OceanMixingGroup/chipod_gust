@@ -40,18 +40,18 @@ if nargin < 2
    savedir = [basdir 'proc/'];
 end
 
-   motionfile = [basedir 'proc' filesep '/motion.mat'];
+wdafile = [basedir 'input' filesep 'dTdz_w.mat'];
+motionfile = [basedir 'proc' filesep 'motion.mat'];
 
-   % determine if chipod or gusT
-   load([basedir '/calib/header.mat'])
-   if isfield(head.coef, 'T1')
-       CP.isChipod = 1;
-   else
-       CP.isChipod = 0;
-   end
+% determine if chipod or gusT
+load([basedir '/calib/header.mat'])
+if isfield(head.coef, 'T1')
+    CP.isChipod = 1;
+else
+    CP.isChipod = 0;
+end
 
-
-   if do_mask, Tz = determine_additional_Tz_mask(CP); end
+if do_mask, Tz = determine_additional_Tz_mask(CP); end
 
 %_____________________find all available chi data______________________
 if(do_combine)
@@ -90,7 +90,8 @@ if(do_combine)
          CP = process_estimate_ID(CP, ID);
 
          % do winters dasaro estimate?
-         do_wda = isfield(chi, 'wda') && ~contains(ID, 'ic') &&  CP.pflag.master.winters_dasaro;
+         do_wda = (exist(wdafile, 'file') || isfield(chi, 'wda')) ...
+                  && ~contains(ID, 'ic') && CP.pflag.master.winters_dasaro;
 
          % convert averaging window from seconds to points
          ww = round(CP.avgwindow/(diff(chi.time(1:2))*3600*24));
@@ -250,11 +251,24 @@ if(do_combine)
              end
              % obtain Kt, Jq using Winters & D'Asaro methodology
              if do_wda
-                 chi.wda = process_wda_estimate(chi, chi.wda);
-
-                 chi.wda.N2 = interp1(chi.time(~isnan(chi.time)), chi.N2(~isnan(chi.time)), chi.wda.time);
-                 chi.wda.eps_Kt = chi.wda.N2 .* chi.wda.Kt/0.2;
-                 chi.wda.eps_Kt(chi.wda.N2 < 0) = nan;
+                 ticwda = tic;
+                 disp('Processing Winters & D''Asaro estimate. Takes 120s for 1 year.');
+                 if ~exist(wdafile, 'file') && isfield(chi, 'wda')
+                     % backward compatibility
+                     disp([wdafile ' not found. Using chi.wda to do Winters & D''Asaro estimate'])
+                     chi.wda = process_wda_estimate(chi, chi.wda);
+                 else
+                     if ~exist('Tz_w', 'var') & exist(wdafile, 'file')
+                         % only needs to be loaded once
+                         load(wdafile);
+                     end
+                     if CP.isChipod
+                         chi.wda = process_wda_estimate(chi, Tz_w.(['wda' num2str(CP.sensor)]));
+                     else
+                         chi.wda = process_wda_estimate(chi, Tz_w.wda);
+                     end
+                 end
+                 toc(ticwda);
 
                  % add in molecular diffusivity
                  chi.wda.Kt = chi.wda.Kt + sw_tdif(interp1(chi.time, chi.S, chi.wda.time), ...
@@ -262,28 +276,14 @@ if(do_combine)
                                                    CP.ChipodDepth);
 
                  if CP.wda_Tz_sign == 'm'
-                     % determine sign of /vertical/ heat flux using mooring gradient
-                     fname = [basedir 'input' filesep 'dTdz_m.mat'];
-                     if exist(fname, 'file')
-                         Tz = load(fname);
-                         Tz = Tz.Tz_m;
-                     else
-                         error([fname 'does not exist. Specify CP.wda_Tz_sign ' ...
-                                'properly.'])
-                     end
+                     sgn = Tz_w.sgn_moor;
+                     chi.wda.sign_used = 'mooring';
                  elseif CP.wda_Tz_sign == 'i'
-                     fname = [basedir 'input' filesep 'dTdz_i.mat'];
-                     if exist(fname, 'file')
-                         Tz = load(fname);
-                         Tz = Tz.Tz_i;
-                         Tz.Tz = Tz.(['Tz' num2str(CP.sensor)]);
-                     else
-                         error([fname 'does not exist. Specify CP.wda_Tz_sign ' ...
-                                'properly.'])
-                     end
+                     sgn = Tz_w.(['sgn_int' num2str(CP.sensor)]);
+                     chi.wda.sign_used = 'internal';
                  end
 
-                 chi.wda.sgn = get_wda_sign(chi, Tz, CP);
+                 chi.wda.sgn = sgn;
                  chi.wda.Jq = -abs(chi.wda.Jq) .* chi.wda.sgn;
 
                  if isfield(chi.wda, 'no_min_dz')
@@ -469,7 +469,7 @@ if(do_combine)
          'pi11    :  Pitot speed    - internal N2 (T1 sensor) - temp_sensor 1 ' ...
          };
 
-%_____________________save combined structure______________________
+   %_____________________save combined structure______________________
    save([savedir '/Turb.mat'], 'Turb');
 end
 
@@ -689,23 +689,6 @@ function [out] = truncate_time(in, time_range)
         end
     end
 
-end
-
-function [sgn] = get_wda_sign(chi, Tz, CP)
-
-    dt = round((Tz.time(2)-Tz.time(1))*86400);
-    Tzi = interp1(Tz.time, Tz.Tz, chi.wda.time);
-
-    % sign of hourly moving median
-    sgn = sign(movmedian(Tzi, 60*60/dt, 'omitnan'));
-    sgn2h = sign(movmedian(Tzi, 2*60*60/dt, 'omitnan'));
-
-    % If T_z is crossing CP.min_dTdz, we shouldn't take it too seriously
-    Tz_min_cross = generate_min_dTdz_crossing_mask(Tzi, CP.min_dTdz, 0);
-    sgn(Tz_min_cross) = nan;
-    sgn = fillmissing(sgn, 'nearest'); % nearest-neighbour filling only works for tiny gaps
-    sgn(abs(Tzi) < CP.min_dTdz) = nan;
-    sgn(isnan(sgn)) = sgn2h(isnan(sgn));
 end
 
 function [] = make_noise_floor_histograms(ID, chi, hspec1, hspec2, hspec3, ...

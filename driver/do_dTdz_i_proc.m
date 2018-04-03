@@ -13,6 +13,12 @@ do_plot     = 1;  % do you want to generate graphical output
 
 dt          = 60;    % sec bits of data for analysis
 do_P        = 0;     % use pressure instead of acceleration to get z 
+min_dz      = 0.1;   % minimum displacement
+
+% winters d'asaro options
+wda_params.do_winters_dasaro = 1; % do sorted gradient required for WDA estimate?
+wda_params.wda_dt      = 60; % time chunk over which to average sorted profiles
+wda_params.do_P        = do_P; % use pressure sensor instead of accelerometer
 
 %_____________________include path of processing flies______________________
 addpath(genpath('./chipod_gust/software/'));% include  path to preocessing routines
@@ -35,7 +41,7 @@ if do_proc
  %_____________processing loop through all raw files__________________
 
 
-   disp('calculating the intrenal dTdz');
+   disp('calculating the internal dTdz');
    % init parallel pool
    if(do_parallel)
       parpool;
@@ -43,7 +49,7 @@ if do_proc
       parfor f=1:length(fids)
          try % take care if script crashes that the parpoo is shut down
             disp(['calculating file ' num2str(f) ' of ' num2str(length(fids))]);
-            chi_generate_dTdz_i(basedir, fids{f}, dt, do_P);
+            chi_generate_dTdz_i(basedir, fids{f}, dt, do_P, min_dz, wda_params);
          catch ME
             disp(['!!!!!! ' fids{f} ' crashed while processing  internal dTdz structure !!!!!!' ]);
             disp(ME);
@@ -54,18 +60,26 @@ if do_proc
    else
       for f=1:length(fids)
          disp(['calculating file ' num2str(f) ' of ' num2str(length(fids))]);
-         chi_generate_dTdz_i(basedir, fids{f}, dt, do_P);
+         chi_generate_dTdz_i(basedir, fids{f}, dt, do_P, min_dz, wda_params);
       end
    end
 
  %____________________merge individual files______________________
    chi_merge_and_avg(basedir, 'dTdz', 600);
 
+   if wda_params.do_winters_dasaro
+       chi_merge_and_avg(basedir, 'dTdz_w', 0);
+   end
+
  %_____________________cp result to the input directory______________________
    if exist('../proc/dTdz.mat','file') == 2
       ! cp ../proc/dTdz.mat ../input/dTdz_i.mat
    elseif exist('../proc/dTdz_600sec.mat','file') == 2
       ! cp ../proc/dTdz_600sec.mat ../input/dTdz_i.mat
+   end
+
+   if exist('../proc/dTdz_w.mat','file') == 2
+      ! cp ../proc/dTdz_w.mat ../input/dTdz_w.mat
    end
 end
 

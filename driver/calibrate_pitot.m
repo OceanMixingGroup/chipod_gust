@@ -48,16 +48,45 @@ addpath(genpath('./chipod_gust/software/'));% include  path to preocessing routi
       % check which sensor longer survives
       if TL.T1(2) < TL.pitot(2) & TL.T2(2)>TL.T1(2)
          use_T = 2;
+         % adjust pitot calibration time if temp dies early
+         if TL.T2(2) < cal_time_range(2) 
+            cal_time_range(2) =  TL.T2(2);
+         end
       else
          use_T = 1;
+         % adjust pitot calibration time if temp dies early
+         if TL.T1(2) < cal_time_range(2) 
+            cal_time_range(2) =  TL.T1(2);
+         end
       end
    
    else  % gust
      use_T = 0; 
+      % adjust pitot calibration time if temp dies early
+      if TL.T(2) < cal_time_range(2) 
+         cal_time_range(2) =  TL.T(2);
+      end
    end
 
    % manually
    % use_T = 1;
+
+
+   % shall the pressure calibration be switched off
+
+      if TL.P(2) == TL.master(1)
+         use_press = 0;
+      else
+         use_T = 1;
+      end
+      % set flag manually 
+      %use_press   =  0;
+   
+      % adjust pitot calibration time if pressure dies early
+      if TL.P(2) < cal_time_range(2) & use_press
+         cal_time_range(2) =  TL.P(2);
+      end
+
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -73,7 +102,7 @@ addpath(genpath('./chipod_gust/software/'));% include  path to preocessing routi
 %_____________________determine V0______________________
    
    if do_v0_self | do_v0_adcp | do_plot
-      determine_v0( basedir, do_v0_self, do_v0_adcp, do_plot, do_vel_p, time_range, use_T )
+      determine_v0( basedir, do_v0_self, do_v0_adcp, do_plot, do_vel_p, time_range, use_T, use_press )
    end
 
  

@@ -1,4 +1,4 @@
-function [] = determine_v0( basedir, do_v0_self, do_v0_adcp, do_plot, do_vel_p, time_range, use_T )
+function [] = determine_v0( basedir, do_v0_self, do_v0_adcp, do_plot, do_vel_p, time_range, use_T, use_press )
 %% [] = determine_v0( basedir, do_v0_self, do_v0_adcp, do_plot, do_vel_p, time_range )
 %     
 %     This function is meant to determine V0 the pitot voltage off set based on different methods
@@ -17,6 +17,9 @@ function [] = determine_v0( basedir, do_v0_self, do_v0_adcp, do_plot, do_vel_p, 
 %        Johannes Becherer
 %        Tue Nov 28 14:26:43 PST 2017
 
+if nargin < 8
+    use_press = 1;
+end
 
 if nargin < 7
     use_T = 1;
@@ -58,6 +61,12 @@ end
          disp('./calib/header_p.mat.backup');
          disp('... And we recalculate V0');
          save([hfid '.backup'], 'W');
+      end
+
+      % remove pressure calibration
+      if ~use_press & W.Ps(2) ~=0
+         disp('!!! the pressure calibration is switched off by setting W.Ps(2) = 0')
+         W.Ps(2)  =  0;
       end
 
 %_____________________load averaged raw data and do basic calibration______________________

@@ -77,7 +77,7 @@ addpath(genpath('./chipod_gust/software/'));% include  path to preocessing routi
       if TL.P(2) == TL.master(1)
          use_press = 0;
       else
-         use_T = 1;
+         use_press = 1;
       end
       % set flag manually 
       %use_press   =  0;

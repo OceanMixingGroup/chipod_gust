@@ -22,6 +22,9 @@ addpath(genpath('./chipod_gust/software/'));% include  path to preocessing routi
    basedir =   here(1:(end-6));    % substract the mfile folder
    savedir =   [basedir 'proc/'];  % directory directory to save data
 
+   filename = [basedir 'mfiles/out/out_combine_turbulence_' datestr(now) '.txt'];
+   diary(filename);
+
 %_____________________get all parameters used for combine______________________
    [CP] = default_parameters_combine_turbulence(basedir);
 
@@ -75,5 +78,4 @@ addpath(genpath('./chipod_gust/software/'));% include  path to preocessing routi
 %_____________________do everything______________________
 CP
 do_combine_turb(basedir, savedir, CP, do_combine, do_plot, do_mask, save_fig, is_visible)
-
-
+diary off

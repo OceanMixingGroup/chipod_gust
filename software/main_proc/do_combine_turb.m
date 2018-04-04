@@ -309,11 +309,18 @@ if(do_combine)
 
                  chi.wda.sgn = sgn;
                  chi.wda.Jq = -abs(chi.wda.Jq) .* chi.wda.sgn;
+                 chi.wda.dTdz = abs(chi.wda.dTdz) .* chi.wda.sgn;
 
                  % add in molecular diffusivity
                  chi.wda.Kt = chi.wda.Kt + sw_tdif(interp1(chi.time, chi.S, chi.wda.time), ...
                                                    interp1(chi.time, chi.T, chi.wda.time), ...
                                                    CP.ChipodDepth);
+
+                 % add sorted gradient to stratification histograms
+                 if isempty(strfind(shown_Tz, 'w'))
+                     shown_Tz = [shown_Tz 'w'];
+                     StratHist(hfstrat, chi.wda, 'ww');
+                 end
 
                  if isfield(chi.wda, 'no_min_dz')
                      disp([num2str(sum(chi.wda.no_min_dz)/length(chi.wda.no_min_dz), '%.2f') ...

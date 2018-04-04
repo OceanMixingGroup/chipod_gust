@@ -162,10 +162,7 @@ classdef chi_processing_flags
          obj.master.pumped = 1;  % do we have a surface pumped mooring
          obj.master.use_compass = 1; % we use compass information by default
          obj.master.use_pres = 0; % we use accelerometer information by default
-         obj.master.winters_dasaro = 0; % do winters & dasaro Kt, Jq estimate?
-         obj.master.wda_dt = 60; % (in seconds) time-interval over which to
-                                 % apply Winters & D'Asaro methodology
-         obj.master.ic_dt  = 600; % (in seconds) time window for ic-estimate 
+         obj.master.ic_dt  = 600; % (in seconds) time window for ic-estimate
          obj.master.ic_frange = [1/50 1/20]; % fiting range for ic-estimate
 
          %_____________ processing flags_________________________________
@@ -334,7 +331,6 @@ classdef chi_processing_flags
          if obj.master.T2     == 0; obj = obj.c_T2(0); end
          if obj.master.Tzi    == 0; obj = obj.c_Tzi(0); end
          if obj.master.Tzm    == 0; obj = obj.c_Tzm(0); end
-         if obj.master.pumped == 0; obj.master.winters_dasaro = 0; end
       end
 
       function obj = c_vel_m(obj, a)

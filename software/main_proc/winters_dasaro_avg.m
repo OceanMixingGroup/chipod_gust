@@ -17,6 +17,8 @@ function [wda] = winters_dasaro_avg(t0, t1, vdisp, chi, T, Tp, dt, plotflag)
     MIN_DIS_Z = 0.05; % minimum length (in metres) of a single up- or down-cast
     nquantiles = round(5/60 * dt); % effectively number of bins
 
+    chi_is_empty = ~isfield(chi, 'chi');
+
     % determine "profile" boundaries
     [~, locs1] = findpeaks(vdisp.dis_z(t0:t1));
     [~, locs2] = findpeaks(-vdisp.dis_z(t0:t1));
@@ -25,12 +27,15 @@ function [wda] = winters_dasaro_avg(t0, t1, vdisp, chi, T, Tp, dt, plotflag)
     chit0 = find_approx(chi.time, vdisp.time(t0));
     chit1 = find_approx(chi.time, vdisp.time(t1));
 
-    zfull = -(vdisp.dis_z(t0:t1)-vdisp.dis_z(t0));
+    zfull = -(vdisp.dis_z(t0:t1)-nanmean(vdisp.dis_z(t0:t1))); % t0 element can be nan?
     Tfull = T.Tenh(t0:t1);
     Tchi = chi.T(chit0:chit1);
 
     tstart = chi.time(chit0);
     tstop = chi.time(chit1);
+
+    % fundamental assumption used below
+    assert(isequal(Tp.time, vdisp.time));
 
     % loop over valid profiles and save 1 Hz temp observations in those profiles.
     % these 1Hz observations are used to identify isothermal surfaces Tbins.
@@ -92,7 +97,9 @@ function [wda] = winters_dasaro_avg(t0, t1, vdisp, chi, T, Tp, dt, plotflag)
         hsort.XAxis.TickLabelRotation = 30; hsort.GridAlpha = 1;
         hdisp = subplot(3,4,[2, 3]); hold on; xlabel('time'); ylabel('Displacement')
         hdisp.Color = 'none';
-        hchi = subplot(3,4,[6,7]); hold on; xlabel('time'); ylabel(['\chi (1 sec, color)'])
+        if ~chi_is_empty
+            hchi = subplot(3,4,[6,7]); hold on; xlabel('time'); ylabel(['\chi (1 sec, color)'])
+        end
         htemp2 = axes('Position', hdisp.Position, 'Color', 'none'); hold on;
         htp = subplot(3,4,[10, 11]); hold on; xlabel(['time ' datestr(chi.time(chit0))]); ylabel(['Tp'])
 
@@ -104,7 +111,7 @@ function [wda] = winters_dasaro_avg(t0, t1, vdisp, chi, T, Tp, dt, plotflag)
 
         if abs(vdisp.dis_z(l0) - vdisp.dis_z(l1)) < MIN_DIS_Z, continue; end
 
-        zvec = -(vdisp.dis_z(l0:l1) - vdisp.dis_z(locs(1)));
+        zvec = -vdisp.dis_z(l0:l1);
         Tvec = T.Tenh(l0:l1); %T.T(l0:l1);
 
         if all(isnan(Tvec)), continue; end
@@ -154,17 +161,19 @@ function [wda] = winters_dasaro_avg(t0, t1, vdisp, chi, T, Tp, dt, plotflag)
             hl = plot(hdisp, vdisp.time(l0:l1), zvec, '-', 'linewidth', 2);
             plot(hsort, Tsort, zthorpe, '-', 'HandleVisibility', 'off');
             plot(htemp2, vdisp.time(l0:l1), Tvec, '-', 'linewidth', 0.5);
-            semilogy(hchi, chi.time(ct0:ct1), chi.chi(ct0:ct1), '-', ...
-                     'handlevisibility', 'off');
+            if ~chi_is_empty
+                semilogy(hchi, chi.time(ct0:ct1), chi.chi(ct0:ct1), '-', ...
+                         'handlevisibility', 'off');
+            end
             if isnan(yloc)
                 yloc = 0.95*min(vdisp.dis_z(t0:t1));
             end
             hsc = scatter(hsort, chi.T(ct0:ct1), yloc * ones(size(chi.T(ct0:ct1))), ...
                           200, hl.Color, 'HandleVisibility', 'off');
 
-            tp_plot = Tp.tp(tpt0:tpt1);
-            tp_plot(isnan(T.Tenh(tpt0:tpt1))) = nan;
-            semilogy(htp, Tp.time(tpt0:tpt1), tp_plot, '-', 'color', hl.Color);
+            tp_plot = Tp.tp(l0:l1);
+            tp_plot(isnan(T.Tenh(l0:l1))) = nan;
+            semilogy(htp, Tp.time(l0:l1), tp_plot, '-', 'color', hl.Color);
         end
     end
 
@@ -180,18 +189,20 @@ function [wda] = winters_dasaro_avg(t0, t1, vdisp, chi, T, Tp, dt, plotflag)
     wda.dz(1:length(Tbins)-1, 1) = dz;
 
     if plotflag
-        wda.dt = dt;
-        % test that we can recover the value
-        wda_proc = process_wda_estimate(chi, wda);
-        % chiavg = isoscalar_average(chi.chi(chit0:chit1), chi.T(chit0:chit1), Tbins);
-        % Jqavg = -chiavg .* dzdT * 4200 * 1025 * 0.5;
-        % Ktavg = chiavg .* dzdT.^2 * 0.5;
-        % Jqda = nansum(dz .* Jqavg)./nansum(dz);
-        % if ~isnan(Jqda), assert(abs(Jqda - wda.Jq) < 1e-2), end
-        title(hdisp, ['K_T = ' num2str(wda_proc.Kt, '%.1e') ...
-                      ' | Jq = ' num2str(wda_proc.Jq)])
+        if ~chi_is_empty
+            wda.dt = dt;
+            % test that we can recover the value
+            wda_proc = process_wda_estimate(chi, wda);
+            % chiavg = isoscalar_average(chi.chi(chit0:chit1), chi.T(chit0:chit1), Tbins);
+            % Jqavg = -chiavg .* dzdT * 4200 * 1025 * 0.5;
+            % Ktavg = chiavg .* dzdT.^2 * 0.5;
+            % Jqda = nansum(dz .* Jqavg)./nansum(dz);
+            % if ~isnan(Jqda), assert(abs(Jqda - wda.Jq) < 1e-2), end
+            title(hdisp, ['K_T = ' num2str(wda_proc.Kt, '%.1e') ...
+                          ' | Jq = ' num2str(wda_proc.Jq)])
+        end
 
-        % fit T against z to get dT/dz
+        % fit T against z to get dT/dz == internal gradient
         [poly, ~, mu] = polyfit(zfull(~isnan(Tfull)), Tfull(~isnan(Tfull)), 1);
         Tzi = poly(1)/mu(2); % undo MATLAB scaling
         if plotflag
@@ -219,18 +230,22 @@ function [wda] = winters_dasaro_avg(t0, t1, vdisp, chi, T, Tp, dt, plotflag)
                       'displayname', ['average \Delta z mean=' ...
                             num2str(nanmean(1./dzdT), '%.1e')]);
 
-        hline5 = plot(hsort, Tbins(1) + [0, diff(hsort.YLim) * mean(chi.dTdz(chit0:chit1))], ...
-                      hsort.YLim, 'r-', 'linewidth' ,2, 'DisplayName', ...
-                      ['mean(chi.dTdz) = ' num2str(mean(chi.dTdz(chit0:chit1)), '%.1e')]);
+        if isfield(chi, 'dTdz')
+            hline5 = plot(hsort, Tbins(1) + [0, diff(hsort.YLim) * mean(chi.dTdz(chit0:chit1))], ...
+                          hsort.YLim, 'r-', 'linewidth' ,2, 'DisplayName', ...
+                          ['mean(chi.dTdz) = ' num2str(mean(chi.dTdz(chit0:chit1)), '%.1e')]);
+        end
 
         hzfull = plot(hdisp, vdisp.time(t0:t1), ...
                       -(vdisp.dis_z(t0:t1) - vdisp.dis_z(t0)), ...
                       'color', [1 1 1]*0.75, 'linewidth', 2);
-        hcfull = plot(hchi, chi.time(chit0:chit1), ...
-                      chi.chi(chit0:chit1), 'HandleVisibility', 'off', ...
-                      'color', [1 1 1]*0.75, 'linewidth', 2);
+        if ~chi_is_empty
+            hcfull = plot(hchi, chi.time(chit0:chit1), ...
+                          chi.chi(chit0:chit1), 'HandleVisibility', 'off', ...
+                          'color', [1 1 1]*0.75, 'linewidth', 2);
+            uistack(hcfull, 'bottom')
+        end
         uistack(hzfull, 'bottom')
-        uistack(hcfull, 'bottom')
 
         hscfull = scatter(hsort, Tchi, yloc * ones(size(chi.T(chit0:chit1))), ...
                           200, 'k', 'HandleVisibility', 'off');
@@ -252,20 +267,27 @@ function [wda] = winters_dasaro_avg(t0, t1, vdisp, chi, T, Tp, dt, plotflag)
         uistack(htpfull, 'bottom')
         axes(htp); datetick('x', 'MM:SS', 'keeplimits');
 
-        semilogy(hchi, chi.time(chit0:chit1), chi.spec_area(chit0:chit1), ...
-                     'color', 'k', 'linewidth', 2, 'displayname', 'spec\_area')
-        legend(hchi, '-dynamiclegend')
-        plot(hchi, hchi.XLim, [1, 1]*chi.spec_floor * chi.nfft, 'k-', ...
-             'displayname', 'noise floor');
-        plot(hchi, hchi.XLim, 2*[1, 1]*chi.spec_floor * chi.nfft, 'k--', ...
-             'displayname', '2x noise floor');
+        if ~chi_is_empty
+            semilogy(hchi, chi.time(chit0:chit1), chi.spec_area(chit0:chit1), ...
+                     'color', 'k', 'linewidth', 2, 'displayname', ['spec_area'])
+            legend(hchi, '-dynamiclegend')
+            plot(hchi, hchi.XLim, [1, 1]*chi.spec_floor * chi.nfft, 'k-', ...
+                 'displayname', 'noise floor');
+            plot(hchi, hchi.XLim, 2*[1, 1]*chi.spec_floor * chi.nfft, 'k--', ...
+                 'displayname', '2x noise floor');
+            axes(hchi); datetick('x', 'MM:SS', 'keeplimits');
+        end
 
         hleg = legend(hsort, '-dynamiclegend');
         hleg.Position = [0.7479    0.7733    0.1650    0.0800];
-        axes(hchi); datetick('x', 'MM:SS', 'keeplimits');
         axes(hdisp); datetick('x', 'MM:SS', 'keeplimits');
         uistack(htemp2, 'bottom');
-        linkaxes([hchi hdisp htp htemp2], 'x');
+        if ~chi_is_empty
+            linkaxes([hchi hdisp htp htemp2], 'x');
+        else
+            linkaxes([hdisp htp htemp2], 'x');
+        end
+
         hdisp.XLim = chi.time([chit0, chit1]);
         htemp2.YAxisLocation = 'right';
         htemp2.XTickLabels = [];
@@ -274,6 +296,7 @@ function [wda] = winters_dasaro_avg(t0, t1, vdisp, chi, T, Tp, dt, plotflag)
         hsort.PlotBoxAspectRatio = [1 2 1];
         htemp.PlotBoxAspectRatio = [1 2 1];
         hsort.XLim = [min(T.Tenh(t0:t1))-1e-3 max(T.Tenh(t0:t1))+1e-3];
+
         % hsort.Title.String = ['Jq_{DA} = ' num2str(Jqda, '%.1f') ...
         %                     ' | Jq_{i} = ' num2str(Jqi, '%.1f') ...
         %                     ' | Jq_{m} = ' num2str(Jqm, '%.1f')];

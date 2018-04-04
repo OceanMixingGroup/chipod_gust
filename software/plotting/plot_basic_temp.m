@@ -71,10 +71,13 @@ end
                xlim(ax(a), tl);
                t1 = text_corner(ax(a), ['AX [m s^{-2}]'], 1);
                t1.Color = [col(1,:)];
-               t2 = text_corner(ax(a), ['AY (offset) [m s^{-2}]'], 2);
+               t2 = text_corner(ax(a), ['AY (+4) [m s^{-2}]'], 2);
                t2.Color = [col(2,:)];
-               t3 = text_corner(ax(a), ['AZ (offset) [m s^{-2}]'], 3);
+               t3 = text_corner(ax(a), ['AZ (+9.81 - 4) [m s^{-2}]'], 3);
                t3.Color = [col(3,:)];
+               plot(ax(a), xlim(ax(a)), [1 1]*0, '--', 'color', col(1,:)*0.5);
+               plot(ax(a), xlim(ax(a)), [1 1]*4, '--', 'color', col(2,:)*0.5);
+               plot(ax(a), xlim(ax(a)), [1 1]*-4, '--', 'color', col(3,:)*0.5);
                ylim(ax(a), [-1, 1]*8);
             
             a = 4;

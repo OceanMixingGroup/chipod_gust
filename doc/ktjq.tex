@@ -2,25 +2,48 @@
 
 \section{Usage}
 
-\texttt{main\_driver} options:
+First generate files containing the sorted gradient by running \texttt{do\_dTdz\_i\_proc.m} with \texttt{wda\_params.do\_winters\_dasaro = 1} (enabled by default).
+This will save \texttt{input/dTdz\_w.mat} which contains the structure \texttt{Tz\_w} with the fields:
 \begin{itemize}
-\item
-  \texttt{pflag.master.winters\_dasaro} : switch on (1) or off (0)
-\item
-  \texttt{pflag.master.wda\_dt} : (seconds) length of time chunk that is processed at a time. Default is 60 seconds which works OK in the top 30m or so. For deeper χpods you can go longer (3 minutes?)
+\item \texttt{Tz1, Tz2} - time series of volume-averaged sorted gradients $T_z$ calculated using sensors 1,2 respectively.
+\item \texttt{zT1, zT2} - time series of volume-averaged inverse sorted gradients $z_T$ calculated using sensors 1,2 respectively.
+\item \texttt{sgn\_moor, sgn\_int1, sgn\_int2} - Sign of the mean gradient inferred from the mooring gradient or the sensor-appropriate ``internal'' gradient (fitting to a cloud of points).
+\item \texttt{time} - time vector for above fields
+\item \texttt{wda1, wda2} - Bins and other information required to estimate $K_T, J_q$ using the \cite{Winters1996} equation.
 \end{itemize}
 
-\texttt{combine\_turbulence} options:
-\begin{itemize}
-\item
-  \texttt{CP.wda\_Tz\_sign} : (\texttt{'m'} or \texttt{'i'}) - gradient time series used to assign sign to heat flux.
-\end{itemize}
+\texttt{do\_dTdz\_i\_proc} automatically runs \texttt{compare\_dTdz} to generate a plot that compares the sorted gradient, internal gradient and the mooring gradient (if available).
+This image is saved as \texttt{pics/Compare\_dTdz.png}.
 
-
+When enabled, \texttt{combine\_turbulence} will read in \texttt{dTdz\_w.mat} and call \texttt{process\_wda\_estimate} to obtain $K_T, J_q$ for \emph{each VC estimate}.
 The output \texttt{Turb.mat} file will contain \texttt{wda} substructure under each estimate i.e. for estimate \texttt{mm1} the fields \texttt{mm1.wda.Jq, mm1.wda.Kt} are estimates computed using the sorted temperature field. \emph{These are different from \texttt{mm1.Jq, mm1.Kt} which are set using the old way of doing things i.e. dividing by mooring gradient in this case.}
-
 Because we are using the sorted $T_z$ field, there is no reason to mask using \texttt{min\_dTdz}.
-All other masking is applied.
+All other masking (and deglitching) is applied.
+
+\subsection{Options}
+\texttt{do\_dTdz\_i\_proc}:
+\begin{itemize}
+\item
+  \texttt{wda\_params.do\_winters\_dasaro} : switch on (1) or off (0)
+\item
+  \texttt{wda\_params.wda\_dt} : (seconds) length of time chunk that is processed at a time. Default is 60 seconds which works OK in the top 30m or so. For deeper χpods you can go longer (3 minutes?). Note that number of quantiles (bins) is scaled appropriately assuming that 5 quantiles for 60 seconds of data is good coverage.
+\end{itemize}
+
+The sensitivity of the mean sorted gradient to \texttt{wda\_dt} is small (Figure \ref{fig:sorted-tz-sensitivity})
+
+\begin{figure}
+  \centering
+  \includegraphics[width=\textwidth]{figs/wda-sorted-dTdz-dt-variation.png}
+  \includegraphics[width=\textwidth]{figs/wda-527-file100-sorted-dTdz.png}
+  \caption{Sensitivity of mean sorted gradient to \texttt{wda\_dt} for a day of data. As expected, for larger time chunks the gradient is smoother. Even when the mooring gradient is tiny, the sorted estimate is well behaved and has converged (the lower panel is a 30m instrument which is pumped quite frequently).}
+  \label{fig:sorted-tz-sensitivity}
+\end{figure}
+
+\texttt{combine\_turbulence}:
+\begin{itemize}
+\item
+  \texttt{CP.wda\_Tz\_sign} : (\texttt{'m'} or \texttt{'i'}) - gradient time series used to assign sign to heat flux. Chooses the appropriate field from \texttt{Tz\_w}.
+\end{itemize}
 
 \section{Theory}
 \newcommand{\Tbins}{T_\text{bins}}
@@ -34,7 +57,7 @@ These angle brackets are interpreted as a time average for χpods and a depth-bi
 
 The Osborn \& Cox formulation is not well behaved when stratification is low.
 It gets worse in places with large salinity influence: large enough that $T_z < 0$ some of the time.
-When $T_z$ crosses through zero, the estimates of $K_T, J_Q^t$ blow up.
+When $T_z$ crosses through zero, the estimates of $K_T, J_q^t$ blow up.
 In these cases, getting ``reasonable'' values for $K_T$ and $J_q^t$ requires masking out estimates when $T_z$ is less than some ill-defined threshold.
 
 Winters \& D'Asaro derive the continuous form:
@@ -62,7 +85,7 @@ Why is the gradient of the (full 3D) sorted field the right gradient to use?
   \end{itemize}
 In practice, we approximate the gradient of the full 3D sorted state by differencing mooring CTDs, fitting a straight line to 50Hz temperature measurements (internal estimate) or sorting 1D profiles (as we do here).
 
-An objection is that we know $T$ at \SI{100}{Hz} and $χ$ at \SI{1}{Hz}; and we want to sort $T$ at the highest possible frequency.
+One objection is that we know $T$ at \SI{100}{Hz} and $χ$ at \SI{1}{Hz}; and we want to sort $T$ at the highest possible frequency.
 Consider however the discrete form of $J_q^t$ defined in \cite{Winters1996}.
 Let $A_S$ is the surface-area of an extremely warped (stirred) temperature surface $S$ and $A$ be the area of that surface when it is flattened out so that $g$ is normal to it (Figure \ref{fig:wda-temp-surf}).
 $J_q^t$ is the diffusive flux normal to the warped surface $S$ i.e. $κ∇T⋅\hat{n}$ integrated over $S$ — $κ$ is molecular diffusivity and $∇T⋅\hat{n} = \abs{∇T} ≈ ΔT/Δn$.
@@ -81,6 +104,7 @@ since $\zs$ is \emph{defined} such that
    AΔ\zs = \int_S Δn \dr S = ΔV = \text{volume of fluid between surfaces separated by} Δ\zs \text{ or } ΔT.
 \end{equation}
 $J_q^t$ is the product of $Δ\zs/ΔT$ and the \emph{volume-averaged} $χ$ between those two surfaces separated by $ΔT, Δ\zs$.
+It would appear that the two can be determined independently of each other.
 In low stratification, estimating the spacing requires high-resolution temperature measurements but that is exactly what the χpod does.
 
 \begin{figure}[htbp]
@@ -90,7 +114,7 @@ In low stratification, estimating the spacing requires high-resolution temperatu
 \end{figure}
 
 \section{Algorithm}
-Consider a 1 minute (configurable parameter \texttt{pflag.master.wda\_dt}) chunk of data.
+Consider a 1 minute chunk of data (configurable parameter \texttt{wda\_params.wda\_dt} in \texttt{do\_dTdz\_i\_proc}).
 \begin{itemize}
 \item
   Once $χ$ has been estimated, we have $χ ≡ χ(t) ≡ χ(T_1)$, $T_1$ is the 1-second averaged temperature time series.
@@ -130,12 +154,19 @@ The temperature noise floor is not a problem then.
 
 When $T'$ is at its noise floor, that means there's no temperature fluctuations and we are either passing through a fully homogeneous patch or a non-turbulent patch.
 For these time instants, the enhanced temperature time series is set to the last valid observation (using \texttt{fillmissing(..., 'previous')}).
-Note that $χ$ will be set to 0 for the same time instants in \texttt{do\_combine\_turbulence}.
+Note that $χ$ can be set to 0 for the same time instants in \texttt{do\_combine\_turbulence} (this choice results in molecular $K_T$ being inferred).
 
 The mean temperature gradient time series in \texttt{chi.().wda.dTdz} will \emph{never recover a zero gradient} i.e. there is a lower bound to detectable mean gradients.
 The easy way to see this is that in homogeneous fluid there are no temperature surfaces to form bins and so we cannot infer a gradient (also $J_q^t = 0$ which we recover by setting $χ=0$ when $T'$ is at noise floor).
-As long as we choose a long enough time chunk within which to sort profiles, the χpod will sense some temperature fluctuations which can then be sorted to yield finite gradients (the sensed $ΔT$ is a function of time chunk $Δt$ for smallish $Δt$).
+As long as we choose a long enough time chunk within which to sort profiles, the χpod will sense some temperature fluctuations which can then be sorted to yield finite gradients (the sensed $ΔT$ is a function of time chunk $Δt$ for smallish $Δt$ --- see Figure \ref{fig:dTdz-dt}).
 The lower bound on detectable gradient seems to be around \SI{2e-3}{\celsius\per\metre}.
+
+\begin{figure}
+  \centering
+  \includegraphics[width=0.9\textwidth]{figs/wda-sorted-dTdz-dt-variation.png}
+  \caption{Variation of sorted mean gradient with time interval \texttt{wda\_dt}. Larger time intervals result in smoother gradient. This is for a time period with high stratification.}
+  \label{fig:dTdz-dt}
+\end{figure}
 
 \subsection{Sign of vertical heat flux}
 When salinity controls density, it is possible that $dT/dz < 0$ for extended periods of time.
@@ -144,6 +175,34 @@ The only sensible thing to do is to determine the sign of the mean (or ``large-s
 Currently \texttt{combine\_turbulence} uses the sign of the hourly running median of mooring $T_z$ (can be switched to internal $T_z$ using \texttt{CP.wda\_Tz\_sign}).
 During times of low gradients ($T_z < $ \texttt{CP.min\_dTdz}), it uses the sign of the 2-hour running median since we want some sort of ``stable'' sign.
 
+\subsection{Number of bins}
+
+Currently the code uses 5 bins per minute of data and scales that according to \texttt{pflag.master.wda\_dt}. The nunmber of bins is set by setting \texttt{nquantiles} in \texttt{do\_wda\_estimate}. More bins mean better use of data but fewer $χ$ measurements to average in each bin. Few bins will result in the inability to determine gradients well because the temperature profiles could be too short to intersect 2 bin edges.
+
+\subsection{Amount of pumping}
+The sorted estimate requires a pumped mooring. With deeper χpods this can be a problem. One option might be to use the \texttt{wda} estimate when gradients are low and revert to the usual estimate when gradient is high.
+
+\subsection{Debugging}
+
+Say you want to debug the $J_q$ estimate at a particular time.
+\texttt{winters\_dasaro\_avg}, which does all the work, can make a debugging plot when it receives the argument \texttt{plotflag = 1}.
+
+So you'll want to
+\begin{itemize}
+\item Call \texttt{chi\_main\_proc} on the appropriate raw file.
+\item Uncomment the call to \texttt{do\_wda\_estimate} in \texttt{chi\_main\_proc}, and
+\item Insert a keyboard statement in that loop that calls \texttt{winters\_dasaro\_avg} in \texttt{do\_wda\_estimate}.
+\item Set \texttt{plotflag = 1} and call \texttt{winters\_dasaro\_avg} with appropriate \texttt{t0} for the time instant you want to check.
+ \end{itemize}
+
+ This will show something like Figure \ref{fig:wda-debug}.
+
+\begin{figure}
+  \centering
+  \includegraphics[width=\textwidth]{figs/wda-debug.png}
+  \caption{Debugging the sorted gradient and $J_q$ estimate (created by \texttt{winters\_dasaro\_avg}). On the left is the temperature observations plotted against depth on the y-axis. The center panels show time series of both vertical displacement and temperature (top panel); $χ$ and area under the spectrum as well as the noise floor (middle panel), and Tp (bottom panel). On the extreme right are the sorted profiles, as well as straight lines showing $dT/dz$ from the mooring and that obtained from the internal fitting. Colors indicate different profiles (see vertical displacement panel = center top). In this particular minute of the data the sorted gradient is extremely large (3°C/m on average, max ≈ 8°C/m), the mooring gradient ≈ 0.15 is quite small (dark red line in extreme right panel). The thick black line in the extreme right panel is a reconstruction of the sorted profile obtained by integrating the inferred $Δ\zs/ΔT$. Circles at the base indicate 1 sec averages of temperature, I.e. these are the temperature surfaces on which we have χ estimates. The vertical grid lines are the chosen temperature bins $\Tbins$.}
+  \label{fig:wda-debug}
+\end{figure}
 
 %%% Local Variables:
 %%% mode: latex

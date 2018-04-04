@@ -2,14 +2,16 @@ function [] = StratHist(hfig, chi, ID)
 
     if ID(2) == 'm', legstr = 'mooring'; end
     if ID(2) == 'i', legstr = 'internal'; end
+    if ID(2) == 'w', legstr = 'sorted'; end
 
+    set(groot, 'currentfigure', hfig);
     set(hfig, 'DefaultLegendBox', 'off')
 
     % this madness is required because h1.EdgeColor == 'auto'
     co = get(gca, 'ColorOrder');
     ico = get(gca, 'ColorOrderIndex');
 
-    subplot(221); cla('reset')
+    subplot(221);
     h1 = histogram(chi.dTdz,  'NumBins', 200, 'DisplayStyle', 'stairs', ...
                    'Normalization', 'probability', 'DisplayName', legstr, ...
                    'LineWidth', 1.5);
@@ -42,6 +44,7 @@ function [] = StratHist(hfig, chi, ID)
     hold on
     xlabel('log_{10} |1/(dTdz)|')
     ylabel('pdf')
+    legend('-dynamiclegend')
 
     subplot(224)
     histogram(log10(1./chi.dTdz.^2),  'DisplayStyle', 'stairs', ...

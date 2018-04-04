@@ -212,9 +212,8 @@ for i = 1:length(pflag.id)
            else
                [chi, stats] = chi_chi_proc(Tp, S, Tz, T);
 
-               if pflag.master.winters_dasaro
-                   chi.wda = do_wda_estimate(pflag, data, chi, T, Tp);
-               end
+               % left for debugging purposes
+               % chi.wda = do_wda_estimate(pflag, data, chi, T, Tp);
            end
 
            %---------------------save data----------------------

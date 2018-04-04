@@ -7,9 +7,11 @@
 %        Wed Aug 16 16:01:26 PDT 2017
 
 
-do_parallel = 1;     % use paralelle computing 
-do_raw_proc = 1;     % do the raw data processing 
-do_plot     = 0;     % generate a over view plot 
+do_raw_proc = 0;  % do the raw data processing 
+do_plot     = 0;  % generate a over view plot 
+do_parallel = 0;  % 1 use default number of parallel workers
+                  % 0 serial processing
+                  % 2...n  use n number of parallel workers
 
 
 dtind = 600; % every 10 minutes, assuming 1 second estimates
@@ -91,12 +93,12 @@ if do_plot
         %% spectra of T1 and T2
         fs = 1/(diff(T.time(1:2))*86400);
 
-        t1range = [find_approx(T.time, TL.T1(1)):find_approx(T.time, TL.T1(2))];
-        t2range = [find_approx(T.time, TL.T2(1)):find_approx(T.time, TL.T2(2))];
 
 
         tic; disp('Calculating PSD')
         if isfield(T, 'T1')
+           t1range = [find_approx(T.time, TL.T1(1)):find_approx(T.time, TL.T1(2))];
+           t2range = [find_approx(T.time, TL.T2(1)):find_approx(T.time, TL.T2(2))];
            [p1,f1] = fast_psd(T.T1(t1range), nfft, fs);
            [p1p,~] = fast_psd(T.T1Pt(t1range), nfft, fs);
            [p2,f2] = fast_psd(T.T2(t2range), nfft, fs);
@@ -108,8 +110,9 @@ if do_plot
            p1a = moving_average(p1, nbandsmooth, nbandsmooth);
            p2a = moving_average(p2, nbandsmooth, nbandsmooth);
         else
-           [p1,f1] = fast_psd(T.T(t1range), nfft, fs);
-           [p1p,~] = fast_psd(T.TPt(t1range), nfft, fs);
+           trange = [find_approx(T.time, TL.T(1)):find_approx(T.time, TL.T(2))];
+           [p1,f1] = fast_psd(T.T(trange), nfft, fs);
+           [p1p,~] = fast_psd(T.TPt(trange), nfft, fs);
            f = moving_average(f1, nbandsmooth, nbandsmooth);
            p1a = moving_average(p1, nbandsmooth, nbandsmooth);
         end

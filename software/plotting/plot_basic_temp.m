@@ -108,8 +108,8 @@ end
                   t2.Color = [col(2,:)];
                %ylim(ax(a), 2*[prctile([T.T1Pt, T.T2Pt], 2), prctile([T.T1Pt, T.T2Pt], 98)]);
               end
-            else
-              if isfield(T, 'varT1p')              
+            else  % gust
+              if isfield(T, 'varTp')              
                   pj = 1; p(pj) = plot(ax(a), T.time(1:dtind:end), T.varTp(1:dtind:end), 'color', [col(pj,:) 1], 'Linewidth', 1);
                      xlim(ax(a), tl);
                      t1 = text_corner(ax(a), ['varTP [K^2/s^2]'], 1);  

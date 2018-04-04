@@ -15,28 +15,40 @@ function [TL] =   whoAmI_timeLimits(basedir)
 %        Tue Mar 27 12:40:09 PDT 2018
 %
 
-% check fi whoAMI exist?
-fname =  [basedir '/mfiles/whoAmI.m'];
 
 tl_default   = [datenum(2000, 1,1) datenum(2050, 1,1)];  % default tl
+
+
+% gust of chipod
+load([basedir '/calib/header.mat']);
+is_chipod   =  isfield( head.coef, 'T1' );
+
 
 %_____________________initialize______________________
 
 TL.master   =  tl_default;
-TL.T1       =  tl_default;
-TL.Tp1      =  tl_default;
-TL.T2       =  tl_default;
-TL.Tp2      =  tl_default;
 TL.P        =  tl_default;
 TL.pitot    =  tl_default;
 TL.acc      =  tl_default;
 TL.cmp      =  tl_default;
 
+if is_chipod
+   TL.T1       =  tl_default;
+   TL.Tp1      =  tl_default;
+   TL.T2       =  tl_default;
+   TL.Tp2      =  tl_default;
+else
+   TL.T        =  tl_default;
+   TL.Tp       =  tl_default;
+end
 
+
+% check if whoAMIxist?
+fname =  [basedir '/mfiles/whoAmI.m'];
 %_____________________get from whoAmI______________________
 if exist(fname)
 
-  addpath(fname);
+  addpath([basedir '/mfiles/']);
   DB = whoAmI;
 
   TL.master(1)       =  convert_timeStr2datenum( DB.instruments.start, tl_default(1));
@@ -46,10 +58,6 @@ if exist(fname)
 
 
   %_____________________set all sub flags to master______________________
-   TL.T1       =  TL.master;
-   TL.Tp1      =  TL.master;
-   TL.T2       =  TL.master;
-   TL.Tp2      =  TL.master;
    TL.P        =  TL.master;
    TL.pitot    =  TL.master;
    TL.acc      =  TL.master;
@@ -59,7 +67,12 @@ if exist(fname)
 
 
   % chipod
-   if isfield(DB, 'chipods')
+   if is_chipod
+
+      TL.T1       =  TL.master;
+      TL.Tp1      =  TL.master;
+      TL.T2       =  TL.master;
+      TL.Tp2      =  TL.master;
 
       TL.T1(2)    =  convert_timeStr2datenum( DB.chipods.T1_stop, tl_default(2));
       TL.T2(2)    =  convert_timeStr2datenum( DB.chipods.T2_stop, tl_default(2));
@@ -73,8 +86,11 @@ if exist(fname)
 
    else  % gust
 
-      TL.T1(2) =  convert_timeStr2datenum( DB.gust.T_stop, tl_default(2));
-      TL.Tp1(2) =  convert_timeStr2datenum( DB.gust.Tp1_stop, tl_default(2));
+      TL.T       =  TL.master;
+      TL.Tp      =  TL.master;
+
+      TL.T(2)    =  convert_timeStr2datenum( DB.gust.T_stop, tl_default(2));
+      TL.Tp(2)   =  convert_timeStr2datenum( DB.gust.Tp_stop, tl_default(2));
 
       TL.P(2)     =  convert_timeStr2datenum( DB.gust.P_stop, tl_default(2));
       TL.pitot(2) =  convert_timeStr2datenum( DB.gust.pitot_stop, tl_default(2));

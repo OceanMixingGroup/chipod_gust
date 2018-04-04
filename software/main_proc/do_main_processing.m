@@ -46,7 +46,14 @@ end
       [fids, fdate] = chi_find_rawfiles(basedir);
 
       if(pflag.master.parallel)
-         parpool;
+
+         % open the parallel pool
+         if pflag.master.parallel == 1
+            parpool;
+         else
+            parpool(pflag.master.parallel);
+         end
+
          % parallel for-loop
          parfor f=1:length(fids)
              disp(['processing day ' num2str(f) ' of ' num2str(length(fids))]);

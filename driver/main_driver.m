@@ -59,7 +59,10 @@ addpath(genpath('./chipod_gust/software/'));% include  path to preocessing routi
     pflag.master.use_pres = 0; % set to 0, accelerometers are
                                % working, else differentiate
                                % pressure to get speed past sensor
-    pflag.master.parallel = 1;
+
+    pflag.master.parallel = 1; % 1 use default number of parallel workers
+                               % 0 serial processing
+                               % 2...n  use n number of parallel workers
 
     pflag.master.winters_dasaro = 0; % do winters & d'asaro estimate of Kt, Jq
                                      % ONLY for pumped chipods

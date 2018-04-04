@@ -159,7 +159,7 @@ classdef chi_processing_flags
          obj.master.ic     = 0;  % do inertial sub-range fit of temperature (1)
          obj.master.vc     = 0;  % do vicous convective sub-range fit of temperature (1) (this is the standart proceedure)
          obj.master.epsp   = 0;  % intertial sub-range fit on pitot_velocities (1)
-         obj.master.pumped = 0;  % do we have a surface pumped mooring
+         obj.master.pumped = 1;  % do we have a surface pumped mooring
          obj.master.use_compass = 1; % we use compass information by default
          obj.master.use_pres = 0; % we use accelerometer information by default
          obj.master.winters_dasaro = 0; % do winters & dasaro Kt, Jq estimate?

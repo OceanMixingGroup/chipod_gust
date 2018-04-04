@@ -55,12 +55,12 @@ addpath(genpath('./chipod_gust/software/'));% include  path to preocessing routi
     %pflag = pflag.c_Tzi(0);      % use local (interal) stratification 
     %pflag = pflag.c_Tzm(0);      % use mooring stratification 
 
-    %pflag.master.pumped = 1;    % do you use a surface pumped mooring (default = 0)
+    %pflag.master.pumped = 0;    % do you use a surface pumped mooring (default = 1)
 
     pflag.master.use_compass = 1; % if 0, assume chipod vane moves it
                                   % into the flow perfectly
 
-    pflag.master.use_pres = 0; % set to 0, accelerometers are
+    %pflag.master.use_pres = 0; % set to 0, accelerometers are
                                % working, else differentiate
                                % pressure to get speed past sensor
 

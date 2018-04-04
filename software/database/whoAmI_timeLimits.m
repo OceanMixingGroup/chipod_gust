@@ -45,12 +45,24 @@ end
 
 % check if whoAMIxist?
 fname =  [basedir '/mfiles/whoAmI.m'];
+
 %_____________________get from whoAmI______________________
 if exist(fname)
 
-  addpath([basedir '/mfiles/']);
-  DB = whoAmI;
+ %---------------------read whoAmI----------------------
+     startdir = pwd;
 
+     % jump to whoAmI directory
+     cd([basedir '/mfiles/']);
+      
+     DB = whoAmI;
+
+     % jump back to inital directory
+     cd(startdir);
+
+
+
+ %---------------------convert whoAmI into time lims----------------------
   TL.master(1)       =  convert_timeStr2datenum( DB.instruments.start, tl_default(1));
   TL.master(2)       =  convert_timeStr2datenum( DB.instruments.stop, tl_default(2));
 

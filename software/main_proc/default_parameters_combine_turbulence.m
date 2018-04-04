@@ -88,11 +88,21 @@ function [CP] = default_parameters_combine_turbulence( basedir)
    CP.time_range  = TL.master;
 
    % if one sensor dies earlier, specify that time here.
-   CP.T1death = TL.Tp1(2); % chipod T1 or gustT T sensor
-   CP.T2death = TL.Tp2(2); % T2 sensor
+   if isfield(TL, 'TP1') %chipod
+      CP.T1death = TL.Tp1(2); % chipod T1 or gustT T sensor
+      CP.T2death = TL.Tp2(2); % T2 sensor
+   else  % gust
+      CP.T1death = TL.Tp(2); % chipod T1 or gustT T sensor
+      CP.T2death = TL.Tp(2); % 
+   end
 
    % mooring velocity measurement death
-   CP.adcpdeath = datenum(2060, 1, 1, 0, 0, 0); % current meter dies here
+   if exist([basedir '/input/vel_m.mat'])
+      load([basedir '/input/vel_m.mat']);
+      CP.adcpdeath = vel_m.time(end); % current meter dies here
+   else
+      CP.adcpdeath = datenum(2060, 1, 1, 0, 0, 0); % current meter dies here
+   end
 
    %_____________ additional time ranges to NaN out as necessary________________
    % make an array that looks like
@@ -110,11 +120,13 @@ function [CP] = default_parameters_combine_turbulence( basedir)
       %---------------------gust or chipod----------------------
        CP.pflag = CP.pflag.auto_set(basedir);
       %---------------------add manual flags----------------------
-      if diff(TL.Tp1) == 0
-        CP.pflag = CP.pflag.c_T1(0);       % switch off T1 if bad
-      end
-      if diff(TL.Tp2) == 0
-        CP.pflag = CP.pflag.c_T2(0);       % switch off T2 if bad
+      if isfield(TL, 'TP1') %chipod
+         if diff(TL.Tp1) == 0
+           CP.pflag = CP.pflag.c_T1(0);       % switch off T1 if bad
+         end
+         if diff(TL.Tp2) == 0
+           CP.pflag = CP.pflag.c_T2(0);       % switch off T2 if bad
+         end
       end
 
       CP.pflag = CP.pflag.c_ic(1);       % switch on ic processing (default off)

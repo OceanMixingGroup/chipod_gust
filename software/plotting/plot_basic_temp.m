@@ -106,7 +106,8 @@ end
                   t1.Color = [col(1,:)];
                   t2 = text_corner(ax(a), ['T2P [K/s]'], 3);  
                   t2.Color = [col(2,:)];
-               %ylim(ax(a), 2*[prctile([T.T1Pt, T.T2Pt], 2), prctile([T.T1Pt, T.T2Pt], 98)]);
+               Tpcombined = [T.T1Pt(1:dtind:end), T.T2Pt(1:dtind:end)];
+               ylim(ax(a), 4*[-1, 1]*max(abs([prctile(Tpcombined, 2), prctile(Tpcombined, 98)])));
               end
             else  % gust
               if isfield(T, 'varTp')              
@@ -120,7 +121,7 @@ end
                      xlim(ax(a), tl);
                      t1 = text_corner(ax(a), ['TP [K/s]'], 1);  
                      t1.Color = [col(1,:)];
-                   ylim(ax(a), 2*[prctile(T.TPt, 2), prctile(T.TPt, 98)]);
+                   ylim(ax(a), 4*[-1, 1] * max(abs([prctile(T.TPt, 2), prctile(T.TPt, 98)])));
               end
             end
                

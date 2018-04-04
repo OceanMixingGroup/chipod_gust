@@ -50,6 +50,17 @@ if diff(f_range) < 0
 end
 fstart = f_range(1); fstop = f_range(2);  % integration range
 
+% check if f_range fits in Tw
+fmin =  2/Tw;
+if fstart < fmin
+   fstart = fmin;
+   disp(['the min frequency fstart is set to 2/window_width ' num2str(fmin)]);
+end
+if fstop < 2*fmin
+   fstop = 2*fmin;
+   disp(['the max frequency fstop is set to 4/window_width ' num2str(2*fmin)]);
+end
+
     
 
 %_____________________bring spd and T to same time grid______________________

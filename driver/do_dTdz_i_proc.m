@@ -50,7 +50,7 @@ if do_proc
             parfor f=1:length(fids)
                 try % take care if script crashes that the parpoo is shut down
                     filedate = datenum(fdate{f}(1:8), 'yymmddhh');
-                    if (filedate)>= floor(time_lim(1)) & (filedate) <= ceil(time_lim(2))
+                    if (filedate) >= floor(time_lim(1)) & (filedate) < ceil(time_lim(2))
                         disp(['calculating file ' num2str(f) ' of ' num2str(length(fids))]);
                         chi_generate_dTdz_i(basedir, fids{f}, dt, do_P, min_dz, wda_params);
                     end
@@ -63,8 +63,11 @@ if do_proc
             delete(gcp);
         else
             for f=1:length(fids)
-                disp(['calculating file ' num2str(f) ' of ' num2str(length(fids))]);
-                chi_generate_dTdz_i(basedir, fids{f}, dt, do_P, min_dz, wda_params);
+                filedate = datenum(fdate{f}(1:8), 'yymmddhh');
+                if (filedate) >= floor(time_lim(1)) & (filedate) < (time_lim(2))
+                    disp(['calculating file ' num2str(f) ' of ' num2str(length(fids))]);
+                    chi_generate_dTdz_i(basedir, fids{f}, dt, do_P, min_dz, wda_params);
+                end
             end
         end
     end

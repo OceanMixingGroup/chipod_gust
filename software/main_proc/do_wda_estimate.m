@@ -7,6 +7,12 @@ function [chi_wda] = do_wda_estimate(params, data, chi, T, Tp)
     nanT = isnan(T.T);
     nanTp = isnan(Tp.tp);
 
+    if all(nanT) || all(nanTp)
+        chi_wda = [];
+        disp(['do_wda_estimate received all-NaN T or all-NaN Tp']);
+        return;
+    end
+
     T.T(~nanT) = fillmissing(deglitch(T.T(~nanT), 100, 5, 'b', 1), 'linear');
     Tinterp = fillmissing(interp1(T.time, T.T, Tp.time, 'nearest'), 'nearest');
     Tenh = nan(size(Tp.tp));

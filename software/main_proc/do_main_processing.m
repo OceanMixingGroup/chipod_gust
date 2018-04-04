@@ -59,7 +59,7 @@ end
              disp(['processing day ' num2str(f) ' of ' num2str(length(fids))]);
              try % take care if script crashes that the parpoo is shut 
                 filedate = datenum(fdate{f}(1:8), 'yymmddhh');
-                if (filedate)>= floor(time_lim(1)) & (filedate) <= ceil(time_lim(2))
+                if (filedate) >= floor(time_lim(1)) & (filedate) < ceil(time_lim(2))
                   chi_main_proc(basedir, fids{f}, pflag);
                 end
              catch ME
@@ -74,7 +74,7 @@ end
              disp(['processing day ' num2str(f) ' of ' num2str(length(fids))]);
              try
                 filedate = datenum(fdate{f}(1:8), 'yymmddhh');
-                if (filedate)>= floor(time_lim(1)) & (filedate) <= ceil(time_lim(2))
+                if (filedate) >= floor(time_lim(1)) & (filedate) < ceil(time_lim(2))
                       chi_main_proc(basedir, fids{f}, pflag);
                  end
              catch ME

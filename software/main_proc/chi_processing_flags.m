@@ -166,7 +166,7 @@ classdef chi_processing_flags
          obj.master.wda_dt = 60; % (in seconds) time-interval over which to
                                  % apply Winters & D'Asaro methodology
          obj.master.ic_dt  = 600; % (in seconds) time window for ic-estimate 
-         odj.master.ic_frange =  [1/50 1/20]; % fiting range for ic-estimate
+         obj.master.ic_frange = [1/50 1/20]; % fiting range for ic-estimate
 
          %_____________ processing flags_________________________________
          for i=1:length(obj.id)

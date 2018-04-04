@@ -73,8 +73,8 @@ addpath(genpath('./chipod_gust/software/'));% include  path to preocessing routi
   % IC-estimate
     %pflag = pflag.c_ic(1);      % switch on ic processing (default off)
     %pflag = pflag.c_vc(0);      % switch off viscous convective processing (default on)
-    %obj.master.ic_dt     = 600; % (in seconds) time window for ic-estimate 
-    %odj.master.ic_frange =  [1/50 1/20]; % fiting range for ic-estimate
+    %pflag.master.ic_dt     = 600; % (in seconds) time window for ic-estimate 
+    %pflag.master.ic_frange =  [1/50 1/19]; % fiting range for ic-estimate
 
 
 

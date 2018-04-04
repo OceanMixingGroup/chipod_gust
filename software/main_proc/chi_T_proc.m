@@ -56,7 +56,7 @@ function [] = chi_T_proc(basedir, rfid, varargin)
       Np          = round(1/(dt_p*36000*24))*10; % how many valus a second; 
       Np_half     = round(Np/2);
       varT_tmp   =  movvar( data.TPt, Np, 'omitnan');
-      T.varTp    =  varT_tmp(Np_half:Np:end-Np_half);
+      T.varTp    =  varT_tmp((1+Np_half):Np:(end-Np_half));
    end
 
 

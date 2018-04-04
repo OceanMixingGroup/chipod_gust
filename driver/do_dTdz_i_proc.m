@@ -90,70 +90,7 @@ end
 
 %_____________________plotting______________________
 if do_plot
-    load ../input/dTdz_i.mat;
-
-    if exist('../input/dTdz_i.mat', 'file')
-        load ../input/dTdz_w.mat;
-    end
-
-    fig = figure('Color',[1 1 1],'visible','on','Paperunits','centimeters',...
-            'Papersize',[30 20],'PaperPosition',[0 0 30 20]);
-    
-            [ax, ~] = create_axes(fig, 3, 1, 0);
-
-            tl = Tz_i.time([1 end]);
-
-            a = 1;
-            if isfield(Tz_i,'T')
-                plot(ax(a), Tz_i.time, Tz_i.T, 'Linewidth', 1);
-                   xlim(ax(a), tl);
-            else
-                plot(ax(a), Tz_i.time, Tz_i.T1, 'Linewidth', 1);
-                   xlim(ax(a), tl);
-                plot(ax(a), Tz_i.time, Tz_i.T2, 'Linewidth', 1);
-                   xlim(ax(a), tl);  
-                plot(ax(a), Tz_i.time, Tz_i.T12, 'Linewidth', 1);
-                   xlim(ax(a), tl); 
-            end
-               t = text_corner(ax(a), ['Temperature [^\circ C]'], 1);
-               
-            a = 2;
-            if isfield(Tz_i,'T')
-                po10 = floor(log10(max(abs(Tz_i.Tz))));
-                plot(ax(a), Tz_i.time, Tz_i.Tz/10^po10, 'Linewidth', 1);
-            else
-                po10 = floor(log10(max(abs(Tz_i.Tz1))));
-                plot(ax(a), Tz_i.time, Tz_i.Tz1/10^po10, 'Linewidth', 1);
-                plot(ax(a), Tz_i.time, Tz_i.Tz2/10^po10, 'Linewidth', 1);
-                plot(ax(a), Tz_i.time, Tz_i.Tz12/10^po10, 'Linewidth', 1);                
-            end               
-                plot(ax(a), tl, [0 0],':k', 'Linewidth', 1);
-                xlim(ax(a), tl);
-                t = text_corner(ax(a), ['T_z [10^{' num2str(po10) '}K/m]'], 1);
-               
-            a = 3;
-            if isfield(Tz_i,'T')
-               po10 = floor(log10(max(abs(Tz_i.N2))));
-               plot(ax(a), Tz_i.time, Tz_i.N2/10^po10, 'Linewidth', 1);
-            else
-               po10 = floor(log10(max(abs(Tz_i.N2_1))));
-               plot(ax(a), Tz_i.time, Tz_i.N2_1/10^po10, 'Linewidth', 1);
-               plot(ax(a), Tz_i.time, Tz_i.N2_2/10^po10, 'Linewidth', 1);
-               plot(ax(a), Tz_i.time, Tz_i.N2_12/10^po10, 'Linewidth', 1);
-            end
-               plot(ax(a), tl, [0 0],':k', 'Linewidth', 1);
-               xlim(ax(a), tl);
-               t = text_corner(ax(a), ['N^2 [10^{' num2str(po10) '} s^{-2}]'], 1);
-
-            datetick(ax(a), 'keeplimits');
-            
-            t = text_corner(ax(1), ['T_z of unit ' unit], -2);
-            
-
-            print(gcf,'../pics/dTdz_i.png','-dpng','-r200','-painters');
-            savefig(fig, '../pics/dTdz_i.fig');
-            
-            
+    compare_dTdz
 end
 
 disp('Finished processing internal dTdz gradient.')

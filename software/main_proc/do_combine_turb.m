@@ -255,7 +255,8 @@ if(do_combine)
                  disp('Processing Winters & D''Asaro estimate. Takes 120s for 1 year.');
                  if ~exist(wdafile, 'file') && isfield(chi, 'wda')
                      % backward compatibility
-                     disp([wdafile ' not found. Using chi.wda to do Winters & D''Asaro estimate'])
+                     disp(['    ' wdafile ' not found. \n' ...
+                           '     Using chi.wda to do Winters & D''Asaro estimate'])
                      chi.wda = process_wda_estimate(chi, chi.wda);
                  else
                      if ~exist('Tz_w', 'var') & exist(wdafile, 'file')
@@ -270,21 +271,49 @@ if(do_combine)
                  end
                  toc(ticwda);
 
-                 % add in molecular diffusivity
-                 chi.wda.Kt = chi.wda.Kt + sw_tdif(interp1(chi.time, chi.S, chi.wda.time), ...
-                                                   interp1(chi.time, chi.T, chi.wda.time), ...
-                                                   CP.ChipodDepth);
+                 if ~exist(wdafile, 'file') && isfield(chi, 'wda')
+                     if CP.wda_Tz_sign == 'm'
+                         % determine sign of /vertical/ heat flux using mooring gradient
+                         fname = [basedir 'input' filesep 'dTdz_m.mat'];
+                         if exist(fname, 'file')
+                             Tz = load(fname);
+                             Tz = Tz.Tz_m;
+                         else
+                             error([fname 'does not exist. Specify CP.wda_Tz_sign ' ...
+                                    'properly.'])
+                         end
+                     elseif CP.wda_Tz_sign == 'i'
+                         fname = [basedir 'input' filesep 'dTdz_i.mat'];
+                         if exist(fname, 'file')
+                             Tz = load(fname);
+                             Tz = Tz.Tz_i;
+                             Tz.Tz = Tz.(['Tz' num2str(CP.sensor)]);
+                         else
+                             error([fname 'does not exist. Specify CP.wda_Tz_sign ' ...
+                                    'properly.'])
+                         end
+                     end
 
-                 if CP.wda_Tz_sign == 'm'
-                     sgn = Tz_w.sgn_moor;
-                     chi.wda.sign_used = 'mooring';
-                 elseif CP.wda_Tz_sign == 'i'
-                     sgn = Tz_w.(['sgn_int' num2str(CP.sensor)]);
-                     chi.wda.sign_used = 'internal';
+                     sgn = get_wda_sign(chi.wda.time, Tz, CP.min_dTdz);
+                     if CP.wda_Tz_sign == 'm', chi.wda.sign_used = 'mooring'; end
+                     if CP.wda_Tz_sign == 'i', chi.wda.sign_used = 'internal'; end
+                 else
+                     if CP.wda_Tz_sign == 'm'
+                         sgn = Tz_w.sgn_moor;
+                         chi.wda.sign_used = 'mooring';
+                     elseif CP.wda_Tz_sign == 'i'
+                         sgn = Tz_w.(['sgn_int' num2str(CP.sensor)]);
+                         chi.wda.sign_used = 'internal';
+                     end
                  end
 
                  chi.wda.sgn = sgn;
                  chi.wda.Jq = -abs(chi.wda.Jq) .* chi.wda.sgn;
+
+                 % add in molecular diffusivity
+                 chi.wda.Kt = chi.wda.Kt + sw_tdif(interp1(chi.time, chi.S, chi.wda.time), ...
+                                                   interp1(chi.time, chi.T, chi.wda.time), ...
+                                                   CP.ChipodDepth);
 
                  if isfield(chi.wda, 'no_min_dz')
                      disp([num2str(sum(chi.wda.no_min_dz)/length(chi.wda.no_min_dz), '%.2f') ...

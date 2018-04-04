@@ -38,12 +38,16 @@ addpath(genpath('./chipod_gust/software/'));% include  path to preocessing routi
    %---------------set processing flags automatically----------
    pflag = pflag.auto_set(basedir);
 
+ % parallel computing
+   pflag.master.parallel = 1; % 1 use default number of parallel workers
+                               % 0 serial processing
+                               % 2...n  use n number of parallel workers
+
+
    %---------------------add manual flags----------------------
     %pflag = pflag.c_T1(0);       % switch off T1 if bad
     %pflag = pflag.c_T2(0);       % switch off T2 if bad
 
-    %pflag = pflag.c_ic(1);       % switch on ic processing (default off)
-    %pflag = pflag.c_vc(0);      % switch off viscous convective processing (default on)
     %pflag.master.epsp = 1;       % switch on eps calculation from pitot (default on)
   
     %pflag = pflag.c_vel_p(0);    % use pitot velocities 
@@ -60,14 +64,19 @@ addpath(genpath('./chipod_gust/software/'));% include  path to preocessing routi
                                % working, else differentiate
                                % pressure to get speed past sensor
 
-    pflag.master.parallel = 1; % 1 use default number of parallel workers
-                               % 0 serial processing
-                               % 2...n  use n number of parallel workers
-
-    pflag.master.winters_dasaro = 0; % do winters & d'asaro estimate of Kt, Jq
+  % Winters & D'Asaro 
+    %pflag.master.winters_dasaro = 0; % do winters & d'asaro estimate of Kt, Jq
                                      % ONLY for pumped chipods
-    pflag.master.wda_dt = 60; % (in seconds) time-interval over which to
+    %pflag.master.wda_dt = 60; % (in seconds) time-interval over which to
                               % apply Winters & D'Asaro methodology
+
+  % IC-estimate
+    %pflag = pflag.c_ic(1);      % switch on ic processing (default off)
+    %pflag = pflag.c_vc(0);      % switch off viscous convective processing (default on)
+    %obj.master.ic_dt     = 600; % (in seconds) time window for ic-estimate 
+    %odj.master.ic_frange =  [1/50 1/20]; % fiting range for ic-estimate
+
+
 
     pflag = pflag.make_cons();   % make sub-flags consitent with master flags
 

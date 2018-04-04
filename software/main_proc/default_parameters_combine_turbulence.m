@@ -15,7 +15,15 @@ function [CP] = default_parameters_combine_turbulence( basedir)
 
 %_____________________get time limits from whoAmI______________________
    [TL] =   whoAmI_timeLimits(basedir);
+   if exist([basedir '/mfiles/whoAmI.m'], 'file')
+       dbstruct = whoAmI;
+   end
 
+   if exist('dbstruct', 'var') & length(dbstruct.chipods.depth) > 0
+       CP.ChipodDepth = str2double(dbstruct.chipods.depth);
+   else
+       CP.ChipodDepth = 0;
+   end
 
    % set thresholds for masking
    CP.min_N2         = 1e-6;
@@ -75,8 +83,6 @@ function [CP] = default_parameters_combine_turbulence( basedir)
    % Fill value for when instrument is at noise floor.
    % Think about setting this to 0. NaN recovers previous behaviour
    CP.noise_floor_fill_value = nan;
-
-   CP.ChipodDepth = 0;
 
    % normalization for *masking* histograms
    % final processed histograms are always pdf

@@ -52,8 +52,7 @@ function [] = chi_main_proc(basedir, rfid, pflag, varargin)
          end
       end
       % load mooring stratification
-      % if pumped chipod - and Tzi not set, use Tz_i.Tz* for masking
-      if(pflag.master.Tzi) | (pflag.master.pumped)
+      if(pflag.master.Tzi) 
          fid = [basedir filesep 'input' filesep 'dTdz_i.mat'];
          if exist(fid, 'file');
             load(fid);
@@ -90,8 +89,6 @@ function [] = chi_main_proc(basedir, rfid, pflag, varargin)
          % case 1 for pumped moorings
          fid = [basedir filesep 'input' filesep 'vel_p.mat'];
          if( pflag.master.pumped &&  exist(fid, 'file')  );
-
-            disp(['The Pitot velocity is handed in PUMPED MODE!']);
             load(fid);
             vel_p1 = vel_p;
             clear vel_p;
@@ -100,7 +97,7 @@ function [] = chi_main_proc(basedir, rfid, pflag, varargin)
 
          else % case 2 not surface pumped mooring
 
-            disp(['The Pitot velocity is handed in NORMAL MODE']);
+            disp(['The direct Pitot velocity is used instead of the vel_p ']);
             fid = [basedir filesep 'calib' filesep 'header_p.mat'];
             if exist(fid, 'file');
                % load Pitot header

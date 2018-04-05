@@ -22,6 +22,7 @@ addpath(genpath('./chipod_gust/software/'));% include  path to preocessing routi
    basedir =   here(1:(end-6));    % substract the mfile folder
    savedir =   [basedir 'proc/'];  % directory directory to save data
 
+   mkdir([basedir 'mfiles/out']);
    filename = [basedir 'mfiles/out/out_combine_turbulence_' datestr(now) '.txt'];
    diary(filename);
 

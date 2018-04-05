@@ -3,10 +3,8 @@ close all;
 
 
 % find ganges on computer (This assumes you operate on ganges)
-%   if you are not on ganges set path2ganges manually
-here = pwd;
-i_ganges = strfind(here, '/ganges/');
-path2ganges    =  here(1:(i_ganges+6));
+% if you are not on ganges set path2ganges manually
+path2ganges = get_ganges_path;
 path2database  =  [path2ganges '/work/database/omg.sqlite'];
 
 addpath(genpath('./chipod_gust/software/'));

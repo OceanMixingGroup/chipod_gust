@@ -1,13 +1,14 @@
 clear all;
 close all;
 
+addpath(genpath('./chipod_gust/software/'));
+
 % find ganges on computer (This assumes you operate on ganges)
 %   if you are not on ganges set path2ganges manually
 path2ganges    =  get_ganges_path;
 path2database  =  [path2ganges '/work/database/omg.sqlite'];
 
 
-addpath(genpath('./chipod_gust/software/'));
 
 %_____________________get info from local file______________________
 DB       = whoAmI();

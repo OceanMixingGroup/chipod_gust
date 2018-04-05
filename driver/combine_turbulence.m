@@ -70,9 +70,7 @@ addpath(genpath('./chipod_gust/software/'));% include  path to preocessing routi
    % Removes a bunch of high values that are suspicious.
    % CP.mask_ic_fits = 1;
 
-   % This still checks for whether the wda substructure exists.
-   % So can be safely enabled even if turned off in main_driver.m
-   CP.pflag.master.winters_dasaro = 1;
+   CP.pflag.master.winters_dasaro = 0;
 
 
 %_____________________do everything______________________

@@ -99,7 +99,7 @@ function [data] = chi_calibrate_chipod(rfid, head)
             chi.AZ = chi.AZ(1:Nt);
           [dis,vel]=integrate_acc(chi,head);
 
-          chi.Acc = sqrt((chi.AX-nanmean(chi.AX)).^2 + (chi.AY-nanmean(chi.AY)).^2 + (chi.AZ-nanmean(chi.AZ)).^2 );
+	  chi.Acc = sqrt((chi.AX-nanmean(chi.AX)).^2 + (chi.AY-nanmean(chi.AY)).^2 + (chi.AZ-nanmean(chi.AZ)).^2 );
 
           chi.a_dis_x = dis.x;
           chi.a_dis_y = dis.y;

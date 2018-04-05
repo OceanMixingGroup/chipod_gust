@@ -1,10 +1,16 @@
 function [data] = apply_time_lims_raw_data(data, TL)
 
-    data.T1 = apply_limits(data.time, data.T1, TL.T1);
-    data.T2 = apply_limits(data.time, data.T2, TL.T2);
+   if isfield(data, 'T1') % chhpod
+       data.T1 = apply_limits(data.time, data.T1, TL.T1);
+       data.T2 = apply_limits(data.time, data.T2, TL.T2);
 
-    data.T1Pt = apply_limits(data.time_tp, data.T1Pt, TL.Tp1);
-    data.T2Pt = apply_limits(data.time_tp, data.T2Pt, TL.Tp2);
+       data.T1Pt = apply_limits(data.time_tp, data.T1Pt, TL.Tp1);
+       data.T2Pt = apply_limits(data.time_tp, data.T2Pt, TL.Tp2);
+   else % gust
+       data.T = apply_limits(data.time, data.T, TL.T);
+
+       data.TPt = apply_limits(data.time_tp, data.TPt, TL.Tp);
+   end
 
     data.W = apply_limits(data.time, data.W, TL.pitot);
 

@@ -29,6 +29,12 @@ function [data] = chi_calibrate_gust(rfid, head)
       chi.T=calibrate_polynomial(rdat.T,head.coef.T);
    % pressure
       chi.P=calibrate_polynomial(rdat.P,head.coef.P);
+         % remove glitches
+         chi.P(chi.P==0) = nan;
+
+
+          % integrate pressure sensor
+          [chi.p_dis_z, chi.p_vel_z] = integrate_pres(chi, head);
       chi.depth = (chi.P-14.7)/1.47;
 
    % time vector
@@ -53,6 +59,8 @@ function [data] = chi_calibrate_gust(rfid, head)
           chi.AY=fillgap(chi.AY);
           chi.AZ=fillgap(chi.AZ);
           [dis,vel]=integrate_acc(chi,head);
+
+	  chi.Acc = sqrt((chi.AX-nanmean(chi.AX)).^2 + (chi.AY-nanmean(chi.AY)).^2 + (chi.AZ-nanmean(chi.AZ)).^2 );
 
           chi.a_dis_x = dis.x;
           chi.a_dis_y = dis.y;

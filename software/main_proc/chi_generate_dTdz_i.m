@@ -125,7 +125,7 @@ function [] = chi_generate_dTdz_i(basedir, rfid, varargin)
           Tz_w.wda = do_wda_estimate(wda_params, data, chi, T, Tp);
 
           % process to get dTdz time series
-          wda_proc = process_wda_estimate(chi1, Tz_w.wda);
+          wda_proc = process_wda_estimate(chi, Tz_w.wda);
 
           % save the dTdz time series
           Tz_w.Tz = wda_proc.dTdz;

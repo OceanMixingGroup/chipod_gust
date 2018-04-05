@@ -94,7 +94,7 @@ function [CP] = default_parameters_combine_turbulence( basedir)
    CP.time_range  = TL.master;
 
    % if one sensor dies earlier, specify that time here.
-   if isfield(TL, 'TP1') %chipod
+   if isfield(TL, 'Tp1') %chipod
       CP.T1death = TL.Tp1(2); % chipod T1 or gustT T sensor
       CP.T2death = TL.Tp2(2); % T2 sensor
    else  % gust

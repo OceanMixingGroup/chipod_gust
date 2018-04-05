@@ -45,7 +45,14 @@ if do_proc
         disp('calculating the internal dTdz');
         % init parallel pool
         if(do_parallel)
-            parpool;
+
+            % open the parallel pool
+            if do_parallel == 1
+               parpool;
+            else
+               parpool(do_parallel);
+            end
+
             % parallel for-loop
             parfor f=1:length(fids)
                 try % take care if script crashes that the parpoo is shut down

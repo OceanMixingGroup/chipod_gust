@@ -121,6 +121,7 @@ function [wda] = process_wda_estimate(chi, chi_wda)
               '% time intervals did not see enough pumping to make an estimate. '])
 
         wda.N2 = interp1(chi.time(~isnan(chi.time)), chi.N2(~isnan(chi.time)), wda.time);
+        wda.T = interp1(chi.time(~isnan(chi.time)), chi.T(~isnan(chi.time)), wda.time);
         wda.eps_Kt = wda.N2 .* wda.Kt/0.2;
         wda.eps_Kt(wda.N2 < 0) = nan;
     end

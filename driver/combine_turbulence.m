@@ -43,7 +43,7 @@ addpath(genpath('./chipod_gust/software/'));% include  path to preocessing routi
       %CP.nantimes{2}       = []; % sensor T2 for chipod
       %CP.nantimes{3}       = []; % pitot sensor
       %CP.avgwindow         = 600;
-      %CP.ChipodDepth       = 0;
+      %CP.depth             = 0;
       %
       %  switch of master pflags
       %CP.pflag             = CP.pflag.c_ic(0);

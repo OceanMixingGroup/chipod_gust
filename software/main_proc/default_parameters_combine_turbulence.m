@@ -19,10 +19,10 @@ function [CP] = default_parameters_combine_turbulence( basedir)
        dbstruct = whoAmI;
    end
 
-   if exist('dbstruct', 'var') & length(dbstruct.chipods.depth) > 0
-       CP.ChipodDepth = str2double(dbstruct.chipods.depth);
+   if exist('dbstruct', 'var') & length(dbstruct.instruments.depth) > 0
+       CP.depth = str2double(dbstruct.instruments.depth);
    else
-       CP.ChipodDepth = 0;
+       CP.depth = 0;
    end
 
    % set thresholds for masking

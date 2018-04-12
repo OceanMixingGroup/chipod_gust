@@ -317,7 +317,7 @@ if(do_combine)
                                                    CP.depth);
 
                  % add sorted gradient to stratification histograms
-                 if isempty(strfind(shown_Tz, 'w'))
+                 if do_plot && isempty(strfind(shown_Tz, 'w'))
                      shown_Tz = [shown_Tz 'w'];
                      StratHist(hfstrat, chi.wda, 'ww');
                  end

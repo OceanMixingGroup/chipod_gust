@@ -12,6 +12,7 @@ function [v0] = fit_pitot_v0(a_time, a_spd, p_time, p_v_cal, s_pd, varargin)
 %                       for P, T, and tilt already!)
 %        s_pd        :  calibration slope from voltage into dynamic pressure [Pa/volt]
 %        do_plot     :  optional argument to produce a figure (default do_plot=0)
+%        vis         :  figures visible (default 'on')
 %
 %     OUTPUT
 %        v0          :  matching v0 for P_d = s_pd*(v_cal-v0)
@@ -20,6 +21,11 @@ function [v0] = fit_pitot_v0(a_time, a_spd, p_time, p_v_cal, s_pd, varargin)
 %        Johannes Becherer
 %        Tue Nov  1 10:32:38 PDT 2016
 
+if nargin == 7
+   vis    = varargin{2};
+else
+   vis = 'on';
+end
 if nargin == 6
    do_plot = varargin{1};
 else
@@ -37,7 +43,7 @@ v0 = nanmean(tmp_v0);
 
 %---------------------plot if requested----------------------
 if do_plot
-    CreateFigure;
+    CreateFigure(vis);
     set(gcf, 'DefaultLineLineWidth', 1);
     ax(1) = subplot(211);
       plot(p_time, tmp_v0);

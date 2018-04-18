@@ -1,4 +1,4 @@
-function [] = determine_v0( basedir, do_v0_self, do_v0_adcp, do_plot, do_vel_p, time_range, use_T, use_press )
+function [] = determine_v0( basedir, do_v0_self, do_v0_adcp, do_plot, do_vel_p, time_range, use_T, use_press, vis )
 %% [] = determine_v0( basedir, do_v0_self, do_v0_adcp, do_plot, do_vel_p, time_range )
 %     
 %     This function is meant to determine V0 the pitot voltage off set based on different methods
@@ -11,6 +11,8 @@ function [] = determine_v0( basedir, do_v0_self, do_v0_adcp, do_plot, do_vel_p, 
 %     do_plot     :   generate some figures in ../pics/ to compare the different velocity estimates
 %     do_vel_p    :   which calibration should be used for vel_p (0 none (default), 1: adcp, 2: self)
 %     use_T       :   which T sensor should be used (default 1)
+%     use_press   :   shall the pressure calibration be used (default 1)
+%     vis         :  shall the figures be vissble (default 'on', 'off')
 %
 %
 %   created by: 
@@ -24,6 +26,12 @@ end
 if nargin < 7
     use_T = 1;
 end
+
+if nargin < 9
+    vis = 'on';
+end
+
+
 cal_time_range = time_range ; 
 
 fidf    = [basedir '/proc/P_fit.mat'];
@@ -145,7 +153,7 @@ if do_v0_self
    W
    
    if do_plot
-       CreateFigure;
+       CreateFigure(vis);
          a=1;
          ax(a) = subplot(3,1,a);
             plot(ax(a), P.time, P.T, 'Linewidth', 1);
@@ -209,7 +217,7 @@ if do_v0_adcp
       iiA = find( vel_m.time>=P.time(iiPcal(1)) &  vel_m.time<=P.time(iiPcal(end)) );
 
    % determine V0
-       [W.V0] = fit_pitot_v0( vel_m.time, vel_m.spd, P.time(iiPcal), P.W(iiPcal), 1/W.Pd(2), do_plot);
+       [W.V0] = fit_pitot_v0( vel_m.time, vel_m.spd, P.time(iiPcal), P.W(iiPcal), 1/W.Pd(2), do_plot, vis);
        if do_plot, print(gcf, [basedir '/pics/pitot-adcp-fit-voltages.png'], '-dpng', '-r200'); end
    % calibrate voltage into speeds
    W1 = W;
@@ -259,7 +267,7 @@ if do_plot
 
          a_L    = 'V0_{fit}';
          p_L    = 'V0_{self}';
-         [fig] =  compare_velocity_timeseries(Pf.P.time, Pf.P.U, a_L, Ps.P.time, Ps.P.U, p_L);
+         [fig] =  compare_velocity_timeseries(Pf.P.time, Pf.P.U, a_L, Ps.P.time, Ps.P.U, p_L, vis);
          print(gcf,[basedir '/pics/pitot_V0_fit_vs_self.png'],'-dpng','-r100')
          savefig(fig,[basedir '/pics/pitot_V0_fit_vs_self.fig'])
    end
@@ -269,7 +277,7 @@ if do_plot
       Pf = load([basedir '/proc/P_fit.mat']);
       a_L    = 'ADCP';
       p_L    = 'Pitot V0_{fit}';
-      [fig] =  compare_velocity_timeseries(vel_m.time, vel_m.U, a_L, Pf.P.time, Pf.P.U, p_L);
+      [fig] =  compare_velocity_timeseries(vel_m.time, vel_m.U, a_L, Pf.P.time, Pf.P.U, p_L, vis);
       print(fig,[basedir '/pics/pitot_vs_ADCP_V0_fit.png'],'-dpng','-r100')
       savefig(fig,[basedir '/pics/pitot_vs_ADCP_V0_fit.fig'])
    end

@@ -1,5 +1,5 @@
 function [Tz_m] = chi_generate_dTdz_m(t1, z1, T1, S1, t2, z2, T2, ...
-                                      S2,  sdir, use_TS_relation);
+                                      S2,  sdir, use_TS_relation, vis);
 % [Tz_m] = chi_generate_dTdz_m(t1, z1, T1, S1, t2, z2, T2, S2,  sdir);
 %
 %        This function generates an input file for chi-processing dTdz_m.m at
@@ -17,6 +17,7 @@ function [Tz_m] = chi_generate_dTdz_m(t1, z1, T1, S1, t2, z2, T2, ...
 %           S2          : salinity vector of 2nd CTD time series (could also be constant scalar)
 %           sdir        : directory to save dTdz_m.met to
 %       use_TS_relation : if 1, fit TS relation; else do naive differencing
+%          vis          :  visible figure 'on' 'off'
 % 
 %        Output
 %           Tz_m.time   : time vector  (1min averages)
@@ -26,6 +27,15 @@ function [Tz_m] = chi_generate_dTdz_m(t1, z1, T1, S1, t2, z2, T2, ...
 %   created by: 
 %        Johannes Becherer
 %        Fri Sep  2 13:49:20 PDT 2016
+
+
+% make figure unvisisible
+if nargin < 11
+   vis = 'on';
+end
+
+picdir   =  [sdir '../pics/'];
+
 
 
 %---------------------check salinity id sclar----------------------
@@ -105,13 +115,20 @@ function [Tz_m] = chi_generate_dTdz_m(t1, z1, T1, S1, t2, z2, T2, ...
 
    Tz_m.time  = time;
 
-   figure;
-   plot(Tz_m.time, Tz_m.N2); hold on;
-   plot(Tz_m.time(Tz_m.N2 < 0), Tz_m.N2(Tz_m.N2 < 0));
-   plot(xlim, [0, 0], '--', 'color', [1 1 1]*0.6);
-   ylabel('N^2')
-   title('Negative N^2 in red')
-   datetick
+
+ % some plotting
+    fig = figure('Color',[1 1 1],'visible',vis,'Paperunits','centimeters',...
+            'Papersize',[30 20],'PaperPosition',[0 0 30 20]);
+      plot(Tz_m.time, Tz_m.N2); hold on;
+      plot(Tz_m.time(Tz_m.N2 < 0), Tz_m.N2(Tz_m.N2 < 0), '.');
+      plot(xlim, [0, 0], '--', 'color', [1 1 1]*0.6);
+      ylabel('N^2')
+      title('Negative N^2 in red')
+      datetick
+
+      if exist(picdir)
+         print(fig,[picdir 'Tz_m.png'],'-dpng','-r200','-painters')
+      end
 
 %---------------------save----------------------
    save([sdir 'dTdz_m.mat'], 'Tz_m');

@@ -3,7 +3,7 @@ function [path2ganges] = get_ganges_path()
 
     path2ganges = '';
 
-    [~, hostname] = system('hostname')
+    [~, hostname] = system('hostname');
 
     if ~isempty(strfind(hostname, 'sallyw'))
         path2ganges = '/Volumes/';

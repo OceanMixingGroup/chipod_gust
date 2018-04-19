@@ -321,11 +321,6 @@ if(do_combine)
                      shown_Tz = [shown_Tz 'w'];
                      StratHist(hfstrat, chi.wda, 'ww');
                  end
-
-                 if isfield(chi.wda, 'no_min_dz')
-                     disp([num2str(sum(chi.wda.no_min_dz)/length(chi.wda.no_min_dz), '%.2f') ...
-                          '% of WDA estimates are NaN because the chipod wasn''t pumped enough.']);
-                 end
              end
 
              % dT/dz has to happen after I use chi to get Winters & D'Asaro

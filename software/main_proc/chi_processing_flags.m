@@ -278,7 +278,7 @@ classdef chi_processing_flags
          end
 
          % o not calculate inerttial sub-range fit by default
-         obj = obj.c_ic(0);
+         obj = obj.c_ic(1);
          obj = obj.c_vc(1);
 
          % check for pitot header if yes set pitot flag

@@ -1,10 +1,11 @@
-function [CP] = default_parameters_combine_turbulence( basedir)
-%% [CP] = default_parameters_combine_turbulence(basedir)
+function [CP] = default_parameters_combine_turbulence( basedir, db_index)
+%% [CP] = default_parameters_combine_turbulence(basedir , [db_index])
 %
 %     Sets all parameter necessary for combine turbulence to its default values
 %
 %     INPUT
 %        basedir     :  unit base directory
+%        db_index    :  instrument index in database (if not provided whiAmI is used)
 %     OUT
 %        CP          :  structure (combine parameters)
 %
@@ -14,6 +15,9 @@ function [CP] = default_parameters_combine_turbulence( basedir)
 %
 
 %_____________________get time limits from whoAmI______________________
+
+if nargin < 2   % if no DB index is provided
+
    [TL] =   whoAmI_timeLimits(basedir);
    if exist([basedir '/mfiles/whoAmI.m'], 'file')
        dbstruct = whoAmI;
@@ -24,6 +28,24 @@ function [CP] = default_parameters_combine_turbulence( basedir)
    else
        CP.depth = 0;
    end
+
+else   % if db index is provided
+
+   p2g = get_ganges_path();
+   [TL] =   db_timeLimits(db_index, p2g);
+   path2database = [p2g '/work/database/omg.sqlite'];
+     % open data base
+     omg_db = sqlite(path2database);
+     sqlstr =  ['select depth from instruments where id = ' num2str(db_index)];
+     try
+         CP.depth = str2double(char(fetch(omg_db, sqlstr )));
+     catch
+       CP.depth = 0;
+     end
+     % close database
+     close(omg_db);
+
+end
 
    % set thresholds for masking
    CP.min_N2         = 1e-6;

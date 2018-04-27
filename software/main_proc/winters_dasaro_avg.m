@@ -34,6 +34,17 @@ function [wda] = winters_dasaro_avg(t0, t1, vdisp, chi, T, Tp, dt, plotflag)
     tstart = chi.time(chit0);
     tstop = chi.time(chit1);
 
+    % initialized returned structure
+    wda.nbins = nquantiles+2;
+    wda.Tbins = (nan(nquantiles+2, 1));
+    wda.tstart = tstart;
+    wda.tstop = tstop;
+    wda.dTdz_bins = (nan(nquantiles+2, 1));
+    wda.dz = (nan(nquantiles+2, 1));
+    wda.no_min_dz = 0;
+
+    if all(isnan(T.Tenh)), return; end
+
     % fundamental assumption used below
     assert(isequal(Tp.time, vdisp.time));
 
@@ -66,15 +77,6 @@ function [wda] = winters_dasaro_avg(t0, t1, vdisp, chi, T, Tp, dt, plotflag)
     % Lets make some T bins by splitting into quantiles so that each bin has equal number of observations
     Tbins = generate_wda_bins(unique(round(Tprof, 5)), nquantiles);
     dT = diff(Tbins);
-
-    % initialized returned structure
-    wda.nbins = nquantiles+2;
-    wda.Tbins = (nan(nquantiles+2, 1));
-    wda.tstart = tstart;
-    wda.tstop = tstop;
-    wda.dTdz_bins = (nan(nquantiles+2, 1));
-    wda.dz = (nan(nquantiles+2, 1));
-    wda.no_min_dz = 0;
 
     % if no long enough profiles are found
     if isempty(Tprof), wda.no_min_dz = 1; return; end

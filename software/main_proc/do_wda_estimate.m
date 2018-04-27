@@ -7,16 +7,15 @@ function [chi_wda] = do_wda_estimate(params, data, chi, T, Tp)
     nanT = isnan(T.T);
     nanTp = isnan(Tp.tp);
 
-    if all(nanT) || all(nanTp)
-        chi_wda = [];
-        disp(['do_wda_estimate received all-NaN T or all-NaN Tp']);
-        return;
-    end
-
-    T.T(~nanT) = fillmissing(deglitch(T.T(~nanT), 100, 5, 'b', 1), 'linear');
-    Tinterp = fillmissing(interp1(T.time, T.T, Tp.time, 'nearest'), 'nearest');
     Tenh = nan(size(Tp.tp));
-    Tenh(~nanTp) = combine_ttc(Tinterp(~nanTp), Tp.tp(~nanTp), 2*pi*10, 100, 0)';
+
+    if all(nanT) || all(nanTp)
+        disp(['do_wda_estimate received all-NaN T or all-NaN Tp']);
+    else
+        T.T(~nanT) = fillmissing(deglitch(T.T(~nanT), 100, 5, 'b', 1), 'linear');
+        Tinterp = fillmissing(interp1(T.time, T.T, Tp.time, 'nearest'), 'nearest');
+        Tenh(~nanTp) = combine_ttc(Tinterp(~nanTp), Tp.tp(~nanTp), 2*pi*10, 100, 0)';
+    end
 
     % % find out when T sensor is at noise floor
     % mask = movvar(T.T, 50*2.5) < T.floor^2 * 9/7;

@@ -102,7 +102,8 @@ if(do_combine)
          try
              load([basedir '/proc/T_m.mat']);
              chi.S = interp1(T1.time, (T1.S + T2.S)/2, chi.time);
-             compare_min_dTdz_N2_against_SBE_specs(abs(T1.z - T2.z), CP, ID);
+             compare_min_dTdz_N2_against_SBE_specs(nanmedian(abs(T1.z - T2.z)), ...
+                                                   CP, ID);
          catch ME
              chi.S = 35*ones(size(chi.time));
          end

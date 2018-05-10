@@ -56,8 +56,10 @@
       error([fid_pitot_header  ' does not exit.']);
    end
 
-   Pdym        = ( data.W - (data.T-W.T0)*W.T(2)  - W.V0 )/W.Pd(2);
-   data.spd    = sign(Pdym).*sqrt(2/1025*abs(Pdym));
+   [data.spd, Pdym, Vcal] = pitot_calibrate(data.W, data.T, data.P, W);
+
+   %Pdym        = ( data.W - (data.T-W.T0)*W.T(2)  - W.V0 )/W.Pd(2);
+   %data.spd    = sign(Pdym).*sqrt(2/1025*abs(Pdym));
    [data.U]    = pitot_add_direction(data.time, data.spd, data.time_cmp, data.cmp);
 
 %___________cal mean speed________________________ 
@@ -77,9 +79,10 @@
 
 %_____________________cal average velocity______________________
    [Peps.vel]   = clever_interp( data.time, data.U, Peps.time );
+   [Peps.spd]   = clever_interp( data.time, data.spd, Peps.time );
 
 %_____________________normalize spectrum by ic-scaling______________________
-   [ Peps.eps, Peps.var_eps, eps_f] = icscaling_velocity( Peps.time, spec_f, spec, Peps.time, Peps.vel, Peps.f_range);
+   [ Peps.eps, Peps.var_eps, eps_f] = icscaling_velocity( Peps.time, spec_f, spec, Peps.time, Peps.spd, Peps.f_range);
 
 %_____________________save spectrogram______________________
 if save_spec % if you want to save the spectrogram for diagnostics

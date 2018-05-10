@@ -43,7 +43,7 @@ end
             try % take care if script crashes that the parpoo is shut down
                disp(['calculating file ' num2str(f) ' of ' num2str(length(fids))]);
                if low_or_high % high frequency estimate
-                  proc_pitot_eps(basedir, fids{f}, 2/(24*3600), [2.5 5], save_spec);
+                  proc_pitot_eps(basedir, fids{f}, 2/(24*3600), [2.5 10], save_spec);
                else
                   proc_pitot_eps(basedir, fids{f}, 1/24/12, [.02 .05], save_spec);
                end

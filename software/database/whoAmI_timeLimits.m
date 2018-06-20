@@ -120,10 +120,14 @@ end
 function [t] = convert_timeStr2datenum( timeStr, defaultTime )
 
    if ~(isempty(timeStr))
-         try 
-            t = datenum( timeStr);
+         try
+             try 
+                t = datenum( timeStr);
+             catch
+                t = datenum(timeStr,'yyyy,mm,dd,HH,MM,SS');
+             end
          catch
-            t = defaultTime;
+             t = defaultTime;
          end
          return;
    end

@@ -51,9 +51,16 @@ function [data] = chi_calibrate_gust(rfid, head)
          % sometimes for gooseneck Ax and Az are switched
          if nanmedian( abs(chi.AX) ) > nanmedian( abs(chi.AZ) ) % find out which is dominated by gravity
             tmpZ = chi.AX;
-            chi.AX = -chi.AZ;
+            chi.AX = chi.AZ;
             chi.AZ = tmpZ;
+
+            chi.AZtilt=calibrate_tilt(rdat.AX,head.coef.AX);
+            chi.AXtilt=calibrate_tilt(rdat.AZ,head.coef.AZ);
+         else
+            chi.AXtilt=calibrate_tilt(rdat.AX,head.coef.AX);
+            chi.AZtilt=calibrate_tilt(rdat.AZ,head.coef.AZ);
          end
+            chi.AYtilt=calibrate_tilt(rdat.AY,head.coef.AY);
 
           chi.AX=fillgap(chi.AX);
           chi.AY=fillgap(chi.AY);
@@ -69,9 +76,6 @@ function [data] = chi_calibrate_gust(rfid, head)
           chi.a_vel_y = vel.y;
           chi.a_vel_z = vel.z;
            
-         chi.AXtilt=calibrate_tilt(rdat.AX,head.coef.AX);
-         chi.AYtilt=calibrate_tilt(rdat.AY,head.coef.AY);
-         chi.AZtilt=calibrate_tilt(rdat.AZ,head.coef.AZ);
 
    % compass
          chi.cmp      = rdat.compass;

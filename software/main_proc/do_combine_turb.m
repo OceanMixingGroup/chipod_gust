@@ -672,12 +672,18 @@ function [spdmask, addspdmask] = determine_speed_masks(basedir, ID, CP, chi)
     % speed mask could change depending on estimate
     mask_spd = ID(1);
 
-    if mask_spd == 'm' & ~exist('vel_m', 'var')
+    if mask_spd == 'm'
         load([basedir '/input/vel_m.mat']);
         vel = vel_m;
-    elseif mask_spd == 'p' & ~exist('vel_p', 'var')
+    elseif mask_spd == 'p' ...
+            & exist([basedir '/input/vel_p.mat'], 'file')
         load([basedir '/input/vel_p.mat']);
         vel = vel_p;
+    else
+        % hack to avoid background velocity masking
+        % if vel_p.mat does not exist
+        vel.time = chi.time;
+        vel.spd = ones(size(chi.time));
     end
     spdmask = interp1(vel.time, vel.spd, chi.time);
 
@@ -725,6 +731,12 @@ function [out] = truncate_time(in, time_range)
         catch ME;
             out.(ff{nn}) = in.(ff{nn});
         end
+    end
+    
+    if isfield(in,'time_floor')
+        iifloor = find( in.time_floor >= time_range(1) & in.time_floor <= time_range(2) );
+        out.time_floor = in.time_floor(iifloor);
+        out.spec_floor = in.spec_floor(iifloor);
     end
 
 end

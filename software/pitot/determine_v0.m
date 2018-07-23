@@ -270,6 +270,10 @@ if do_plot
          [fig] =  compare_velocity_timeseries(Pf.P.time, Pf.P.U, a_L, Ps.P.time, Ps.P.U, p_L, vis);
          print(gcf,[basedir '/pics/pitot_V0_fit_vs_self.png'],'-dpng','-r100')
          %savefig(fig,[basedir '/pics/pitot_V0_fit_vs_self.fig'])
+      a_L    = 'ADCP';
+      p_L    = 'Pitot V0_{self}';
+      [fig] =  compare_velocity_timeseries(vel_m.time, vel_m.U, a_L, Ps.P.time, Ps.P.U, p_L, vis);
+      print(fig,[basedir '/pics/pitot_self_vs_ADCP_V0_fit.png'],'-dpng','-r100')
    end
    if (exist(fidf, 'file') & exist(fidvelm, 'file') )
       load(fidvelm);
@@ -278,7 +282,7 @@ if do_plot
       a_L    = 'ADCP';
       p_L    = 'Pitot V0_{fit}';
       [fig] =  compare_velocity_timeseries(vel_m.time, vel_m.U, a_L, Pf.P.time, Pf.P.U, p_L, vis);
-      print(fig,[basedir '/pics/pitot_vs_ADCP_V0_fit.png'],'-dpng','-r100')
+      print(fig,[basedir '/pics/pitot_fit_vs_ADCP_V0_fit.png'],'-dpng','-r100')
       %savefig(fig,[basedir '/pics/pitot_vs_ADCP_V0_fit.fig'])
    end
 end

@@ -85,6 +85,11 @@ end
       disp(['The raw data are not processed yet you need to set']);
       disp('do_raw_data = 1; or run do_raw_pitot.m')
    end
+
+
+
+
+
    %--------------------base calibation----------------------
    P.time = Praw.time;
 
@@ -99,6 +104,15 @@ end
       else % in case T1 is broken
          P.T    = P.T2;
       end
+   end
+
+   %% recalculate slope for reduced temperature range
+   if isfield(W, 'data')
+      ii_T_range  =  find( W.data.T.degC>=min(P.T) & W.data.T.degC<=max(P.T) );
+      T_coeffs_new   =  polyfit( W.data.T.degC, W.data.T.V, 1  );
+      disp([' Calculated new temperature slope : ' num2str(T_coeffs_new(1))]);
+      disp(['                        old slope : ' num2str(W.T(2))]);
+      W.T(2) = T_coeffs_new(1);
    end
 
    % pressure

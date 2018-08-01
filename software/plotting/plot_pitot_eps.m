@@ -5,14 +5,14 @@ function [fig] = plot_pitot_eps( basedir, spec_length)
 %
 %  INPUT
 %     basedir   :  instrument directory
-%     matfile   :  which mat file (default '300sec')
+%     matfile   :  which mat file (default '')
 %
 %   created by: 
 %        Johannes Becherer
 %        Thu Nov 30 14:54:08 PST 2017
 
 if nargin < 2
-   spec_length = '300sec';
+   spec_length = '';
 end
 
    unit    = chi_get_unit_name(basedir); % get unit name
@@ -27,16 +27,18 @@ end
             
             xl = Peps.time([1 end]);
             
-            Navg = round(length(Peps.time)/100);
+            %Navg = round(length(Peps.time)/300);
+            Navg = round(180/3600/24/diff(Peps.time([1 2])));
             if Navg<1
                Navg=1;
             end
             
             a=1;
+               plot(ax(a), Peps.time, Peps.eps_nomask, 'color', [.7 .7 .7 1], 'Linewidth', 1);
                plot(ax(a), Peps.time, Peps.eps, 'color', [col(1,:) .5], 'Linewidth', 1);
-               pj = 1; p(pj) = plot(ax(a), Peps.time, movmean(Peps.eps, Navg, 'omitnan'), 'color', [col(pj,:)*.5 1], 'Linewidth', 2);
-               plot(ax(a), Peps.time, (2e-3*abs(Peps.vel).^2).^1.5/.4, 'color', [col(2,:) .5], 'Linewidth', 1);
-               pj = 2; p(pj) =plot(ax(a), Peps.time, movmean((2e-3*abs(Peps.vel).^2).^1.5/.4, Navg, 'omitnan'), 'color', [col(2,:)*.7 1], 'Linewidth', 2);
+               plot(ax(a), Peps.time, (2e-3*abs(Peps.spd).^2).^1.5/.4, 'color', [col(2,:) .5], 'Linewidth', 1);
+               pj = 1; p(pj) = plot(ax(a), Peps.time, movmean(Peps.eps, Navg, 'omitnan').*(movmean(isnan(Peps.eps),Navg)<.9), 'color', [col(pj,:)*.5 1], 'Linewidth', 2);
+               pj = 2; p(pj) =plot(ax(a), Peps.time, movmean((2e-3*abs(Peps.spd).^2).^1.5/.4, Navg, 'omitnan'), 'color', [col(2,:)*.7 1], 'Linewidth', 2);
                
 
                legend(p, '\epsilon_{pitot}', '\epsilon_{bbl1m}');
@@ -53,8 +55,8 @@ end
                set(ax(a), 'Yscale', 'log');
 
             a=2;
-               plot(ax(a), Peps.time, Peps.vel, 'color', [col(1,:) .5], 'Linewidth', 1);
-               plot(ax(a), Peps.time,  movmean(Peps.vel, Navg, 'omitnan'), 'color', [col(1,:)*.5 1], 'Linewidth', 2);
+               plot(ax(a), Peps.time, Peps.spd, 'color', [col(1,:) .5], 'Linewidth', 1);
+               plot(ax(a), Peps.time,  movmean(Peps.spd, Navg, 'omitnan'), 'color', [col(1,:)*.5 1], 'Linewidth', 2);
                t = text_corner(ax(a), ['speed [m/s]'], 1);
 
                xlim(ax(a), xl);

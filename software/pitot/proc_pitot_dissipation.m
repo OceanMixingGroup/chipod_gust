@@ -57,6 +57,10 @@
       error([fid_pitot_header  ' does not exit.']);
    end
 
+   if isfield(data, 'T1')   % for chipods
+       data.T = data.T1;
+   end
+   
    [data.spd, ~, ~] = pitot_calibrate(data.W, data.T, data.P, W);
 
 

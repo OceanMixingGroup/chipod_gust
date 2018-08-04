@@ -80,7 +80,7 @@ if do_plot
       load([basedir '/input/dTdz_m.mat']);
 
        fig = figure('Color',[1 1 1],'visible','on','Paperunits','centimeters',...
-               'Papersize',[30 20],'PaperPosition',[0 0 30 20])
+               'Papersize',[30 40],'PaperPosition',[0 0 30 40])
        [ax, ~] = create_axes(fig, 5, 1, 0);
        col = get(groot,'DefaultAxesColorOrder');
        clear p;
@@ -186,10 +186,12 @@ if do_plot
          xlim(ax(a), tl);
        datetick(ax(a), 'keeplimits');
 
+       print(gcf,'../pics/eps_fit_chi.png','-dpng','-r200','-painters')
+       
        
 %%_____________________correlation______________________
     fig = figure('Color',[1 1 1],'visible','on','Paperunits','centimeters',...
-            'Papersize',[20 30],'PaperPosition',[0 0 20 30])
+            'Papersize',[40 30],'PaperPosition',[0 0 40 30])
     
        load cmap;
             [ax, ~] = create_axes(fig, 1, 3, 0);
@@ -213,6 +215,10 @@ if do_plot
             %pcolor(ax(a), binx, biny, hist);    shading(ax(a),'flat');
             contourf(ax(a),binx,biny,hist,[0:.1:1]*max(max(hist)), 'edgecolor', 'none');
                plot(ax(a), binx, biny,'k', 'Linewidth', 1);
+               plot(ax(a), binx, log10(5*10.^biny),'k:', 'Linewidth', 1);
+               plot(ax(a), binx, log10(2*10.^biny),'k--', 'Linewidth', 1);
+               plot(ax(a), binx, log10(.5*10.^biny),'k--', 'Linewidth', 1);
+               plot(ax(a), binx, log10(.2*10.^biny),'k:', 'Linewidth', 1);
                colormap(ax(a), cmap.chi);
                xlabel(ax(a), XL)
                ylabel(ax(a), YL)
@@ -242,6 +248,10 @@ if do_plot
             contourf(ax(a),binx,biny,hist,[0:.1:1]*max(max(hist)), 'edgecolor', 'none');
                colormap(ax(a), cmap.chi);
                plot(ax(a), binx, biny,'k', 'Linewidth', 1);
+               plot(ax(a), binx, log10(5*10.^biny),'k:', 'Linewidth', 1);
+               plot(ax(a), binx, log10(2*10.^biny),'k--', 'Linewidth', 1);
+               plot(ax(a), binx, log10(.5*10.^biny),'k--', 'Linewidth', 1);
+               plot(ax(a), binx, log10(.2*10.^biny),'k:', 'Linewidth', 1);
                xlabel(ax(a), XL)
                %ylabel(ax(a), YL)
                ylim(ax(a), yl);
@@ -262,6 +272,10 @@ if do_plot
             contourf(ax(a),binx,biny,hist,[0:.1:1]*max(max(hist)), 'edgecolor', 'none');
                colormap(ax(a), cmap.chi);
                plot(ax(a), binx, biny,'k', 'Linewidth', 1);
+               plot(ax(a), binx, log10(5*10.^biny),'k:', 'Linewidth', 1);
+               plot(ax(a), binx, log10(2*10.^biny),'k--', 'Linewidth', 1);
+               plot(ax(a), binx, log10(.5*10.^biny),'k--', 'Linewidth', 1);
+               plot(ax(a), binx, log10(.2*10.^biny),'k:', 'Linewidth', 1);
                xlabel(ax(a), XL)
                %ylabel(ax(a), YL)
                ylim(ax(a), yl);
@@ -273,6 +287,7 @@ if do_plot
                t.FontWeight  =  'bold';
           
 
+       print(gcf,'../pics/BBL_vs_pitot_bore_soliton.png','-dpng','-r200','-painters')
 
     % [fig] = plot_pitot_eps( basedir)
     % print(fig,['../pics/Pitot_eps.png'],'-dpng','-r200','-painters')

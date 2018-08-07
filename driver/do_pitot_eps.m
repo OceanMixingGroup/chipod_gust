@@ -1,10 +1,9 @@
-%% this script does all the basic calibration excluding chi-processing and save 1s infomation
-%     in ./proc/temp.mat
-%  
+%%  This script runs the chi-processing based on Pitot epsilon in the BBL
 %
+%  
 %   created by: 
 %        Johannes Becherer
-%        Wed Aug 16 16:01:26 PDT 2017
+%        Fri Aug  3 11:53:11 PDT 2018
 
 
 do_parallel = 1;     % use paralelle computing 

@@ -1,4 +1,4 @@
-function [] = determine_v0( basedir, do_v0_self, do_v0_adcp, do_plot, do_vel_p, time_range, use_T, use_press, vis )
+function [] = determine_v0( basedir, do_v0_self, do_v0_adcp,  do_plot, do_vel_p, time_range, use_T, use_press, vis, do_v0_self_in_time, DcalWindow, DcalIncrement )
 %% [] = determine_v0( basedir, do_v0_self, do_v0_adcp, do_plot, do_vel_p, time_range )
 %     
 %     This function is meant to determine V0 the pitot voltage off set based on different methods
@@ -31,8 +31,6 @@ if nargin < 9
     vis = 'on';
 end
 
-
-cal_time_range = time_range ; 
 
 fidf    = [basedir '/proc/P_fit.mat'];
 fids    = [basedir '/proc/P_self.mat'];
@@ -91,14 +89,23 @@ end
 
 
    %--------------------base calibation----------------------
-   P.time = Praw.time;
+   if time_range(1)< Praw.time(1)
+      time_range(1) =Praw.time(1);  
+   end
+   if time_range(2)>  Praw.time(end)
+      time_range(2) =Praw.time(end);  
+   end
+   cal_time_range = time_range ; 
+
+   ii_time_range  =  find( Praw.time>=time_range(1) & Praw.time<=time_range(2) );
+   P.time         = Praw.time(ii_time_range);
 
    % temperature
    if (isfield(Praw, 'T')) %gusTs
-      P.T   =  (Praw.T.^2+Praw.vT)*head.coef.T(3)+ Praw.T*head.coef.T(2) + head.coef.T(1);
+      P.T   =  (Praw.T(ii_time_range).^2+Praw.vT(ii_time_range))*head.coef.T(3)+ Praw.T(ii_time_range)*head.coef.T(2) + head.coef.T(1);
    else  % chipods
-      P.T1   =  (Praw.T1.^2+Praw.vT1)*head.coef.T1(3)+ Praw.T1*head.coef.T1(2) + head.coef.T1(1);
-      P.T2   =  (Praw.T2.^2+Praw.vT2)*head.coef.T2(3)+ Praw.T2*head.coef.T2(2) + head.coef.T2(1);
+      P.T1   =  (Praw.T1(ii_time_range).^2+Praw.vT1(ii_time_range))*head.coef.T1(3)+ Praw.T1(ii_time_range)*head.coef.T1(2) + head.coef.T1(1);
+      P.T2   =  (Praw.T2(ii_time_range).^2+Praw.vT2(ii_time_range))*head.coef.T2(3)+ Praw.T2(ii_time_range)*head.coef.T2(2) + head.coef.T2(1);
       if use_T==1
          P.T    = P.T1; 
       else % in case T1 is broken
@@ -116,13 +123,13 @@ end
    end
 
    % pressure
-   P.P    =  Praw.P*head.coef.P(2) + head.coef.P(1);
+   P.P    =  Praw.P(ii_time_range)*head.coef.P(2) + head.coef.P(1);
 
    % compass
       if isfield(head.coef, 'CMP')
-         P.cmp  = Praw.cmp + head.coef.CMP(1);
+         P.cmp  = Praw.cmp(ii_time_range) + head.coef.CMP(1);
       else
-         P.cmp  = Praw.cmp;
+         P.cmp  = Praw.cmp(ii_time_range);
          disp(['CMP' ' does not exit in header']);
       end
 
@@ -136,8 +143,99 @@ end
    W.P0   =  nanmean(P.P(iiPcal));
 
    % calibrate the Pitot voltage for temperature (pressure ? Tilt ?)
-   P.W   =   Praw.W - (P.T-W.T0)*W.T(2);
+   P.W   =   Praw.W(ii_time_range) - (P.T-W.T0)*W.T(2);
 
+Porg = P;
+
+P.spd = nan(size(P.W));
+if do_v0_self_in_time
+      W.V0     =  nan; 
+      W.time   =  nan; 
+      
+      cnt   =  1;
+      time_low =  cal_time_range(1);
+      time_up  =  time_low+ DcalWindow;
+      while time_up <= cal_time_range(2)
+         iiWcal   =  find( P.time>=time_low & P.time<=time_up );
+         if ~isempty(iiWcal)
+         W.time(cnt)   =  nanmean(P.time(iiWcal));
+         W.V0(cnt)  =  v0_self(P.W(iiWcal));
+
+         % calibrate voltage into speeds
+         % temperature calibration done earlier so set that to 0
+         W1 = W;
+            W1.P0 = 0; % switch off temp and press calibration
+            W1.T = [0 0 0 0 0];
+            W1.Ps = [0 0 0 0 0];
+            W1.V0 =  W.V0(cnt);
+         [P.spd(iiWcal), ~, ~] = pitot_calibrate(P.W(iiWcal), P.T(iiWcal), 0, W1);
+
+         cnt = cnt+1;
+         end
+         time_low =  time_low + DcalIncrement;
+         time_up  =  time_low + DcalWindow;
+      end
+
+
+   disp(['Time instants with calibrated Pd < 0 = ' ...
+        num2str(sum(P.spd(iiP) == 0)/length(P.spd(iiP))*100) '%'])
+   % add directional information from the compass
+   P.U = pitot_add_direction(P.time, P.spd, P.time, P.cmp);
+
+
+   % output
+   disp(['based on the internal method V0 is calculated to be']);
+   W
+   
+   if do_plot
+       CreateFigure(vis);
+         a=1;
+         ax(a) = subplot(3,1,a);
+            plot(ax(a), P.time, P.T, 'Linewidth', 1);
+            hold all;
+            plot(ax(a), P.time([1 end]), [1 1]*W.T0, 'Linewidth', 1);
+            ylabel(ax(a), 'T [deg C]');
+            datetick(ax(a), 'keeplimits');
+            legend(ax(a),  'T signal', 'T_0');
+         a=2;
+         ax(a) = subplot(3,1,a);
+            plot(ax(a), P.time, P.P, 'Linewidth', 1);
+            hold all;
+            plot(ax(a), P.time([1 end]), [1 1]*W.P0, 'Linewidth', 1);
+            ylabel(ax(a), 'Pres [psu]');
+            legend(ax(a),  'P signal', 'P_0');
+            datetick(ax(a), 'keeplimits');
+         a=3;
+         ax(a) = subplot(3,1,a);
+            plot(ax(a), P.time, P.W, 'Linewidth', 1);
+            hold all;
+            plot(ax(a), W.time, W.V0, 'Linewidth', 1);
+            plot(ax(a), W.time, W.V0,'+', 'Linewidth', 1);
+            ylabel(ax(a), '[Volt]');
+            legend(ax(a),  'Pitot signal', 'V_0');
+            datetick(ax(a), 'keeplimits');
+
+            linkaxes(ax, 'x');
+            xlim(ax(1), time_range)
+
+         print(gcf,[basedir '/pics/pitot_self_diagnostic.png'],'-dpng','-r100','-painters')
+         
+            
+   end
+
+   % cut data matrix
+   ff = fields(P);
+   for fi = 1:length(ff)
+      P.(ff{fi})   = P.(ff{fi})(iiP);
+   end
+
+   % save header and calibrated data
+   save([basedir '/calib/header_p_self_in_time.mat'], 'W');
+   save([basedir '/calib/header_p.mat'], 'W');
+
+   save([basedir '/proc/P_self.mat'], 'P');
+   P = Porg;
+end
 
 
 %_____________________detremine V0 based on min method (self contained)______________________
@@ -145,8 +243,7 @@ Porg = P;
 if do_v0_self
 
    % calculate V0 as the median of the smallest 5 % of the averaged values
-      w_sort = sort(P.W(iiPcal));
-      W.V0 = median(w_sort(1:round(length(w_sort)/20)));
+      W.V0  =  v0_self(P.W(iiPcal));
 
    % calibrate voltage into speeds
    % temperature calibration done earlier so set that to 0
@@ -276,6 +373,7 @@ if do_plot
 
    if (exist(fidf, 'file') & exist(fids, 'file') )
 
+      load('../input/vel_m.mat');
       Ps = load(fids);
       Pf = load(fidf);
 
@@ -325,3 +423,14 @@ if do_vel_p > 0
    save([basedir '/input/vel_p.mat'], 'vel_p');
    disp('vel_p.mat created!')
 end
+
+
+end % end of main function
+
+
+function [V0]  =  v0_self(W)
+   % calculate V0 as the median of the smallest 5 % of the averaged values
+      w_sort = sort(W);
+      V0 = median(w_sort(1:round(length(w_sort)/20)));
+end
+

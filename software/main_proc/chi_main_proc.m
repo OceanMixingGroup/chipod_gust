@@ -113,7 +113,7 @@ function [] = chi_main_proc(basedir, rfid, pflag, varargin)
                   end
 
                   vel_p.time = data.time;
-                  [vel_p.spd, ~, ~] = pitot_calibrate( data.W, data.T, data.P, W);
+                  [vel_p.spd, ~, ~] = pitot_calibrate_time( data.time,  data.W, data.T, data.P, W);
                   vel_p.spd(vel_p.spd<0) = 0;
                else
                   disp(['W.V0, W.T0 and W.P0 do not exit']);

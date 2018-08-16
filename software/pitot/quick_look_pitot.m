@@ -30,7 +30,7 @@ end
  % calibrate Pitot tube
     P.time = data.time;
 
-    [P.spd, ~, ~] = pitot_calibrate(data.W, data.T, data.P, W);
+    [P.spd, ~, ~] = pitot_calibrate_time( data.time, data.W, data.T, data.P, W);
 
      spd_vel = P.spd; 
      spd_vel(P.spd<0) = 0; % remove negative speeds before add direction

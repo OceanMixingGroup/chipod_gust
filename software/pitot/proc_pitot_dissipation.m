@@ -61,7 +61,7 @@
        data.T = data.T1;
    end
    
-   [data.spd, ~, ~] = pitot_calibrate(data.W, data.T, data.P, W);
+   [data.spd, ~, ~] = pitot_calibrate_time(data.time, data.W, data.T, data.P, W);
 
 
    dt = median( diff(data.time));

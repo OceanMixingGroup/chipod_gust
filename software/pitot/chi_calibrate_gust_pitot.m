@@ -74,7 +74,7 @@ function [data] = chi_calibrate_gust(rfid, head)
             chi.V_raw  = rdat.WP;
          end
 
-         [chi.spd, chi.Pdym, chi.V_cal] = pitot_calibrate(chi.V_raw, chi.T, chi.P, head.W);
+         [chi.spd, chi.Pdym, chi.V_cal] = pitot_calibrate_time( chi.time, chi.V_raw, chi.T, chi.P, head.W);
 
          chi.U  = pitot_add_direction( chi.time, chi.spd, chi.time_cmp, chi.cmp);
          chi.u  = real(chi.U);

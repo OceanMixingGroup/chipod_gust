@@ -56,7 +56,7 @@
       error([fid_pitot_header  ' does not exit.']);
    end
 
-   [data.spd, Pdym, Vcal] = pitot_calibrate(data.W, data.T, data.P, W);
+   [data.spd, Pdym, Vcal] = pitot_calibrate_time( data.time, data.W, data.T, data.P, W);
 
    %Pdym        = ( data.W - (data.T-W.T0)*W.T(2)  - W.V0 )/W.Pd(2);
    %data.spd    = sign(Pdym).*sqrt(2/1025*abs(Pdym));

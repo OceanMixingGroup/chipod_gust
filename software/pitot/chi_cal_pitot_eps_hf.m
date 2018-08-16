@@ -36,7 +36,7 @@ end
 
 
 %_____________________calibrate speed______________________
-   [data.spd, data.Pdym, data.V_cal] = pitot_calibrate(data.W, data.T, data.P, W);
+   [data.spd, data.Pdym, data.V_cal] = pitot_calibrate_time( data.time, data.W, data.T, data.P, W);
 
    % get directional information for U
    data.U  = pitot_add_direction( data.time, data.spd, data.time_cmp, data.cmp);

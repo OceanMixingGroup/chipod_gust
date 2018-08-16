@@ -39,7 +39,7 @@ function [P] = make_P_1sec(basedir)
    P.depth  =  T.depth;
    P.cmp    = T.cmp;
 
-   [P.spd, ~, ~] = pitot_calibrate(T.W, T.T, T.P, W);
+   [P.spd, ~, ~] = pitot_calibrate_time( T.time, T.W, T.T, T.P, W);
 
    ii_nan = (P.spd < 0);
 

@@ -1,4 +1,4 @@
-function [] = determine_v0( basedir, do_v0_self, do_v0_adcp,  do_plot, do_vel_p, time_range, use_T, use_press, vis, do_v0_self_in_time, DcalWindow, DcalIncrement )
+function [] = determine_v0( basedir, do_v0_self, do_v0_adcp,  do_plot, do_vel_p, time_range, use_T, use_press, vis, DcalWindow, DcalIncrement )
 %% [] = determine_v0( basedir, do_v0_self, do_v0_adcp, do_plot, do_vel_p, time_range )
 %     
 %     This function is meant to determine V0 the pitot voltage off set based on different methods
@@ -19,18 +19,22 @@ function [] = determine_v0( basedir, do_v0_self, do_v0_adcp,  do_plot, do_vel_p,
 %        Johannes Becherer
 %        Tue Nov 28 14:26:43 PST 2017
 
-if nargin < 8
-    use_press = 1;
-end
 
 if nargin < 7
     use_T = 1;
 end
-
+if nargin < 8
+    use_press = 1;
+end
 if nargin < 9
     vis = 'on';
 end
-
+if nargin < 10
+     DcalWindow =  1000;    % 1000 days window for V0 time (effectivly only a single value for the entire record)
+end
+if nargin < 11
+     DcalIncrement = 1000;  % 1000 day increment
+end
 
 fidf    = [basedir '/proc/P_fit.mat'];
 fids    = [basedir '/proc/P_self.mat'];
@@ -95,7 +99,6 @@ end
    if time_range(2)>  Praw.time(end)
       time_range(2) =Praw.time(end);  
    end
-   cal_time_range = time_range ; 
 
    ii_time_range  =  find( Praw.time>=time_range(1) & Praw.time<=time_range(2) );
    P.time         = Praw.time(ii_time_range);
@@ -135,7 +138,7 @@ end
 
    %---------------------pre calibration for Pitot----------------------
       %% find all idexes in the desired time interval;
-      iiPcal = find( P.time>=cal_time_range(1) & P.time<=cal_time_range(2) );
+      iiPcal = find( P.time>=time_range(1) & P.time<=time_range(2) );
       iiP = find( P.time>=time_range(1) & P.time<=time_range(2) );
 
    % set the average temperature as reference value for the Pitot calibration
@@ -145,17 +148,23 @@ end
    % calibrate the Pitot voltage for temperature (pressure ? Tilt ?)
    P.W   =   Praw.W(ii_time_range) - (P.T-W.T0)*W.T(2);
 
+
+%_____________________self methode______________________
 Porg = P;
 
 P.spd = nan(size(P.W));
-if do_v0_self_in_time
+if do_v0_self
       W.V0     =  nan; 
       W.time   =  nan; 
       
       cnt   =  1;
-      time_low =  cal_time_range(1);
+      time_low =  time_range(1);
       time_up  =  time_low+ DcalWindow;
-      while time_up <= cal_time_range(2)
+         % for an interval larger than the record
+         if time_up > time_range(2)
+            time_up = time_range(2)
+         end
+      while time_up <= time_range(2)
          iiWcal   =  find( P.time>=time_low & P.time<=time_up );
          if ~isempty(iiWcal)
          W.time(cnt)   =  nanmean(P.time(iiWcal));
@@ -211,81 +220,10 @@ if do_v0_self_in_time
             hold all;
             plot(ax(a), W.time, W.V0, 'Linewidth', 1);
             plot(ax(a), W.time, W.V0,'+', 'Linewidth', 1);
-            ylabel(ax(a), '[Volt]');
-            legend(ax(a),  'Pitot signal', 'V_0');
-            datetick(ax(a), 'keeplimits');
+            if length(W.V0) == 1
+               plot(ax(a), time_range, [1 1]*W.V0, 'Linewidth', 1);
+            end
 
-            linkaxes(ax, 'x');
-            xlim(ax(1), time_range)
-
-         print(gcf,[basedir '/pics/pitot_self_diagnostic.png'],'-dpng','-r100','-painters')
-         
-            
-   end
-
-   % cut data matrix
-   ff = fields(P);
-   for fi = 1:length(ff)
-      P.(ff{fi})   = P.(ff{fi})(iiP);
-   end
-
-   % save header and calibrated data
-   save([basedir '/calib/header_p_self_in_time.mat'], 'W');
-   save([basedir '/calib/header_p.mat'], 'W');
-
-   save([basedir '/proc/P_self.mat'], 'P');
-   P = Porg;
-end
-
-
-%_____________________detremine V0 based on min method (self contained)______________________
-Porg = P;
-if do_v0_self
-
-   % calculate V0 as the median of the smallest 5 % of the averaged values
-      W.V0  =  v0_self(P.W(iiPcal));
-
-   % calibrate voltage into speeds
-   % temperature calibration done earlier so set that to 0
-   W1 = W;
-      W1.P0 = 0; % switch off temp and press calibration
-      W1.T = [0 0 0 0 0];
-      W1.Ps = [0 0 0 0 0];
-   [P.spd, ~, ~] = pitot_calibrate(P.W, P.T, 0, W1);
-
-   disp(['Time instants with calibrated Pd < 0 = ' ...
-        num2str(sum(P.spd(iiP) == 0)/length(P.spd(iiP))*100) '%'])
-   % add directional information from the compass
-   P.U = pitot_add_direction(P.time, P.spd, P.time, P.cmp);
-
-
-   % output
-   disp(['based on the internal method V0 is calculated to be']);
-   W
-   
-   if do_plot
-       CreateFigure(vis);
-         a=1;
-         ax(a) = subplot(3,1,a);
-            plot(ax(a), P.time, P.T, 'Linewidth', 1);
-            hold all;
-            plot(ax(a), P.time([1 end]), [1 1]*W.T0, 'Linewidth', 1);
-            ylabel(ax(a), 'T [deg C]');
-            datetick(ax(a), 'keeplimits');
-            legend(ax(a),  'T signal', 'T_0');
-         a=2;
-         ax(a) = subplot(3,1,a);
-            plot(ax(a), P.time, P.P, 'Linewidth', 1);
-            hold all;
-            plot(ax(a), P.time([1 end]), [1 1]*W.P0, 'Linewidth', 1);
-            ylabel(ax(a), 'Pres [psu]');
-            legend(ax(a),  'P signal', 'P_0');
-            datetick(ax(a), 'keeplimits');
-         a=3;
-         ax(a) = subplot(3,1,a);
-            plot(ax(a), P.time, P.W, 'Linewidth', 1);
-            hold all;
-            plot(ax(a), P.time([1 end]), [1 1]*W.V0, 'Linewidth', 1);
             ylabel(ax(a), '[Volt]');
             legend(ax(a),  'Pitot signal', 'V_0');
             datetick(ax(a), 'keeplimits');

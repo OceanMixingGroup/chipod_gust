@@ -12,11 +12,10 @@ close all;
    do_parallel = 0;     % use paralelle computing 
    do_raw_data = 0;     % do the averaging of the raw-data (1) or skip (0) if done before
    do_v0_self  = 0;     % detremine V0 based on a min of the averaged signal (self contained)
-   do_v0_self_in_time  = 1;     % detremine V0 based on a min of the averaged signal (self contained)
-     DcalWindow =  1;    % 1 day window for V0 time 
-     DcalIncrement = .3;  % 1/5 day increment
+     DcalWindow =  1000;    % 1000 days window for V0 time (effectivly only a single value for the entire record)
+     DcalIncrement = 1000;  % 1000 day increment
    do_v0_adcp  = 0;     % detremin V0 based on a fit against reference velocity (adcp) data
-   do_plot     = 1;     % generate some figures in ../pics/ to compare the different velocity estimates
+   do_plot     = 0;     % generate some figures in ../pics/ to compare the different velocity estimates
    do_vel_p    = 0;     % which calibration should be used for vel_p (0 none (default), 1: adcp, 2: self)
 
 %_____________________include path of processing flies______________________
@@ -105,7 +104,7 @@ addpath(genpath('./chipod_gust/software/'));% include  path to preocessing routi
 %_____________________determine V0______________________
    
    if do_v0_self | do_v0_adcp | do_plot
-      determine_v0( basedir, do_v0_self, do_v0_adcp, do_plot, do_vel_p, time_range, use_T, use_press, 'on', do_v0_self_in_time, DcalWindow, DcalIncrement );
+      determine_v0( basedir, do_v0_self, do_v0_adcp, do_plot, do_vel_p, time_range, use_T, use_press, 'on', DcalWindow, DcalIncrement );
    end
 
  

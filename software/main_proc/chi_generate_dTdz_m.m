@@ -85,22 +85,22 @@ picdir   =  [sdir '../pics/'];
    S1_int = interp1(t1, S1, time);
    S2_int = interp1(t2, S2, time);
 
-   if length(z1) ~= 1
-       z1 = interp1(t1, z1, time);
-   end
-   if length(z2) ~= 1
-       z2 = interp1(t2, z2, time);
-   end
-
    % cal temperature gradient
    Tz_m.Tz = (T1_int-T2_int)/dz;
    % cal salinity gradient
    Tz_m.Sz = (S1_int-S2_int)/dz;
 
    if ~use_TS_relation
+       if length(z1) ~= 1
+           z1_int = interp1(t1, z1, time);
+       end
+       if length(z2) ~= 1
+           z2_int = interp1(t2, z2, time);
+       end
+
        % cal density
-       D1 = sw_pden(S1_int,T1_int,abs(z1), 0.5*abs(z1+z2));
-       D2 = sw_pden(S2_int,T2_int,abs(z2), 0.5*abs(z1+z2));
+       D1 = sw_pden(S1_int,T1_int,abs(z1_int), 0.5*abs(z1_int+z2_int));
+       D2 = sw_pden(S2_int,T2_int,abs(z2_int), 0.5*abs(z1_int+z2_int));
 
        % N2
        g        = 9.81;
@@ -115,18 +115,19 @@ picdir   =  [sdir '../pics/'];
 
    Tz_m.time  = time;
 
-
- % some plotting
+   numneg = length(Tz_m.N2(Tz_m.N2 < 0));
+   % some plotting
     fig = figure('Color',[1 1 1],'visible',vis,'Paperunits','centimeters',...
             'Papersize',[30 20],'PaperPosition',[0 0 30 20]);
-      plot(Tz_m.time, Tz_m.N2); hold on;
-      plot(Tz_m.time(Tz_m.N2 < 0), Tz_m.N2(Tz_m.N2 < 0), '.');
-      plot(xlim, [0, 0], '--', 'color', [1 1 1]*0.6);
-      ylabel('N^2')
-      title('Negative N^2 in red')
-      datetick
+    plot(Tz_m.time, Tz_m.N2, 'b'); hold on;
+    plot(Tz_m.time(Tz_m.N2 < 0), Tz_m.N2(Tz_m.N2 < 0), 'r.');
+    plot(xlim, [0, 0], '--', 'color', [1 1 1]*0.6);
+    ylabel('N^2')
+    title(['Negative N^2 in red = ' num2str(numneg) '/' num2str(length(Tz_m.N2)) ...
+           ' = ' num2str(numneg/length(Tz_m.N2) * 100) '%'])
+    datetick
 
-      if exist(picdir)
+    if exist(picdir)
          print(fig,[picdir 'Tz_m.png'],'-dpng','-r200','-painters')
       end
 

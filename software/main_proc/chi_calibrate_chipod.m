@@ -15,10 +15,12 @@ function [data] = chi_calibrate_chipod(rfid, head)
 %        Johannes Becherer
 %        Fri Sep  2 15:53:26 PDT 2016
 
-
 %_____________________read in raw data______________________
-
-[rdat, headtest]  = raw_load_chipod(rfid);
+if isstruct(rfid)
+    rdat = rfid;
+else
+    [rdat, headtest]  = raw_load_chipod(rfid);
+end
 
 %____________ check if raw_file head corresponds to given head___________
 

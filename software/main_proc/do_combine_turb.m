@@ -605,12 +605,15 @@ function [chi] = add_nans(CP, chi)
    end
 
    %____________________NaN out specific time ranges as necessary____________
+   % NaN out spec_area too so that you don't overwrite NaNs with zeros if
+   % that condition is satisfied.
    % for temp sensor
    if ~isempty(CP.nantimes{CP.sensor})
        for tt = 1:size(CP.nantimes{CP.sensor}, 1)
            chi.chi(find_approx(chi.time, CP.nantimes{CP.sensor}(tt, 1), 1): ...
                    find_approx(chi.time, CP.nantimes{CP.sensor}(tt, 2), 1)) = NaN;
        end
+       chi.spec_area(isnan(chi.chi)) = NaN;
        chi.eps(isnan(chi.chi)) = NaN;
    end
 
@@ -619,6 +622,7 @@ function [chi] = add_nans(CP, chi)
            chi.chi(find_approx(chi.time, CP.nantimes{3}(tt, 1), 1): ...
                    find_approx(chi.time, CP.nantimes{3}(tt, 2), 1)) = NaN;
        end
+       chi.spec_area(isnan(chi.chi)) = NaN;
        chi.eps(isnan(chi.chi)) = NaN;
    end
 end

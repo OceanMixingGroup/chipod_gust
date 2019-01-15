@@ -610,11 +610,14 @@ function [chi] = add_nans(CP, chi)
    % for temp sensor
    if ~isempty(CP.nantimes{CP.sensor})
        for tt = 1:size(CP.nantimes{CP.sensor}, 1)
-           chi.chi(find_approx(chi.time, CP.nantimes{CP.sensor}(tt, 1), 1): ...
-                   find_approx(chi.time, CP.nantimes{CP.sensor}(tt, 2), 1)) = NaN;
+           it1 = find_approx(chi.time, CP.nantimes{CP.sensor}(tt, 1), 1);
+           it2 = find_approx(chi.time, CP.nantimes{CP.sensor}(tt, 2), 1);
+           chi.chi(it1:it2) = NaN;
+           chi.eps(it1:it2) = NaN;
+           if isfield(chi, 'spec_area')
+               chi.spec_area(it1:it2) = NaN;
+           end
        end
-       chi.spec_area(isnan(chi.chi)) = NaN;
-       chi.eps(isnan(chi.chi)) = NaN;
    end
 
    if CP.isPitotEstimate & ~isempty(CP.nantimes{3})

@@ -80,69 +80,40 @@
    % initialize fields
    Peps.time = nan(1,length(I));
    Peps.spd  = Peps.time;
-   Peps.T    = Peps.time;
-   Peps.depth= Peps.time;
    Peps.eps  = Peps.time;
-   Peps.nu   = Peps.time;
    Peps.eta  = Peps.time;
    Peps.ks_range = nan(2,length(I));
    if save_spec
+      %Peps.D_k   = nan(N_spec/2,length(I));
+      %Peps.k     = nan(N_spec/2,length(I));
       Peps.D_k   = nan(length(ii_frange),length(I));
       Peps.k     = nan(length(ii_frange),length(I));
    end
-
-
    
-   %nu = 2.3e-6; % This should be dynamically calculated
-
-
+   nu       = 2.3e-6; % This should be dynamically calculated
    for i = 1:length(Peps.time)
       Peps.time(i)  = mean(data.time(I{i}));
-      Peps.spd(i)   = nanmean(data.spd(I{i}));
-      Peps.T(i)     = nanmean(data.T(I{i}));
-      Peps.depth(i) = nanmean(data.depth(I{i}));
-      Peps.nu(i) = sw_visc(35, Peps.T(i), Peps.depth(i));
-   
-      f2krad   = 2*pi/Peps.spd(i);
-      f2kcyc   = f2krad/(2*pi);
+      Peps.spd(i)   = mean(data.spd(I{i}));
 
-      if Peps.spd(i) > 0.05 
-         tmp_spd =  data.spd(I{i}) ;
-         tmp_spd(tmp_spd<.02) = nan;
-         [E11, f] = gappy_psd( tmp_spd, N_spec, f_sample, 10);
-            if length(f)<max(ii_frange)
-               continue;
-            end
+      if Peps.spd(i) > 0
+         [E, f] = gappy_psd( data.spd(I{i}) , N_spec, f_sample, 10);
             f = f(ii_frange);
-            E11 = E11(ii_frange);
-
-            % transform from u = dudx
-            D11f = E11.*(f2krad*f).^2;
-
-         krad = f2krad*f;
-         kcpm = f/Peps.spd(i);
-         
-         D11k = D11f/f2krad;
-         % I think 2 is wrong ... it should be 7.5 for 1D spec (transferse) and 15 for 
-         % longitudinal see pope p134? 
-         %D = 2*nu*krad.^2 .*E/f2krad; 
-
-         D2eps = 15*Peps.nu(i);
-         %D = D2eps*krad.^2 .*E11/f2krad; 
-
-         [Peps.eps(i), eta, ~] =   dissipation_spec(krad, D11k, Peps.nu(i));
+            E = E(ii_frange);
+         k = 2*pi/Peps.spd(i)*f;
+         D = 2*nu*k.^2.*E*Peps.spd(i)/2/pi; 
+         [Peps.eps(i), eta, ~] =   dissipation_spec(k, D);
          % if the range is very different repeat calculation
-         if krad(end)*eta<1e-1  
-            [Peps.eps(i), eta, ~] =   dissipation_spec(krad, D11k, Peps.nu(i), eta);
+         if k(end)*eta<1e-1  
+            [Peps.eps(i), eta, ~] =   dissipation_spec(k, D, eta);
          end
          Peps.eta(i) = eta;
-         Peps.ks_range(:,i) = krad([1 end])*eta;
+         Peps.ks_range(:,i) = k([1 end])*eta;
          if save_spec
             if ~isfield(Peps, 'f') % f does not change
                 Peps.f        = f;
             end
-            Peps.D_k(:,i) = D11k;
-            Peps.kcpm(:,i)   = krad;
+            Peps.D_k(:,i) = D;
+            Peps.k(:,i)   = k;
          end
       end
    end

@@ -15,6 +15,7 @@ if nargin<3
     nstd=2;
 elseif nargin<4
     side='b';
+    quiet_flag = 0;
 elseif nargin<5
     quiet_flag = 0;
 end

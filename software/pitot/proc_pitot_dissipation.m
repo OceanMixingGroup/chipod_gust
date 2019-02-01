@@ -74,7 +74,7 @@
 
       % find frange
          [~, f] = gappy_psd( data.spd(I{1}) , N_spec, f_sample, 10);
-         ii_frange   =  find(f>=Peps.f_range(1) & f<=Peps.f_range(2));
+         ii_frange = find(f>=Peps.f_range(1) & f<=Peps.f_range(2));
 
 
    % initialize fields
@@ -87,8 +87,9 @@
    Peps.eta  = Peps.time;
    Peps.ks_range = nan(2,length(I));
    if save_spec
+      Peps.D_k_acc   = nan(length(ii_frange),length(I));
       Peps.D_k   = nan(length(ii_frange),length(I));
-      Peps.k     = nan(length(ii_frange),length(I));
+      Peps.k     =  nan(length(ii_frange),length(I));
    end
 
 
@@ -107,22 +108,29 @@
       f2kcyc   = f2krad/(2*pi);
 
       if Peps.spd(i) > 0.05 
-         tmp_spd =  data.spd(I{i}) ;
+         % acc
+         tmp_spd_acc =  data.a_vel_x(I{i});
+         % pitot 
+         tmp_spd     =  data.spd(I{i}) ;
          tmp_spd(tmp_spd<.02) = nan;
-         [E11, f] = gappy_psd( tmp_spd, N_spec, f_sample, 10);
+         [E11_acc, f] = gappy_psd( tmp_spd_acc, N_spec, f_sample, 10);
+         [E11, f]     = gappy_psd( tmp_spd, N_spec, f_sample, 10);
             if length(f)<max(ii_frange)
                continue;
             end
             f = f(ii_frange);
-            E11 = E11(ii_frange);
+            E11     = E11(ii_frange);
+            E11_acc = E11_acc(ii_frange);
 
             % transform from u = dudx
-            D11f = E11.*(f2krad*f).^2;
+            D11f     = E11.*(f2krad*f).^2;
+            D11f_acc = E11_acc.*(f2krad*f).^2;
 
          krad = f2krad*f;
          kcpm = f/Peps.spd(i);
          
-         D11k = D11f/f2krad;
+         D11k     = D11f/f2krad;
+         D11k_acc = D11f_acc/f2krad;
          % I think 2 is wrong ... it should be 7.5 for 1D spec (transferse) and 15 for 
          % longitudinal see pope p134? 
          %D = 2*nu*krad.^2 .*E/f2krad; 
@@ -141,8 +149,9 @@
             if ~isfield(Peps, 'f') % f does not change
                 Peps.f        = f;
             end
-            Peps.D_k(:,i) = D11k;
-            Peps.kcpm(:,i)   = krad;
+            Peps.D_k(:,i)     = D11k;
+            Peps.D_k_acc(:,i) = D11k_acc;
+            Peps.k(:,i)       = krad;
          end
       end
    end

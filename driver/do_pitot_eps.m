@@ -1,12 +1,13 @@
-%%  This script runs the chi-processing based on Pitot epsilon in the BBL
-%
+%% this script does all the basic calibration excluding chi-processing and save 1s infomation
+%     in ./proc/temp.mat
 %  
+%
 %   created by: 
 %        Johannes Becherer
-%        Fri Aug  3 11:53:11 PDT 2018
+%        Wed Aug 16 16:01:26 PDT 2017
 
 
-do_parallel = 1;     % use paralelle computing 
+do_parallel = 3;     % use paralelle computing 
 do_raw_proc = 1;     % do the raw data processing 
 do_plot     = 1;     % generate a over view plot 
 
@@ -29,9 +30,10 @@ addpath(genpath('./chipod_gust/software/'));% include  path to preocessing routi
 
 if do_raw_proc
     save_spec     = 1; % shall the spectrum be saved
-    spec_length   =  1; % in seconds 
-    frange        =  [1/spec_length 10/spec_length];
-    %frange        =  [1 50];
+    spec_length   =  2; % in seconds 
+
+    frange        =  [1/spec_length 20];
+
 
     generate_pitot_eps(basedir, do_parallel,  time_range, spec_length, frange,  save_spec);
 end

@@ -46,6 +46,7 @@ eps = nan;
 
 D2eps = 15*nu;  % 15 because 1D longitudinal
 
+Neta = 3; % how many kolmogorov length should be the kmax cut off
 
 % assuming that k_in is equidistant
 dk_in = median(diff(k_in));
@@ -61,18 +62,18 @@ if nargin<4
    eta_in = (nu^3/(eps_in*2))^.25;
 end
 
-% ignor high waves numbers since they might be contaminated
-if kmax_in > 1/(3*eta_in)
-   kmax_in = 1/(3*eta_in);
-  % eps_in  = sum(D_in(k_in<=kmax_in))*dk_in; 
-   ii_in = find(k_in<=kmax_in);
+   % ignor high waves numbers since they might be contaminated
+   if kmax_in > 1/(Neta*eta_in)
+      kmax_in = 1/(Neta*eta_in);
+     % eps_in  = sum(D_in(k_in<=kmax_in))*dk_in; 
+      ii_in = find(k_in<=kmax_in);
 
-   if length(ii_in) > 2
-      eps_in  = D2eps*int_eps( k_in(ii_in), D_in(ii_in));
-   else  % no enough spectral points to work with
-      return;
+      if length(ii_in) > 2
+         eps_in  = D2eps*int_eps( k_in(ii_in), D_in(ii_in));
+      else  % no enough spectral points to work with
+         return;
+      end
    end
-end
 
 
 
@@ -86,11 +87,23 @@ epss(1) = eps_in;
       
       [D_na, k_na, eta] = nasmyth2Dk( kks, G1_na, epss(i), nu );
 
+         if k_in(ii_in(end)) > 1/(Neta*eta)
+            kmax_in = 1/(Neta*eta);
+            ii_in = find(k_in<=kmax_in);
+            if length(ii_in) > 2
+               eps_in  = D2eps*int_eps( k_in(ii_in), D_in(ii_in));
+            else  % no enough spectral points to work with
+               return
+            end
+         end
+
       ii_na_part  =  find( k_na>= kmin_in & k_na<= kmax_in);
       eps_na_part = D2eps*int_eps( k_na(ii_na_part), D_na(ii_na_part)); 
       eps_na      = D2eps*int_eps( k_na, D_na); 
 
-       epss(i+1)  = eps_na*(epss(1)/eps_na_part);
+
+
+       epss(i+1)  = eps_na*(eps_in/eps_na_part);
 
 
       % break for early convergence

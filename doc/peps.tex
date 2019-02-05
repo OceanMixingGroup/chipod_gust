@@ -1,0 +1,54 @@
+\chapter{Processing dissipation rates, $\epsilon$, from pitot}
+This chapter explains how to process pitot tube data to obtain 
+dissipation rates. 
+
+It is assumed that the pitot tube is already calibrated such 
+that a file \textit{{../calib/header\_p.mat}} exists, containing 
+a structure $W$. $W$ should have the following field, 
+\begin{itemize}
+   \item W.Ps     -  Pressure dependence  (lab calib)
+   \item W.Pd     -  dynamic pressure calibration( lab calib)
+   \item W.T      -  temperature dependence (lab calib) 
+   \item W.tilt   -  tilt dependence (lab calib)
+   \item W.V0     -  V0 offset (determined by user)
+   \item W.T0     -  mean temperature corresponding to V0 (determined by user)
+   \item W.P0     -  mean pressure corresponding to V0 (determined by user)
+\end{itemize}
+
+\section{\textit{{do\_pitot\_eps}}}
+\textit{{do\_pitot\_eps}} is the main driver for processing the raw data to get
+dissipation rates from pitot data. It generates a file: \textit{../proc/pitot\_eps.mat},
+containing a structure $Peps$ with all relevant data.
+
+There are a couple of option that can be specified:
+\begin{itemize}
+   \item {save\_spec}  :  shall the spectra be saved (this increases the size of pitot\_eps a lot!!!, by adding Peps.k and Peps.D\_k )
+   \item spec\_length  : is the length of the spectrum used to fit, (default is 2 sec)
+   \item frange        : specify the rage to perform the fit in
+\end{itemize}
+
+If you save the spectrum (save\_spec $= 1$) than you can use peps\_spec\_plot.m 
+to look at averaged or individual spectra.
+
+\subsection{dependent files}
+   here is a list of the dependent files of \textit{{do\_pitot\_eps}}
+\begin{itemize}
+   \item ./chipod\_gust/software/pitot/generate\_pitot\_eps.m
+   \item ./chipod\_gust/software/pitot/proc\_pitot\_dissipation.m
+   \item ./chipod\_gust/software/pitot/dissipation\_spec.m
+   \item ./chipod\_gust/software/pitot/nasmyth\_G1.m
+   \item ./chipod\_gust/software/pitot/nasmyth2Dk.m
+   \item ./chipod\_gust/software/pitot/pitot\_calibrate.m
+   \item ./chipod\_gust/software/pitot/flag\_Peps.m
+\end{itemize}
+
+\subsection{flag\_Peps.m}
+This function generates a couple of flagging masks for the structure $Peps$ and
+flags the Peps.eps with the product of these masks. 
+The structure Peps does however always contain an unmasked time series of $\epsilon$,
+in case you want to apply different masks. 
+flag\_Peps.m is designed to mask high frequency spectra 
+for moored GusTs in a surface wave contaminated environment.
+If you have a different deployment or longer spectra or different environments, you
+should use a different set of masks applied on the unmasked field Peps.eps\_nomaks.
+

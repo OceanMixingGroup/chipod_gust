@@ -7,7 +7,7 @@
 %        Wed Aug 16 16:01:26 PDT 2017
 
 
-do_parallel = 3;     % use paralelle computing 
+do_parallel = 0;     % use paralelle computing 
 do_raw_proc = 1;     % do the raw data processing 
 do_plot     = 1;     % generate a over view plot 
 
@@ -29,8 +29,8 @@ addpath(genpath('./chipod_gust/software/'));% include  path to preocessing routi
 
 
 if do_raw_proc
-    save_spec     = 1; % shall the spectrum be saved
-    spec_length   =  2; % in seconds 
+    save_spec     = 0; % shall the spectrum be saved
+    spec_length   = 2; % in seconds 
 
     frange        =  [1/spec_length 20];
 

@@ -13,6 +13,9 @@ function [Peps]  = flag_Peps(Peps)
    dt = median(diff(Peps.time));
    Dt = 20/3600/24;  %20sec
    Nlp = round(Dt/dt);
+   if Nlp < 1
+       Nlp = 1;
+   end
 
    Peps.spd_lp = movmean(Peps.spd, Nlp);
    Peps.spd_hp = Peps.spd - Peps.spd_lp;

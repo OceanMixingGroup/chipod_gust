@@ -118,7 +118,7 @@ eps = epss(ii_nan(end));
 eta = (nu^3/eps)^.25;
 
    % only for testing purpose
-   if  0 % rand(1)>.99
+   if 0%  rand(1)>.99
         loglog(k_in, D_in);
         hold all;
         loglog( k_in(k_in<=kmax_in), D_in(k_in<=kmax_in), 'g'); 

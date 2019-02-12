@@ -17,10 +17,13 @@ function []  = chi_merge_and_avg(basedir, ddir, aw , time_lim, sname)
 %        Tue Sep 20 16:28:51 PDT 2016
 %
 
+
 % if no time limits are set we use pratical no limits
 if nargin < 4 | isempty(time_lim)
    time_lim = [datenum(1900,1,1) datenum(2100,1,1)];
 end
+
+basedir = [basedir filesep]; 
 
 if nargin < 5
     sname = [basedir 'proc' filesep ddir];

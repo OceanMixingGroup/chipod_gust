@@ -75,7 +75,9 @@ end
       end
    end
 
-
+if isnan(eps_in)
+    return;
+end
 
 
 

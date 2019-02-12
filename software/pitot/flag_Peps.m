@@ -38,7 +38,8 @@ function [Peps]  = flag_Peps(Peps)
    Peps.mask_flow   = movmean(Peps.mask_flow, 2);
 
 
-   Peps.mask_tot = Peps.mask_max.*Peps.mask_wave.*Peps.mask_flow;
+   %Peps.mask_tot = Peps.mask_max.*Peps.mask_wave.*Peps.mask_flow;
+   Peps.mask_tot = Peps.mask_wave.*Peps.mask_flow;
 
    Peps.eps_nomask = Peps.eps;
    Peps.eps    =  Peps.eps.*Peps.mask_tot;

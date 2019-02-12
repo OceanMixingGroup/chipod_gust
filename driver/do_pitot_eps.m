@@ -55,9 +55,20 @@ if do_plot
          peps_spec_plot;
       end
 
+      if TL.Tp1(2) < TL.Tp2(2)
+         whichTurb = 'pm2';
+      else
+         whichTurb = 'pm1';
+      end
+         
+      if exist([basedir '/proc/Turb.mat'])
+         [fig, fig1] = plot_compare_PepsTurb( basedir, whichTurb)
+            print(fig,['../pics/Pitot_eps_Turb.png'],'-dpng','-r200','-painters')
+            print(fig1,['../pics/Pitot_eps_Turb_hist2d.png'],'-dpng','-r200','-painters')
+      end
 
       [fig] = plot_pitot_eps( basedir)
-      print(fig,['../pics/Pitot_eps.png'],'-dpng','-r200','-painters')
+      print(fig,['../pics/Pitot_eps_bbl.png'],'-dpng','-r200','-painters')
 
 
             

@@ -12,8 +12,8 @@ cbw = .02;  % colorbar width
 
 
 % generate the frame inside the figure
-Fx = [.1 .97]; % xdimension of frame
-Fy = [.1 .97]; % xdimension of frame   
+Fx = [.1 .95]; % xdimension of frame
+Fy = [.1 .95]; % xdimension of frame   
                if(n_rows==1 & colorb~=0)
                    Fy = [.15 .9];
                end

@@ -1,5 +1,5 @@
-%% this script does all the basic calibration excluding chi-processing and save 1s infomation
-%     in ./proc/temp.mat
+%% this script does all the pitot epsilon processing
+%     in ./proc/pitot_eps.mat
 %  
 %
 %   created by: 
@@ -9,9 +9,9 @@
 
 do_parallel = 0;     % use paralelle computing 
 do_raw_proc = 0;     % do the raw data processing 
-   save_spec = 0; % shall the spectrum be saved
+   save_spec = 0;    % shall the spectrum be saved
 do_plot     = 1;     % generate a over view plot 
-do_merge    = 1;     % merge provcessed files 
+do_merge    = 0;     % merge provcessed files 
 
 
 %_____________________include path of processing flies______________________
@@ -27,7 +27,8 @@ addpath(genpath('./chipod_gust/software/'));% include  path to preocessing routi
 
 % get time limits from whoAmI;
    [TL] =   whoAmI_timeLimits(basedir);
-   time_range      = TL.master;
+   time_range      = TL.pitot;
+   %time_range      = [datenum(2017,09,20) datenum(2017,09,21)];
 
 
 if do_raw_proc

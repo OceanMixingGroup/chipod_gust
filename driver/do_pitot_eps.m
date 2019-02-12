@@ -30,12 +30,15 @@ addpath(genpath('./chipod_gust/software/'));% include  path to preocessing routi
 
 if do_raw_proc
     save_spec     = 0; % shall the spectrum be saved
-    spec_length   = 2; % in seconds 
+    spec_length   = 5; % in seconds 
+    accfilter     = 1; % shall the spectrum be filtered Correlation with Acc
+                       % as a result the spectrum will be shorter (needs longer spec_length)
+                       % and processing time longer
 
-    frange        =  [1/spec_length 20];
+    frange        =  [1/spec_length 2];
 
 
-    generate_pitot_eps(basedir, do_parallel,  time_range, spec_length, frange,  save_spec);
+    generate_pitot_eps(basedir, do_parallel,  time_range, spec_length, frange,  save_spec, accfilter);
 end
 
 

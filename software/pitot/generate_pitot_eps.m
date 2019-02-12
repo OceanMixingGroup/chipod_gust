@@ -1,5 +1,5 @@
-function [] = generate_pitot_eps(basedir, do_parallel,  time_limits, spec_length, frange, save_spec)
-%  [] = generate_pitot_eps(basedir, do_parallel,  [time_limits, spec_length, frange, save_spec])
+function [] = generate_pitot_eps(basedir, do_parallel,  time_limits, spec_length, frange, save_spec, accfilter)
+%  [] = generate_pitot_eps(basedir, do_parallel,  [time_limits, spec_length, frange, save_spec, accfilter])
 %
 %     This function drives the pitot epsilon processing
 %
@@ -29,6 +29,9 @@ end
 if nargin < 6
    save_spec   = 0;
 end
+if nargin < 7
+   accfilter   = 0;
+end
 
 
    %_____________________get list of all raw data______________________
@@ -50,7 +53,11 @@ end
          parfor f=1:length(fids)
             try % take care if script crashes that the parpoo is shut down
                disp(['calculating file ' num2str(f) ' of ' num2str(length(fids))]);
-               proc_pitot_dissipation(basedir, fids{f}, spec_length/(24*3600), frange, save_spec)
+               if accfilter
+                  proc_pitot_dissipation(basedir, fids{f}, spec_length/(24*3600), frange, save_spec)
+               else
+                  proc_pitot_dissipation_noaccfilter(basedir, fids{f}, spec_length/(24*3600), frange, save_spec)
+               end
             catch ME
                disp(['!!!!!! ' fids{f} ' crashed while processing T structure !!!!!!' ]);
                disp(ME)
@@ -61,7 +68,11 @@ end
       else
          for f=1:length(fids)
             disp(['calculating file ' num2str(f) ' of ' num2str(length(fids))]);
-            proc_pitot_dissipation(basedir, fids{f}, spec_length/(24*3600), frange, save_spec)
+            if accfilter
+               proc_pitot_dissipation(basedir, fids{f}, spec_length/(24*3600), frange, save_spec)
+            else
+               proc_pitot_dissipation_noaccfilter(basedir, fids{f}, spec_length/(24*3600), frange, save_spec)
+            end
          end
       end
 

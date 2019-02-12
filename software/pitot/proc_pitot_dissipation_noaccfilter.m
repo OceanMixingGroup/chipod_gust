@@ -1,5 +1,5 @@
-    function [] = proc_pitot_dissipation(basedir, rfid, varargin)
-%% [] = proc_pitot_disspation(basedir, rfid, [spec_length], [f_range], [save_spec])
+    function [] = proc_pitot_dissipation_noaccfilter(basedir, rfid, varargin)
+%% [] = proc_pitot_disspation_noaccfilter(basedir, rfid, [spec_length], [f_range], [save_spec])
 %     This function drives the epsilon processing of the Pitot-tube
 %     for a single raw-files 
 %
@@ -76,9 +76,7 @@
       [I] = split_fragments( J, N_spec, round(N_spec*segment_overlap) );
 
       % find frange
-         %[~, f] = gappy_psd( data.spd(I{1}) , N_spec, f_sample, 10);
-         A = [data.a_vel_x(I{1}) data.a_vel_y(I{1}) data.a_vel_z(I{1})];
-         [~, ~, ~, ~, f] = clean_shear_spec( A, data.spd(I{1}) , Nfft, f_sample );
+         [~, f] = gappy_psd( data.spd(I{1}) , N_spec, f_sample, 10);
          ii_frange = find(f>=Peps.f_range(1) & f<=Peps.f_range(2));
 
 
@@ -95,9 +93,9 @@
       Peps.D_k_acx   = nan(length(ii_frange),length(I));
       Peps.D_k_acy   = nan(length(ii_frange),length(I));
       Peps.D_k_acz   = nan(length(ii_frange),length(I));
-      Peps.D_k       = nan(length(ii_frange),length(I));
+      Peps.D_k   = nan(length(ii_frange),length(I));
       Peps.D_k_org   = nan(length(ii_frange),length(I));
-      Peps.k          =  nan(length(ii_frange),length(I));
+      Peps.k     =  nan(length(ii_frange),length(I));
    end
 
 
@@ -121,21 +119,20 @@
          % pitot 
          tmp_spd     =  data.spd(I{i}) ;
          tmp_spd(tmp_spd<.02) = nan;
-         A = [data.a_vel_x(I{i}) data.a_vel_y(I{i}) data.a_vel_z(I{i})];
-         [E11, AA, E11_org, ~, f] = clean_shear_spec( A, tmp_spd , Nfft, f_sample );
-         %[E11, f]     = gappy_psd( tmp_spd, N_spec, f_sample, 10);
+         [E11, f]     = gappy_psd( tmp_spd, N_spec, f_sample, 10);
             if length(f)<max(ii_frange)
                continue;
             end
             f = f(ii_frange);
             E11     = E11(ii_frange);
-            E11_org = E11_org(ii_frange);
+
+            % transform from u = dudx
+            D11f     = E11.*(f2krad*f).^2;
 
          krad = f2krad*f;
          kcpm = f/Peps.spd(i);
          
-         D11k     = E11*f2krad.*f.^2;
-         D11k_org = E11_org*f2krad.*f.^2;
+         D11k     = D11f/f2krad;
          % I think 2 is wrong ... it should be 7.5 for 1D spec (transferse) and 15 for 
          % longitudinal see pope p134? 
          %D = 2*nu*krad.^2 .*E/f2krad; 
@@ -156,14 +153,14 @@
             end
             Peps.k(:,i)       = krad;
             Peps.D_k(:,i)     = D11k;
-            Peps.D_k_org(:,i) = D11k_org;
+            Peps.D_k_org(:,i) = D11k;
          % acc
-           %[E11_acx, ~] = gappy_psd( data.a_vel_x(I{i}), N_spec, f_sample, 10);
-           %[E11_acy, ~] = gappy_psd( data.a_vel_y(I{i}), N_spec, f_sample, 10);
-           %[E11_acz, ~] = gappy_psd( data.a_vel_z(I{i}), N_spec, f_sample, 10);
-            Peps.D_k_acx(:,i) = squeeze(AA(1,1,ii_frange))*f2krad.*(f).^2;
-            Peps.D_k_acy(:,i) = squeeze(AA(2,2,ii_frange))*f2krad.*(f).^2;
-            Peps.D_k_acz(:,i) = squeeze(AA(3,3,ii_frange))*f2krad.*(f).^2;
+            [E11_acx, ~] = gappy_psd( data.a_vel_x(I{i}), N_spec, f_sample, 10);
+            [E11_acy, ~] = gappy_psd( data.a_vel_y(I{i}), N_spec, f_sample, 10);
+            [E11_acz, ~] = gappy_psd( data.a_vel_z(I{i}), N_spec, f_sample, 10);
+            Peps.D_k_acx(:,i) = E11_acx(ii_frange)*f2krad.*(f).^2;
+            Peps.D_k_acy(:,i) = E11_acy(ii_frange)*f2krad.*(f).^2;
+            Peps.D_k_acz(:,i) = E11_acz(ii_frange)*f2krad.*(f).^2;
          end
       end
    end

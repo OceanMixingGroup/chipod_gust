@@ -83,7 +83,8 @@ if plot_avg_spec
          end
          ylabel(ax(a), 'D_{11}(k)/(15\nu) [s^{-2}(rad/m)^{-1}]');
          xlabel(ax(a), 'k [(rad/m)]');
-               [axf , ~] = copy_axes(ax);
+               [axf , axwaste] = copy_axes(ax);
+                  uistack(axwaste,'bottom');
                xlf = xl*median(Peps.spd(~isnan(Peps.eps)))/(2*pi);
                xlim(axf,xlf);
                set(axf, 'XaxisLocation', 'top', 'Xscale', 'log', 'Xtick', [10.^(ceil(log10(xlf(1))):floor(log10(xlf(2))))]);
@@ -156,7 +157,8 @@ if plot_individual_spec
 
             set(ax(a), 'Yscale', 'log', 'Xscale', 'log');
               % set(ax(a), 'box', 'on', 'TickDir', 'out');
-               [axf , ~] = copy_axes(ax);
+               [axf , axwaste] = copy_axes(ax);
+                  uistack(axwaste,'bottom');
                xlf = xl*Peps.spd(ii_what(s))/(2*pi)
                xlim(axf,xlf);
                set(axf, 'XaxisLocation', 'top', 'Xscale', 'log', 'Xtick', [10.^(ceil(log10(xlf(1))):floor(log10(xlf(2))))]);

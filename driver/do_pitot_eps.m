@@ -55,10 +55,14 @@ if do_plot
          peps_spec_plot;
       end
 
-      if TL.Tp1(2) < TL.Tp2(2)
-         whichTurb = 'pm2';
-      else
-         whichTurb = 'pm1';
+      if isfield(TL, 'T') % gust
+         whichTurb = 'pmg';
+      else  % chipod
+         if TL.Tp1(2) < TL.Tp2(2)
+            whichTurb = 'pm2';
+         else
+            whichTurb = 'pm1';
+         end
       end
          
       if exist([basedir '/proc/Turb.mat'])

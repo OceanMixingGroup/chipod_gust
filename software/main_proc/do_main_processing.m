@@ -43,7 +43,7 @@ end
    %_____________________get all raw files______________________
 
    if ~do_just_merge
-      [fids, fdate] = chi_find_rawfiles(basedir);
+      [fids, fdate] = chi_find_rawfiles(basedir, time_lim);
 
       if(pflag.master.parallel)
 

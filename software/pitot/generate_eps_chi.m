@@ -30,7 +30,7 @@ end
 
 
    %_____________________get list of all raw data______________________
-      [fids, fdate] = chi_find_rawfiles(basedir);
+      [fids, fdate] = chi_find_rawfiles(basedir, time_limits);
 
 
    %_____________processing loop through all raw files__________________

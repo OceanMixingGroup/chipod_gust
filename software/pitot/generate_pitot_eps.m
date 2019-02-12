@@ -77,5 +77,3 @@ end
          end
       end
 
-   %____________________merge individual files______________________
-      chi_merge_and_avg(basedir, 'pitot_eps', 0, time_limits);

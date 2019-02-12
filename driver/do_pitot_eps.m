@@ -8,8 +8,10 @@
 
 
 do_parallel = 0;     % use paralelle computing 
-do_raw_proc = 1;     % do the raw data processing 
+do_raw_proc = 0;     % do the raw data processing 
+   save_spec = 0; % shall the spectrum be saved
 do_plot     = 1;     % generate a over view plot 
+do_merge    = 1;     % merge provcessed files 
 
 
 %_____________________include path of processing flies______________________
@@ -29,7 +31,6 @@ addpath(genpath('./chipod_gust/software/'));% include  path to preocessing routi
 
 
 if do_raw_proc
-    save_spec     = 0; % shall the spectrum be saved
     spec_length   = 5; % in seconds 
     accfilter     = 1; % shall the spectrum be filtered Correlation with Acc
                        % as a result the spectrum will be shorter (needs longer spec_length)
@@ -41,10 +42,22 @@ if do_raw_proc
     generate_pitot_eps(basedir, do_parallel,  time_range, spec_length, frange,  save_spec, accfilter);
 end
 
+if do_merge
+   disp('---- merging processed days ----')
+   chi_merge_and_avg(basedir, 'pitot_eps', 0, time_range);
+end
+
 
 if do_plot
       
+      if save_spec
+         peps_spec_plot;
+      end
+
+
       [fig] = plot_pitot_eps( basedir)
       print(fig,['../pics/Pitot_eps.png'],'-dpng','-r200','-painters')
+
+
             
 end

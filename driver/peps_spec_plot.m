@@ -1,10 +1,10 @@
-clear all;
-close all;
+%clear all;
+%close all;
 
 addpath(genpath('./chipod_gust/software/'));
 
 do_load              = 1;
-plot_individual_spec = 1;
+plot_individual_spec = 0;
 plot_avg_spec        = 1;
 
 if do_load 

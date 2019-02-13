@@ -83,23 +83,34 @@ end
 
 epss(1) = eps_in;
 
-[G1_na,kks]=nasmyth_G1(1000,20);
+[G1_na,kks]=nasmyth_G1(10000,100);
 
-   for i = 1:Nmax_iteration;
+   for i = 1:Nmax_iteration
       
       [D_na, k_na, eta] = nasmyth2Dk( kks, G1_na, epss(i), nu );
 
-         if k_in(ii_in(end)) > 1/(Neta*eta)
-            kmax_in = 1/(Neta*eta);
-            ii_in = find(k_in<=kmax_in);
+           if k_na(1)>=kmin_in
+                kmin_in = k_na(1);
+           end
+           if k_in(ii_in(end)) > 1/(Neta*eta)
+               kmax_in = 1/(Neta*eta);
+           end
+      
+          if k_na(1)>=kmin_in | k_in(ii_in(end)) > 1/(Neta*eta)
+            ii_in = find(k_in<=kmax_in & k_in >= kmin_in);
             if length(ii_in) > 2
                eps_in  = D2eps*int_eps( k_in(ii_in), D_in(ii_in));
             else  % no enough spectral points to work with
                return
             end
-         end
+          end
+
 
       ii_na_part  =  find( k_na>= kmin_in & k_na<= kmax_in);
+      if length(ii_na_part) < 2
+          eps =nan;
+          return;
+      end
       eps_na_part = D2eps*int_eps( k_na(ii_na_part), D_na(ii_na_part)); 
       eps_na      = D2eps*int_eps( k_na, D_na); 
 

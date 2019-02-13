@@ -200,7 +200,11 @@ if(do_combine)
                  if ~isfield(chi, 'time_floor')
                      spec_floor = nanmedian(chi.spec_floor);
                  else
-                     spec_floor = interp1(chi.time_floor, chi.spec_floor, chi.time);
+                     if length(chi.time_floor)>1
+                        spec_floor = interp1(chi.time_floor, chi.spec_floor, chi.time);
+                     else
+                        spec_floor = chi.spec_floor;
+                     end
                  end
 
                  if ~exist('hspecfig', 'var')

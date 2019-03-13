@@ -15,7 +15,38 @@ path2database  =  [path2ganges '/work/database/omg.sqlite'];
    savedir =   [basedir 'proc/'];  % directory directory to save data
    unit    = chi_get_unit_name(basedir); % get unit name
 
-   %unit = '52';
+
+
+
+%_____________________Check if database exist______________________
+if ~exist(path2database)
+   disp( 'I could not find the database at:')
+   disp(path2database)
+   disp( ' You should check if you have set the right path to ganges !!!')
+
+   disp( '-------------------------------------------')
+   disp( '  If you want to generate a dummy whoAmI.m file instead ')
+   disp( '               WITHOUT connection to the database choose one of the following options')
+   disp('      1     : create a dummy chipod whoAmI');
+   disp('      2     : create a dummy gust   whoAmI');
+   disp('      9999  : cancel')
+   prompt   = ['Which option do you choose : ']; 
+   inkey    =  input(prompt);
+
+   if inkey == 1  
+      disp('------- create dummy chipod whoAmI.m')
+      copyfile([here '/chipod_gust/software/database/whoAmI_chipod.dummy'], [here '/whoAmI.m']); 
+      return
+   elseif inkey == 2  
+      disp('------- create dummy gust whoAmI.m')
+      copyfile([here '/chipod_gust/software/database/whoAmI_gust.dummy'], [here '/whoAmI.m']); 
+      return
+   else
+      disp('------- Operation canceled: No  whoAmI.m generated!!')
+      return
+   end
+end
+
 
 %_____________________Ask the data base______________________
 % open omg database

@@ -26,7 +26,7 @@ if nargin == 7
 else
    vis = 'on';
 end
-if nargin == 6
+if nargin >= 6
    do_plot = varargin{1};
 else
    do_plot = 0;

@@ -18,6 +18,7 @@ close all;
    do_v0_adcp  = 0;     % detremin V0 based on a fit against reference velocity (adcp) data
    do_plot     = 0;     % generate some figures in ../pics/ to compare the different velocity estimates
    do_vel_p    = 0;     % which calibration should be used for vel_p (0 none (default), 1: adcp, 2: self)
+   do_P1sec    = 0;     % this generates proc/P_1sec.mat based on data from temp.mat
 
 %_____________________include path of processing flies______________________
 addpath(genpath('./chipod_gust/software/'));% include  path to preocessing routines
@@ -108,5 +109,10 @@ addpath(genpath('./chipod_gust/software/'));% include  path to preocessing routi
    if do_v0_self | do_v0_adcp | do_plot
       determine_v0( basedir, do_v0_self, do_v0_adcp, do_plot, do_vel_p, time_range, use_T, use_press, 'on', DcalWindow, DcalIncrement );
    end
+
+%____________________cal P_1sec.mat_____________________
+  if do_P1sec
+     make_P_1sec(basedir);
+  end
 
  

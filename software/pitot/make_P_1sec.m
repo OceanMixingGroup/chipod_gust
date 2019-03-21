@@ -9,6 +9,8 @@ function [P] = make_P_1sec(basedir)
 %        Thu Mar  8 10:12:05 PST 2018
 
 
+   [TL]            = whoAmI_timeLimits(basedir);
+   time_range      = TL.pitot;
 
    % if you don't set the basedir function assumes you 
    % in the mfile folder of the instrument directory
@@ -35,11 +37,22 @@ function [P] = make_P_1sec(basedir)
    end
 
    P.time   = T.time;
-   P.T      = T.T;
+   P.T   =  zeros(size(P.time));
+   if isfield(TL, 'T1')
+      if TL.T1< TL.T2
+         P.T      = T.T2;
+      else
+         P.T      = T.T1;
+      end
+   elseif  isfield(TL, 'T1')
+      P.T      = T.T;
+   end
    P.depth  =  T.depth;
    P.cmp    = T.cmp;
+   P.W      = T.W;
+   P.P      = T.P;
 
-   [P.spd, ~, ~] = pitot_calibrate_time( T.time, T.W, T.T, T.P, W);
+   [P.spd, ~, ~] = pitot_calibrate_time( P.time, P.W, P.T, P.P, W);
 
    ii_nan = (P.spd < 0);
 

@@ -482,7 +482,7 @@ if(do_combine)
        end
    end
 
-   Turb.hash = githash('driver/combine_turbulence.m');
+   Turb.hash = githash(['driver' filesep 'combine_turbulence.m']);
    Turb.do_mask = do_mask;
    Turb.parameters = CP;
 

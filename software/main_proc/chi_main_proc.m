@@ -70,10 +70,15 @@ function [] = chi_main_proc(basedir, rfid, pflag, varargin)
             load(fid);
             vel_m1 = vel_m;
             clear vel_m;
-            [vel_m.time, vel_m.spd] = ...
+            if(pflag.master.pumped) 
+              [vel_m.time, vel_m.spd] = ...
                 chi_convert_vel_m_to_sensor_spd(vel_m1, data, ...
                                                 pflag.master.use_compass, ...
                                                 pflag.master.use_pres);
+            else
+               vel_m.time = vel_m1.time;
+               vel_m.spd  = vel_m1.spd;
+            end
          else
             disp([fid ' does not exit']);
             disp('corresponding processing flags are switched off');
@@ -96,8 +101,6 @@ function [] = chi_main_proc(basedir, rfid, pflag, varargin)
                 chi_convert_vel_m_to_sensor_spd(vel_p1, data);
 
          else % case 2 not surface pumped mooring
-
-            disp(['The direct Pitot velocity is used instead of the vel_p ']);
             fid = [basedir filesep 'calib' filesep 'header_p.mat'];
             if exist(fid, 'file');
                % load Pitot header

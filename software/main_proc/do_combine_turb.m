@@ -196,7 +196,8 @@ if(do_combine)
                  toc;
              end
 
-             if isfield(chi, 'spec_area')
+             if isempty(ic_test) & isfield(chi, 'spec_area') & isfield(chi, 'spec_floor')
+                 % account for two possible versions of the code
                  if ~isfield(chi, 'time_floor')
                      spec_floor = nanmedian(chi.spec_floor);
                  else
@@ -625,7 +626,9 @@ function [chi] = add_nans(CP, chi)
            chi.chi(find_approx(chi.time, CP.nantimes{3}(tt, 1), 1): ...
                    find_approx(chi.time, CP.nantimes{3}(tt, 2), 1)) = NaN;
        end
-       chi.spec_area(isnan(chi.chi)) = NaN;
+       if isfield(chi, 'spec_area')
+           chi.spec_area(isnan(chi.chi)) = NaN;
+       end
        chi.eps(isnan(chi.chi)) = NaN;
    end
 end

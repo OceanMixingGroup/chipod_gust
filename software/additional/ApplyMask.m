@@ -55,8 +55,8 @@ function [chi, percentage, mask] = ApplyMask(chi, maskvar, relation, criterion, 
           verb num2str(percentage, '%.2f') ...
           '% of estimates (' num2str(dnans) ' points)'])
 
-    if percentage > 0.5
+    if percentage > 0.5 & do_plot
         perlabel = [label ' -' num2str(percentage, '%.1f') '%'];
-        if do_plot, Histograms(chi, hfig, 'count', ID, [perlabel]); end
+        Histograms(chi, hfig, 'count', ID, [perlabel]);
     end
 end

@@ -155,7 +155,7 @@ if(do_combine)
 
              disp(sprintf('\n    ==== Now masking 1 sec averaged estimate.'))
 
-             [spdmask, addspdmask] = determine_speed_masks(basedir, ID, CP, chi);
+             [spd_for_mask, addspd_for_mask] = determine_speed_masks(basedir, ID, CP, chi);
 
              if CP.mask_flushing
 
@@ -182,12 +182,12 @@ if(do_combine)
                  [], nan, do_plot, hfig, ID, 'inst spd');
 
              [chi, chi.stats.background_flow_mask_percentage, chi.masks.back_flow] = ApplyMask(...
-                 chi, spdmask, '<', CP.min_spd, 'background flow', ...
+                 chi, spd_for_mask, '<', CP.min_spd, 'background flow', ...
                  [], nan, do_plot, hfig, ID, 'back flow');
 
              if CP.additional_mask_spd ~= ''
                  [chi, chi.stats.additional_background_flow_mask_percentage, chi.masks.add_back_flow] = ApplyMask(...
-                     chi, addspdmask, '<', CP.min_spd, 'additional background flow mask');
+                     chi, addspd_for_mask, '<', CP.min_spd, 'additional background flow mask');
              end
 
              % remove values greater than thresholds
@@ -442,9 +442,9 @@ if(do_combine)
          % recalculate using averaged quantities
          % if we average over a time period greater than
          % sampling period of dTdz, this estimate will differ!
+         % add in molecular diffusivity before estimating heat flux.
          Turb.(ID).Kt = 0.5 * Turb.(ID).chi ./ Turb.(ID).dTdz.^2 + ...
-             sw_tdif(interp1(chi.time, chi.S, Turb.(ID).time), ...
-                     Turb.(ID).T, CP.depth);
+             sw_tdif(Turb.(ID).S, Turb.(ID).T, CP.depth);
          Turb.(ID).Jq = -1025 .* 4200 .* Turb.(ID).Kt .* Turb.(ID).dTdz;
 
          [Turb.(ID), Turb.(ID).stats.max_Kt_percentage] = ApplyMask(Turb.(ID), Turb.(ID).Kt, '>', CP.max_Kt, 'max_Kt');
@@ -751,7 +751,7 @@ function [Tz] = determine_additional_Tz_mask(CP)
 
 end
 
-function [spdmask, addspdmask] = determine_speed_masks(basedir, ID, CP, chi)
+function [spd_for_mask, addspd_for_mask] = determine_speed_masks(basedir, ID, CP, chi)
 
     % speed mask could change depending on estimate
     mask_spd = ID(1);
@@ -769,7 +769,7 @@ function [spdmask, addspdmask] = determine_speed_masks(basedir, ID, CP, chi)
         vel.time = chi.time;
         vel.spd = ones(size(chi.time));
     end
-    spdmask = interp1(vel.time, vel.spd, chi.time);
+    spd_for_mask = interp1(vel.time, vel.spd, chi.time);
 
     if CP.additional_mask_spd ~= ''
         if CP.additional_mask_spd == 'm' & ~exist('vel_m', 'var')
@@ -779,9 +779,9 @@ function [spdmask, addspdmask] = determine_speed_masks(basedir, ID, CP, chi)
             load([basedir '/input/vel_p.mat']);
             vel = vel_p;
         end
-        addspdmask = interp1(vel.time, vel.spd, chi.time);
+        addspd_for_mask = interp1(vel.time, vel.spd, chi.time);
     else
-        addspdmask = [];
+        addspd_for_mask = [];
     end
 end
 

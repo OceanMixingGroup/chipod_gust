@@ -25,9 +25,9 @@ function maybe_symlog(ax, axis, linthresh)
 
         if length(cc) < 3, continue; end
 
-        sgn = sign(nanmedian(cc));
+        sgn = sign(nanmedian(cc(cc ~= 0)));
 
-        if sgn >= 0
+        if sgn > 0
             fraction = nansum(cc < 0) / length(cc);
         else
             fraction = nansum(cc > 0) / length(cc);

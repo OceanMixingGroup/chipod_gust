@@ -275,6 +275,9 @@ if(do_combine)
                  end
              end
 
+             % save mask where elements are 0.
+             zeromask = (chi.chi < 1e-15);
+
              % obtain Kt, Jq using Winters & D'Asaro methodology
              if do_wda
                  ticwda = tic;
@@ -353,6 +356,9 @@ if(do_combine)
                  disp('    =================================================================')
              end
 
+             % save mask where elements are 0.
+             zeromask = logical(chi.chi < 1e-15);
+
              % dT/dz has to happen after I use chi to get Winters & D'Asaro
              % estimates of Kt, Jq!
              [chi, chi.stats.dTdz_mask_percentage, chi.masks.dTdz] = ApplyMask(...
@@ -371,6 +377,12 @@ if(do_combine)
                      chi, abs(Tzmask), '<', 1e-4, ['Additional Tz_' CP.additional_mask_dTdz], ...
                      [], nan, do_plot, hfig, ID, ['|Tz| > ' num2str(CP.min_dTdz, '%.1e')]);
              end
+
+             % make sure I didn't NaN out anything that was set to zero earlier.
+             % This is just to be sure. When I set things to 0, that's for a
+             % "good" reason; let's not throw those values out.
+             chi = ApplyMask(chi, zeromask & isnan(chi.chi), '=', 1, ...
+                             'undo NaNing of previously zero values', [], 0);
 
              if do_plot
                  set(0, 'currentfigure', hfig);

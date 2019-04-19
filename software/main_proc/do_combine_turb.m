@@ -76,7 +76,8 @@ if(do_combine)
          end
 
          disp(sprintf(['\n----------> adding ' ID '\n']));
-         clear chi;
+         % clear some variables to save memory before loading next estimate
+         clear chi chi_pre_mask Reb stats spec_floor;
          load([dirname 'chi_' ID '.mat'])
 
          fds = fields(chi);
@@ -120,8 +121,8 @@ if(do_combine)
          disp(['    ' num2str(sum(isnan(chi.chi))/length(chi.chi) * 100) ...
                '% chi estimates are NaN before I start masking.'])
 
-         % save unmasked chi structure for later use
-         chi_pre_mask = chi;
+         % save unmasked chi for later use
+         chi_pre_mask = chi.chi;
 
          if do_plot
              hfig = CreateFigure(is_visible, ['Histograms: effect of masking for ' ID]);
@@ -233,7 +234,8 @@ if(do_combine)
                  %  - chi.spec_floor is an estimate of the spectral energy density when
                  %    Tp is noise (estimated in chi_calibrate_chipod)
                  %  - Multiply spec_floor by nfft to get area under noise spectrum
-                 spec_floor_mask = chi.spec_area < CP.factor_spec_floor * spec_floor * nanmean(chi.nfft);
+                 spec_floor_mask = logical(...
+                     chi.spec_area < CP.factor_spec_floor * spec_floor * nanmean(chi.nfft));
 
                  % noise floor vary by sensor; make sure we aren't plotting
                  % the same curve multiple times
@@ -276,7 +278,7 @@ if(do_combine)
              end
 
              % save mask where elements are 0.
-             zeromask = (chi.chi < 1e-15);
+             zeromask = logical(chi.chi < 1e-15);
 
              % obtain Kt, Jq using Winters & D'Asaro methodology
              if do_wda
@@ -418,7 +420,7 @@ if(do_combine)
 
              % To prevent confusion, set masks to 0 when chi was NaN
              % *before masking* i.e. use chi_pre_mask.
-             chi.masks = mask_all_fields(chi.masks, isnan(chi_pre_mask.chi));
+             chi.masks = mask_all_fields(chi.masks, isnan(chi_pre_mask));
 
              disp(sprintf('    Summing up masks...'))
              tic;

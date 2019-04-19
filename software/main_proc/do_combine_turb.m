@@ -223,15 +223,8 @@ if(do_combine)
                      end
                  end
 
-                 if ~exist('hspecfig', 'var')
-                     hspecfig = CreateFigure(is_visible, ...
-                                             'Noise floor diagnostics');
-                     hspecfig.Position(3) = 2000;
-                     hspecfig.Position(4) = 1065;
-                     hspec1 = subplot(2,2,[1,2]); hold on;
-                     hspec2 = subplot(223); hold on;
-                     hspec3 = subplot(224); hold on;
-
+                 if ~exist('fig_noise_floor', 'var')
+                     fig_noise_floor = [];
                      shown_sensors_noise_floor = [];
                  end
 
@@ -245,12 +238,12 @@ if(do_combine)
                  % noise floor vary by sensor; make sure we aren't plotting
                  % the same curve multiple times
                  do_spec_area = ~any(shown_sensors_noise_floor == CP.sensor);
-                 make_noise_floor_histograms(ID, chi, hspec1, hspec2, hspec3, ...
-                                             spec_floor, spec_floor_mask, do_spec_area)
+                 fig_noise_floor = make_noise_floor_histograms(...
+                     ID, chi, fig_noise_floor, is_visible, spec_floor, spec_floor_mask, do_spec_area);
                  if do_spec_area, shown_sensors_noise_floor = [shown_sensors_noise_floor, CP.sensor]; end
 
                  [chi, chi.stats.spec_floor_percentage, chi.masks.noise_floor] = ApplyMask( ...
-                     chi, spec_floor_mask & isnan(chi.chi), '=', 1, ['Is Tp at noise floor? spec_floor_mask'], ...
+                     chi, spec_floor_mask, '=', 1, ['Is Tp at noise floor? spec_floor_mask'], ...
                      [], CP.noise_floor_fill_value, do_plot, hfig, ID, 'spec floor');
              end
 
@@ -537,8 +530,8 @@ if(do_combine)
                 '-dpng','-r200','-painters')
        end
 
-       if exist('hspecfig', 'var')
-           print(hspecfig, [basedir '/pics/histograms-noise-floor.png'], ...
+       if exist('fig_noise_floor', 'var') & ~isempty(fig_noise_floor)
+           print(fig_noise_floor.fig, [basedir '/pics/histograms-noise-floor.png'], ...
                  '-dpng','-r200','-painters')
        end
 
@@ -822,48 +815,6 @@ function [out] = truncate_time(in, time_range)
         out.time_floor = in.time_floor(iifloor);
         out.spec_floor = in.spec_floor(iifloor);
     end
-
-end
-
-function [] = make_noise_floor_histograms(ID, chi, hspec1, hspec2, hspec3, ...
-                                          spec_floor, spec_floor_mask, do_spec_area)
-
-    clr = choose_color(ID, 'color');
-
-    if do_spec_area
-        histogram(hspec1, log10(chi.spec_area), 'EdgeColor', clr, ...
-                  'displaystyle', 'stairs', 'DisplayName', ID);
-        plot(hspec1, [1 1]* log10(nanmedian(spec_floor) * nanmean(chi.nfft)), hspec1.YLim, ...
-             '--', 'color', clr, 'displayname', [ID ' noise floor'])
-        legend(hspec1, '-dynamiclegend');
-        xlabel(hspec1, 'log_{10} area under Tp spectrum')
-        ylabel(hspec1, 'count')
-    end
-
-    histogram(hspec2, log10(chi.chi(~spec_floor_mask)), 'EdgeColor', clr, ...
-              'normalization', 'count', 'displaystyle', 'stairs', ...
-              'HandleVisibility', 'off')
-    histogram(hspec2, log10(chi.chi(spec_floor_mask)), 'linestyle', '--', ...
-              'EdgeColor', clr, 'normalization', 'count', 'displaystyle', 'stairs', ...
-              'HandleVisibility', 'off')
-    histogram(hspec2, log10(chi.chi), 'EdgeColor', clr, 'linewidth', 2, ...
-              'normalization', 'count', 'displaystyle', 'stairs', 'displayname', ['\chi_{' ID '}'])
-    legend(hspec2, '-dynamiclegend')
-    xlabel(hspec2, 'log_{10} \chi')
-    ylabel(hspec2, 'count')
-    title(hspec2, 'thin dashed, solid = (below, above) noise floor | thick = all values')
-
-    histogram(hspec3, log10(chi.eps(~spec_floor_mask)), 'EdgeColor', clr, ...
-              'normalization', 'count', 'displaystyle', 'stairs', ...
-              'HandleVisibility', 'off')
-    histogram(hspec3, log10(chi.eps(spec_floor_mask)), 'linestyle', '--', ...
-              'EdgeColor', clr, 'normalization', 'count', 'displaystyle', 'stairs', ...
-              'HandleVisibility', 'off')
-    histogram(hspec3, log10(chi.eps), 'EdgeColor', clr, 'linewidth', 2, ...
-              'normalization', 'count', 'displaystyle', 'stairs', 'displayname', ['\epsilon_{' ID '}'])
-    legend(hspec3, '-dynamiclegend')
-    xlabel(hspec3, 'log_{10} \epsilon')
-    ylabel(hspec3, 'count')
 
 end
 

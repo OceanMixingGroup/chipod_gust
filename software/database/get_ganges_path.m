@@ -10,7 +10,7 @@ function [path2ganges] = get_ganges_path()
     end
 
     if ~isempty(strfind(hostname, 'darya'))
-        path2ganges = '/media/ganges/';
+        path2ganges = '/home/deepak/';
     end
 
     if ~isempty(strfind(hostname, 'spielwiese'))

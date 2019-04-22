@@ -14,8 +14,8 @@ function [wda] = winters_dasaro_avg(t0, t1, vdisp, chi, T, Tp, dt, plotflag)
 
     optional = 0;
 
-    MIN_DIS_Z = 0.05; % minimum length (in metres) of a single up- or down-cast
-    nquantiles = round(5/60 * dt); % effectively number of bins
+    MIN_DIS_Z = 0.2; % minimum length (in metres) of a single up- or down-cast
+    nquantiles = 10; round(2/60 * dt); % effectively number of bins
 
     chi_is_empty = ~isfield(chi, 'chi');
 

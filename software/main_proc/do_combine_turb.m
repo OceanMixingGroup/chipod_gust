@@ -148,7 +148,7 @@ if(do_combine)
                  shown_Tz = [shown_Tz ID(2)];
              end
          else
-             do_plot = [];
+             hfig = [];
          end
 
          if do_mask

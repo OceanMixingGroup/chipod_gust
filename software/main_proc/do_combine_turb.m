@@ -195,6 +195,32 @@ if(do_combine)
              [chi, chi.stats.max_chi_percentage, chi.masks.max_chi] = ApplyMask(chi, chi.chi, '>', CP.max_chi, 'max_chi');
              [chi, chi.stats.max_eps_percentage, chi.masks.max_eps] = ApplyMask(chi, chi.eps, '>', CP.max_eps, 'max_eps');
 
+             % filter out bad fits using fitting statistics
+             statsname = [basedir filesep 'proc' filesep 'chi' filesep 'stats' ...
+                         filesep 'chi_' ID '_stats.mat'];
+             if ~contains(ID, '_ic')
+                 if exist(statsname, 'file')
+                     load(statsname);
+                     % truncate + add nans for sensor deaths as for chi
+                     stats = truncate_time(stats, CP.time_range);
+                     stats = mask_all_fields(stats, isnan(chi_pre_mask));
+                     assert(isequal(stats.time, chi.time));
+
+                     [chi, chi.stats.nfreq_percentage, chi.masks.min_n_freq] = ApplyMask( ...
+                         chi, stats.n_freq, '<', CP.min_n_freq, 'number of points in final fitting range, n_freq', ...
+                         [], nan, do_plot, hfig, ID, 'n_freq');
+
+                     if CP.mask_ic_fits
+                         [chi, chi.stats.ic_fit_percentage, chi.masks.ic_fit] = ApplyMask(...
+                             chi, stats.k_stop < stats.ki, '=', 1, ['IC fit for a VC estimate, kstop < ki'], ...
+                             [], nan, do_plot, hfig, ID, 'IC fit');
+                     end
+                 else
+                     disp(['    >>> Combined stats file does not exist. Cannot ' ...
+                           'filter out bad fits.<<< '])
+                 end
+             end
+
              if isempty(ic_test)
                  % deglitch chi and eps before calculating Jq and Kt
                  % not required for IC estimate because that is already
@@ -249,32 +275,6 @@ if(do_combine)
                  [chi, chi.stats.spec_floor_percentage, chi.masks.noise_floor] = ApplyMask( ...
                      chi, spec_floor_mask, '=', 1, ['Is Tp at noise floor? spec_floor_mask'], ...
                      [], CP.noise_floor_fill_value, do_plot, hfig, ID, 'spec floor');
-             end
-
-             % filter out bad fits using fitting statistics
-             statsname = [basedir filesep 'proc' filesep 'chi' filesep 'stats' ...
-                         filesep 'chi_' ID '_stats.mat'];
-             if ~contains(ID, '_ic')
-                 if exist(statsname, 'file')
-                     load(statsname);
-                     % truncate + add nans for sensor deaths as for chi
-                     stats = truncate_time(stats, CP.time_range);
-                     stats = mask_all_fields(stats, isnan(chi_pre_mask.chi));
-                     assert(isequal(stats.time, chi.time));
-
-                     [chi, chi.stats.nfreq_percentage, chi.masks.min_n_freq] = ApplyMask( ...
-                         chi, stats.n_freq, '<', CP.min_n_freq, 'number of points in final fitting range, n_freq', ...
-                         [], nan, do_plot, hfig, ID, 'n_freq');
-
-                     if CP.mask_ic_fits
-                         [chi, chi.stats.ic_fit_percentage, chi.masks.ic_fit] = ApplyMask(...
-                             chi, stats.k_stop < stats.ki, '=', 1, ['IC fit for a VC estimate, kstop < ki'], ...
-                             [], nan, do_plot, hfig, ID, 'IC fit');
-                     end
-                 else
-                     disp(['    >>> Combined stats file does not exist. Cannot ' ...
-                           'filter out bad fits.<<< '])
-                 end
              end
 
              % save mask where elements are 0.

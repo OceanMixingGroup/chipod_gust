@@ -238,8 +238,10 @@ if(do_combine)
                  % noise floor vary by sensor; make sure we aren't plotting
                  % the same curve multiple times
                  do_spec_area = ~any(shown_sensors_noise_floor == CP.sensor);
-                 fig_noise_floor = make_noise_floor_histograms(...
-                     ID, chi, fig_noise_floor, is_visible, spec_floor, spec_floor_mask, do_spec_area);
+                 if do_plot
+                     fig_noise_floor = make_noise_floor_histograms(...
+                         ID, chi, fig_noise_floor, is_visible, spec_floor, spec_floor_mask, do_spec_area);
+                 end
                  if do_spec_area, shown_sensors_noise_floor = [shown_sensors_noise_floor, CP.sensor]; end
 
                  [chi, chi.stats.spec_floor_percentage, chi.masks.noise_floor] = ApplyMask( ...

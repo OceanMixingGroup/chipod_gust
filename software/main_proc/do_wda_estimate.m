@@ -46,12 +46,23 @@ function [chi_wda] = do_wda_estimate(params, data, chi, T, Tp)
 
     % need accelerometer/pressure data at 100Hz too since T has been enhanced
     vdisp.time = T.time_enh;
+
+    % This routine can be called from both generate_dTdz_i or chi_main_proc.
+    % in the former this parameter is do_P; in the latter it is use_pres :/
+    % So we need this section; if something has gone wrong; assume 0.
+    if ~isfield(params, 'do_P') & isfield(params, 'use_pres')
+        params.do_P = params.use_pres;
+    else
+        error('params.do_P not set in do_wda_estimate.')
+    end
+
     if params.do_P
         vdisp.dis_z = interp1(data.time, data.p_dis_z, T.time_enh);
     else
         vdisp.dis_z = interp1(data.time, data.a_dis_z, T.time_enh);
     end
 
+    % params.wda_dt = 90;
     ndt = params.wda_dt * round(1/diff(vdisp.time(1:2)*86400));
     idx = 1;
     plotflag = 0;
@@ -71,6 +82,7 @@ function [chi_wda] = do_wda_estimate(params, data, chi, T, Tp)
     % keyboard;
     % wda_proc = process_wda_estimate(chi, chi_wda);
     % plot_estimate(wda_proc)
+    % plot_estimate(chi)
 
     % old 50Hz style inference
     % acc50hz.time = data.time;

@@ -74,7 +74,8 @@ function [wda] = winters_dasaro_avg(t0, t1, vdisp, chi, T, Tp, dt, plotflag)
         end
     end
 
-    % Lets make some T bins by splitting into quantiles so that each bin has equal number of observations
+    % Lets make some T bins by splitting into quantiles
+    % so that each bin has equal number of observations
     Tbins = generate_wda_bins(unique(round(Tprof, 5)), nquantiles);
     dT = diff(Tbins);
 
@@ -91,19 +92,127 @@ function [wda] = winters_dasaro_avg(t0, t1, vdisp, chi, T, Tp, dt, plotflag)
     end
     dzmat = nan(length(dT), length(locs));
 
+    % set up figure + plot timeseries
     if plotflag
+
         CreateFigure;
-        htemp = subplot(3,4,[1, 5, 9]); hold on; xlabel('Temp'); ylabel('z (accel)')
-        hsort = subplot(3,4,[4, 8, 12]); hold on; xlabel('Temp (sorted)'); ylabel('z (interp)')
-        hsort.XGrid = 'on'; hsort.XTick = Tbins;
+        gray = [1, 1, 1] * 0.75;
+
+        % temp profiles
+        htemp = subplot(4,4,[4, 8, 12]);
+        hold on; xlabel('T [C]'); title('Unsorted profiles');
+        htemp.YTickLabels = [];
+
+        % sorted temp profiles
+        hsort = subplot(4,4,[3, 7, 11]); hold on; ylabel('z [m]')
+        % hsort.XGrid = 'on';
+        hsort.XAxis.TickDirection = 'out';
+        hsort.XTick = Tbins;
+        hsort.XTickLabels = [];
         hsort.XAxis.TickLabelRotation = 30; hsort.GridAlpha = 1;
-        hdisp = subplot(3,4,[2, 3]); hold on; xlabel('time'); ylabel('Displacement')
+        title(hsort, 'Individual sorted profiles')
+
+        % displacement
+        hdisp = subplot(4,4,[1, 2]);
+        hzfull = plot(hdisp, vdisp.time(t0:t1), -(vdisp.dis_z(t0:t1)), ...
+                      'color', gray, 'linewidth', 2);
+        hold on;
+        xlabel('time'); ylabel('Displacement z [m]')
         hdisp.Color = 'none';
+        % enhanced temp time series
+
+        % htemp2 = axes('Position', hdisp.Position, 'Color', 'none'); hold on;
+        htemp2 = subplot(4,4,[5, 6]);
+        tpt0 = find_approx(Tp.time, vdisp.time(t0));
+        tpt1 = find_approx(Tp.time, vdisp.time(t1));
+        hfullT = plot(htemp2, T.time_enh(tpt0:tpt1), T.Tenh(tpt0:tpt1), ...
+                      'color', gray);
+        ylim(htemp2, robust_lim(T.Tenh(tpt0:tpt1)))
+        hold on; xlabel('time'); ylabel('T [C]')
+
+        % Tp time series
+        htp = subplot(4,4,[9, 10]); hold on;  xlabel('time'); ylabel('dT/dt [C/s]')
+        htpfull = semilogy(htp, Tp.time(tpt0:tpt1), Tp.tp(tpt0:tpt1), ...
+                           'color', gray);
+        htp.Clipping = 'off';
+        % ylim(htp, robust_lim(Tp.tp(tpt0:tpt1)))
+
         if ~chi_is_empty
-            hchi = subplot(3,4,[6,7]); hold on; xlabel('time'); ylabel(['\chi (1 sec, color)'])
+            hchi = subplot(4,4,[13, 14]);
+            hcfull = plot(hchi, chi.time(chit0:chit1), ...
+                          chi.chi(chit0:chit1), 'HandleVisibility', 'off', ...
+                          'color', gray, 'linewidth', 2);
+            hchi.YScale = 'log';
+            hold on;
+            xlabel(['time since ' datestr(chi.time(chit0)) ' [MM:ss]']);
+            ylabel(['\chi [C^2/s]'])
+
+            hchi_scatter = subplot(4,4,15);
+            hscfull = scatter(hchi_scatter, ...
+                              Tchi, chi.chi(chit0:chit1), ...
+                              32, repmat(gray, [length(Tchi), 1]), ...
+                              'filled', 'HandleVisibility', 'off');
+
+            hold on; xlabel('T [C]')
+            hchi_scatter.XGrid = 'on';
+            hchi_scatter.YScale = 'log';
+            hchi_scatter.XAxis.TickDirection = 'out';
+            hchi_scatter.XAxis.TickLabelRotation = 90;
+            hchi_scatter.XTick = Tbins;
+            hchi_scatter.GridAlpha = 1;
+            fs = hchi_scatter.FontSize;
+            hchi_scatter.FontSize = fs * 0.8;
+
+            linkaxes([hsort, hchi_scatter], 'x')
+            linkaxes([hchi_scatter, hchi], 'y')
+
+            hchi.YLim = robust_lim(chi.chi(chit0:chit1));
         end
-        htemp2 = axes('Position', hdisp.Position, 'Color', 'none'); hold on;
-        htp = subplot(3,4,[10, 11]); hold on; xlabel(['time ' datestr(chi.time(chit0))]); ylabel(['Tp'])
+
+        % hcloud = plot(hsort, Tfull, zfull, '.', ...
+        %               'color', [1 1 1]*0.8, 'HandleVisibility', 'off');
+        % uistack(hcloud, 'bottom');
+
+        % noise floor diagnostics
+        % if ~chi_is_empty
+        %     semilogy(hchi, chi.time(chit0:chit1), chi.spec_area(chit0:chit1), ...
+        %              'color', 'k', 'linewidth', 2, 'displayname', ['spec_area'])
+        %     legend(hchi, '-dynamiclegend')
+        %     plot(hchi, hchi.XLim, [1, 1]*chi.spec_floor * chi.nfft, 'k-', ...
+        %          'displayname', 'noise floor');
+        %     plot(hchi, hchi.XLim, 2*[1, 1]*chi.spec_floor * chi.nfft, 'k--', ...
+        %          'displayname', '2x noise floor');
+        % end
+
+        hleg = legend(htemp, '-dynamiclegend');
+        hleg.Position = [0.734 0.132 0.176 0.092];
+        hleg.Title.String = 'Various T_z estimates';
+        hleg.Box = 'off';
+
+        % hleg.Position = [0.7479    0.7733    0.1650    0.0800];
+
+        for aa=[hdisp, htemp2, htp]
+            datetick(aa, 'x', 'MM:SS', 'keeplimits');
+        end
+
+        if ~chi_is_empty
+            linkaxes([hchi hdisp htp htemp2], 'x');
+            datetick(hchi, 'x', 'MM:SS', 'keeplimits');
+            axx = [hdisp, htemp2, htp, hchi, hsort, hchi_scatter, htemp];
+        else
+            axx = [hdisp, htemp2, htp, hsort, htemp];
+            linkaxes([hdisp htp htemp2], 'x');
+        end
+
+        x0 = 0.05; y0=0.9;
+        labels = 'abcdefgh';
+        for xxx=1:length(axx)
+            text(axx(xxx), x0, y0, ['(' labels(xxx) ')'], 'units', 'normalized')
+        end
+
+        % set reasonable limits
+        hdisp.XLim = chi.time([chit0, chit1]);
+        hsort.XLim = htemp2.YLim;
 
         yloc = NaN;
     end
@@ -118,11 +227,13 @@ function [wda] = winters_dasaro_avg(t0, t1, vdisp, chi, T, Tp, dt, plotflag)
 
         if all(isnan(Tvec)), continue; end
 
+        % Tp glitch; ignore this profile
         if any(Tp.tp(l0:l1) > 15), continue; end
 
         % interpolate to uniform depths before sorting
         Tinterp = interp1(zvec, Tvec, zthorpe);
 
+        % At least 5 points in profile
         if sum((~isnan(Tinterp))) < 5, continue; end
 
         % Tsort is on depth grid zthorpe
@@ -159,7 +270,7 @@ function [wda] = winters_dasaro_avg(t0, t1, vdisp, chi, T, Tp, dt, plotflag)
             ct0 = find_approx(chi.time(chit0:chit1), vdisp.time(l0)) + chit0-1;
             ct1 = find_approx(chi.time(chit0:chit1), vdisp.time(l1)) + chit0-1;
 
-            plot(htemp, Tvec, zvec, '-', 'linewidth', 0.5);
+            plot(htemp, Tvec, zvec, '-', 'linewidth', 0.5, 'HandleVisibility', 'off');
             hl = plot(hdisp, vdisp.time(l0:l1), zvec, '-', 'linewidth', 2);
             plot(hsort, Tsort, zthorpe, '-', 'HandleVisibility', 'off');
             plot(htemp2, vdisp.time(l0:l1), Tvec, '-', 'linewidth', 0.5);
@@ -170,8 +281,10 @@ function [wda] = winters_dasaro_avg(t0, t1, vdisp, chi, T, Tp, dt, plotflag)
             if isnan(yloc)
                 yloc = 0.95*min(vdisp.dis_z(t0:t1));
             end
-            hsc = scatter(hsort, chi.T(ct0:ct1), yloc * ones(size(chi.T(ct0:ct1))), ...
-                          200, hl.Color, 'HandleVisibility', 'off');
+            hsc = scatter(hchi_scatter, ...
+                          chi.T(ct0:ct1), chi.chi(ct0:ct1), ...
+                          32, repmat(hl.Color, [length(ct0:ct1), 1]), ...
+                          'filled', 'HandleVisibility', 'off');
 
             tp_plot = Tp.tp(l0:l1);
             tp_plot(isnan(T.Tenh(l0:l1))) = nan;
@@ -179,7 +292,7 @@ function [wda] = winters_dasaro_avg(t0, t1, vdisp, chi, T, Tp, dt, plotflag)
         end
     end
 
-    % reconstruct profile from binned dz/dT
+    % Now we reconstruct a mean "sorted profile" from binned dz/dT
     dz = nanmean(dzmat, 2)';
     numgood = sum(~isnan(dzmat), 2);
     % make sure the isotherm is present in at least three profiles
@@ -204,14 +317,32 @@ function [wda] = winters_dasaro_avg(t0, t1, vdisp, chi, T, Tp, dt, plotflag)
                           ' | Jq = ' num2str(wda_proc.Jq)])
         end
 
+
+        % plot all available gradients
         % fit T against z to get dT/dz == internal gradient
+        % plot this as one reference
         [poly, ~, mu] = polyfit(zfull(~isnan(Tfull)), Tfull(~isnan(Tfull)), 1);
         Tzi = poly(1)/mu(2); % undo MATLAB scaling
-        if plotflag
-            hline = plot(hsort, polyval(poly, hsort.YLim, [], mu), hsort.YLim, ...
-                         'k-', 'DisplayName', ['dTdz_i = ' num2str(Tzi, '%.1e')]);
-            plot(htemp, polyval(poly, hsort.YLim, [], mu), htemp.YLim, ...
-                 'k-', 'DisplayName', ['dTdz_i = ' num2str(Tzi, '%.1e')]);
+
+        % our estimated mean "sorted" profile.
+        dz(isnan(dz)) = 0;
+        zprof = [mean(zthorpe)-std(zthorpe), mean(zthorpe)-std(zthorpe) + cumsum(dz)];
+
+        for aa = [hsort, htemp]
+            % internal
+            plot(aa, polyval(poly, hsort.YLim, [], mu), aa.YLim, ...
+                 'k-.', 'LineWidth', 2, 'DisplayName', ...
+                 ['T_z^{fit} = ' num2str(Tzi, '%.1e') ' C/m']);
+
+            % sorted
+            plot(aa, Tbins, zprof, 'k-', 'linewidth', 2, 'displayname', ...
+                 ['Mean T_z^{sort} = ' num2str(nanmean(1./dzdT), '%.1e') ' C/m']);
+
+            % chi.dTdz
+            plot(aa, ...
+                 Tbins(1) + [0, diff(hsort.YLim) * mean(chi.dTdz(chit0:chit1))], ...
+                 aa.YLim, 'k--', 'linewidth' ,2, 'DisplayName', ...
+                 ['mean(chi.dTdz) = ' num2str(mean(chi.dTdz(chit0:chit1)), '%.1e')]);
         end
 
         % fit z against T to get dz/dT
@@ -221,97 +352,40 @@ function [wda] = winters_dasaro_avg(t0, t1, vdisp, chi, T, Tp, dt, plotflag)
         %               'k-', 'DisplayName', ['1/(dz/dT) = ' num2str(1./zTi, '%.1e')]);
 
         if optional
-            % isoscalar average zTj
+            % isoscalar average zTj : average over sorted profiles
+            % this is usually junk.
+            % I think the problem is choosing a sensible reference so that
+            % we get a proper average.
+            % instead I choose to average separations between isotherms
+            % and then reconstruct a profile. That works a lot better.
             hline3 = plot(hsort, Tj, nanmean(zTj, 2), ...
                           'r-', 'linewidth', 2, 'DisplayName', ['W&DA']);
         end
 
-        dz(isnan(dz)) = 0;
-        zprof = [mean(zthorpe)-std(zthorpe), mean(zthorpe)-std(zthorpe) + cumsum(dz)];
-        hline4 = plot(hsort, Tbins, zprof, 'k-', 'linewidth', 2, ...
-                      'displayname', ['average \Delta z mean=' ...
-                            num2str(nanmean(1./dzdT), '%.1e')]);
-
-        if isfield(chi, 'dTdz')
-            hline5 = plot(hsort, Tbins(1) + [0, diff(hsort.YLim) * mean(chi.dTdz(chit0:chit1))], ...
-                          hsort.YLim, 'r-', 'linewidth' ,2, 'DisplayName', ...
-                          ['mean(chi.dTdz) = ' num2str(mean(chi.dTdz(chit0:chit1)), '%.1e')]);
+        for aa=[hdisp, htemp2, htp]
+            aa.XTickLabels = [];
+            aa.XLabel.String = '';
         end
 
-        hzfull = plot(hdisp, vdisp.time(t0:t1), ...
-                      -(vdisp.dis_z(t0:t1) - vdisp.dis_z(t0)), ...
-                      'color', [1 1 1]*0.75, 'linewidth', 2);
-        if ~chi_is_empty
-            hcfull = plot(hchi, chi.time(chit0:chit1), ...
-                          chi.chi(chit0:chit1), 'HandleVisibility', 'off', ...
-                          'color', [1 1 1]*0.75, 'linewidth', 2);
-            uistack(hcfull, 'bottom')
-        end
-        uistack(hzfull, 'bottom')
+        hchi_scatter.XLabel.FontSize = fs * 1.1;
 
-        hscfull = scatter(hsort, Tchi, yloc * ones(size(chi.T(chit0:chit1))), ...
-                          200, 'k', 'HandleVisibility', 'off');
-
-        hfullT = plot(htemp2, T.time, T.T, 'color', [1 1 1]*0.5);
-        ylim(htemp2, robust_lim(chi.T(chit0:chit1)))
-        uistack(hfullT, 'bottom');
-
-        hchi.YScale = 'log';
-        hcloud = plot(hsort, Tfull, zfull, '.', ...
-                      'color', [1 1 1]*0.8, 'HandleVisibility', 'off');
-        uistack(hcloud, 'bottom');
-
-        tpt0 = find_approx(Tp.time, vdisp.time(t0));
-        tpt1 = find_approx(Tp.time, vdisp.time(t1));
-        htpfull = semilogy(htp, Tp.time(tpt0:tpt1), Tp.tp(tpt0:tpt1), 'color', ...
-                           [1 1 1]*0.6);
-        ylim(htp, robust_lim(Tp.tp(tpt0:tpt1)))
-        uistack(htpfull, 'bottom')
-        axes(htp); datetick('x', 'MM:SS', 'keeplimits');
-
-        if ~chi_is_empty
-            semilogy(hchi, chi.time(chit0:chit1), chi.spec_area(chit0:chit1), ...
-                     'color', 'k', 'linewidth', 2, 'displayname', ['spec_area'])
-            legend(hchi, '-dynamiclegend')
-            plot(hchi, hchi.XLim, [1, 1]*chi.spec_floor * chi.nfft, 'k-', ...
-                 'displayname', 'noise floor');
-            plot(hchi, hchi.XLim, 2*[1, 1]*chi.spec_floor * chi.nfft, 'k--', ...
-                 'displayname', '2x noise floor');
-            axes(hchi); datetick('x', 'MM:SS', 'keeplimits');
-        end
-
-        hleg = legend(hsort, '-dynamiclegend');
-        hleg.Position = [0.7479    0.7733    0.1650    0.0800];
-        axes(hdisp); datetick('x', 'MM:SS', 'keeplimits');
-        uistack(htemp2, 'bottom');
-        if ~chi_is_empty
-            linkaxes([hchi hdisp htp htemp2], 'x');
-        else
-            linkaxes([hdisp htp htemp2], 'x');
-        end
-
-        hdisp.XLim = chi.time([chit0, chit1]);
-        htemp2.YAxisLocation = 'right';
-        htemp2.XTickLabels = [];
-        htemp2.XTick = hdisp.XTick;
-
-        hsort.PlotBoxAspectRatio = [1 2 1];
-        htemp.PlotBoxAspectRatio = [1 2 1];
-        hsort.XLim = [min(T.Tenh(t0:t1))-1e-3 max(T.Tenh(t0:t1))+1e-3];
+        % hsort.PlotBoxAspectRatio = [1 2 1];
+        % htemp.PlotBoxAspectRatio = [1 2 1];
+        hsort.XLim = [min(T.Tenh(t0:t1)) max(T.Tenh(t0:t1))];
 
         % hsort.Title.String = ['Jq_{DA} = ' num2str(Jqda, '%.1f') ...
         %                     ' | Jq_{i} = ' num2str(Jqi, '%.1f') ...
         %                     ' | Jq_{m} = ' num2str(Jqm, '%.1f')];
     end
-end
 
+end
 function [data] = jitter(data, magnitude)
     data = data + magnitude * rand(size(data));
 end
 
 function [lims] = robust_lim(data)
     if max(abs(data)) > 3 * std(data)
-        lims = [prctile(data, 2), prctile(data, 98)];
+        lims = [prctile(data, 1), prctile(data, 99)];
     else
         lims = [0.9 * min(data), 1.1 * max(data)];
     end

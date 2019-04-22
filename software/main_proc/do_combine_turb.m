@@ -147,6 +147,8 @@ if(do_combine)
                              'DisplayName', 'averaging window');
                  shown_Tz = [shown_Tz ID(2)];
              end
+         else
+             do_plot = [];
          end
 
          if do_mask

@@ -82,10 +82,11 @@ epsilon  =   1e-7; % this is the first guess. ;
 for b=1:n_iterations
 
     ks = ((epsilon/(nu^3))^.25 )/2/pi;
-    k_start = 2;
     kb=(ks*sqrt(nu/tdif));
     k_end = kb/2;
-    f_start= k_start * fspd;
+    %k_start = 2;   % this k_start is completly unnecessary and restricts fast spectra
+    %f_start= k_start * fspd;
+    f_start = freq(1); 
     f_stop = k_end * fspd;
     if f_stop>fmax;
         f_stop=fmax;
@@ -93,9 +94,9 @@ for b=1:n_iterations
     if max(freq)<f_stop
         f_stop=max(freq);
     end
-    if f_start<freq(1)
-        f_start=freq(1);
-    end
+   %if f_start<freq(1)
+   %    f_start=freq(1);
+   %end
     if f_stop<f_start
         f_stop=f_start+0.1;
     end

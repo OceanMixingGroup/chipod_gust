@@ -120,7 +120,7 @@
       if Peps.spd(i) > 0.05 
          % pitot 
          tmp_spd     =  data.spd(I{i}) ;
-         tmp_spd(tmp_spd<.02) = nan;
+         tmp_spd( tmp_spd<.02 | data.W(I{i})>4 ) = nan;
          A = [data.a_vel_x(I{i}) data.a_vel_y(I{i}) data.a_vel_z(I{i})];
          [E11, AA, E11_org, ~, f] = clean_shear_spec( A, tmp_spd , Nfft, f_sample );
          %[E11, f]     = gappy_psd( tmp_spd, N_spec, f_sample, 10);

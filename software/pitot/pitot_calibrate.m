@@ -48,7 +48,7 @@ if(length(T)<2)
 end
 
 Sp = Vs; % slope for the dynamic pressure
-    if Sp <0
+    if Sp <1
         Sp = 1/Sp;
     end
 ST = Ts; % slope for the temperature

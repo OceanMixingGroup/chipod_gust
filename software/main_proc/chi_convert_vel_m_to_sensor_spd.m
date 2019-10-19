@@ -42,9 +42,10 @@ end
       cmp = angle(interp1(data.time_cmp, exp(1i*data.cmp/180*pi), data.time, 'linear', NaN));
 
       velx = u.*sin(cmp) + v.*cos(cmp);
-      % potentially an issue here, Lu thinks this should be:
-      %  vely = - u.*cos(cmp) + v.*sin(cmp);
-      vely = u.*cos(cmp) + v.*sin(cmp); 
+      % potentially an issue here, Lu thinks this should be (I think he is right, maybe double check someone):  
+      vely = - u.*cos(cmp) + v.*sin(cmp);
+      % old version :
+      % vely = u.*cos(cmp) + v.*sin(cmp); 
   else
       spd = interp1(vel_m.time, vel_m.spd, data.time, 'linear', NaN);
       % Simple assuption chipod is perfectly stired in the flow

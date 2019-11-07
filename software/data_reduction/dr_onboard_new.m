@@ -1,0 +1,174 @@
+function  [DR] = dr_onboard(basedir, rfid, varargin)
+%%    [DR] = dr_onboard(basedir, rfid, [dt])
+%
+%        This function emulates the processing on board of a 
+%        chipod for data reduction. It returns a structure that
+%        contains all the data that need to be send back in order
+%        to garantee turbulence processing
+%
+%        INPUT
+%           basedir  :  processing base directory
+%           rfid     :  name of the raw file to process
+%           dt       :  what average interval should be chosen in sec (default 600s)
+%
+%        OUTPUT
+%           DR.time  :  time vector
+%           DR.T1    :  mean temperture (sensor 1)
+%           DR.T2    :  mean temperture (sensor 2)
+%           DR.vT1   :  variance of temperture (sensor 1)
+%           DR.vT2   :  variance of temperture (sensor 2)
+%           DR.P     :  pressure
+%           DR.Tz1   :  vertical temperature gradient
+%           DR.Tz2   :  vertical temperature gradient
+%           DR.AX    :  average acceleration in x direction
+%           DR.AY    :  average acceleration in y direction
+%           DR.AZ    :  average acceleration in z direction
+%           DR.vAX   :  variance of acceleration in x direction
+%           DR.vAY   :  variance of acceleration in y direction
+%           DR.vAZ   :  variance of acceleration in z direction
+%
+%           DR.f1    :  frequency vector for the full spectrum
+%           DR.Pt1_1 :  power spectral density for the derivative spectrum (sensor 1) 
+%           DR.Pt2_1 :  power spectral density for the derivative spectrum (sensor 2) 
+%
+%           DR.f2    :  frequency vector for the cut spectrum
+%           DR.Pt1_2 :  power spectral density for the derivative spectrum (sensor 1) 
+%           DR.Pt2_2 :  power spectral density for the derivative spectrum (sensor 2) 
+%
+%           DR.f3    :  frequency vector for the bin averaged spectrum
+%           DR.Pt1_3 :  power spectral density for the derivative spectrum (sensor 1) 
+%           DR.Pt2_3 :  power spectral density for the derivative spectrum (sensor 2) 
+%
+%           DR.fit_Tp1 :  linear fit for psd (sensor 1) 
+%           DR.fit_Tp1 :  linear fit for psd (sensor 2) 
+%
+%   created by: 
+%        Johannes Becherer
+%        Wed Feb  8 16:49:46 PST 2017
+
+%  set averaging interval
+if nargin < 3
+   dt = 600;
+else
+   dt = varargin{1};
+end
+
+
+%_____________________read raw_data______________________
+[rdat, ~] = raw_load_chipod([basedir '/raw/', rfid]);
+
+
+%_____________________split data vector______________________
+   % time vector
+      rdat.time    = rdat.datenum(1:2:end);
+      rdat.time_tp  = rdat.datenum;
+      %rdat.time_cmp = rdat.datenum(1:10:end);
+
+   % for normal time vector
+   %Nf    = dt/median(diff(rdat.time)*3600*24);
+   Nf    = dt/.02;
+   J{1}  = 1:length(rdat.time);
+   I     = split_fragments(J, Nf, 0);  
+
+
+%_____________________spectral parametres______________________
+   nfft       = Nf/2; % use two windows on entire time length
+   samplerate = 1/.02;
+   f_min      = 1/100;
+   f_max      = 1/20;
+
+%_____________________Pitot______________________
+   % which variable carries the Pitot signal
+   W = rdat.W2; % only true for Pirata should be generalized
+
+%_____________________initialize quantities______________________
+   DR.time  = nan(1,length(I));
+   DR.T1    = nan(1,length(I));
+   DR.T2    = nan(1,length(I));
+   DR.vT1   = nan(1,length(I));
+   DR.vT2   = nan(1,length(I));
+   DR.P     = nan(1,length(I));
+   DR.Tz1   = nan(1,length(I));
+   DR.Tz2   = nan(1,length(I));
+   DR.AX    = nan(1,length(I));
+   DR.AY    = nan(1,length(I));
+   DR.AZ    = nan(1,length(I));
+   DR.vAX   = nan(1,length(I));
+   DR.vAY   = nan(1,length(I));
+   DR.vAZ   = nan(1,length(I));
+   DR.vUax   = nan(1,length(I));
+   DR.vUay   = nan(1,length(I));
+   DR.vUaz   = nan(1,length(I));
+   DR.Wa     = nan(1,length(I));
+   DR.Wa2    = nan(1,length(I));
+   DR.Wm     = nan(1,length(I));
+
+   DR.fit_Tp1 = nan(1,length(I));
+   DR.fit_Tp2 = nan(1,length(I));
+
+%_____________________integrate acceleration______________________
+    % dummy head for integrate routine (This part should be integrated from the routine)
+    dhead.sensor_index.AX = 1;
+    dhead.samplerate = 50;
+    [~,vel]=integrate_acc(rdat,dhead);
+
+%_____________________loop through dt intervals______________________
+
+for i=1:length(I)
+
+   %-------------normal bulk stuff-----------------
+   DR.time(i)  = nanmean( rdat.time(I{i}) ); 
+   DR.T1(i)    = nanmean( rdat.T1(I{i}) ); 
+   DR.T2(i)    = nanmean( rdat.T2(I{i}) ); 
+   DR.P(i)     = nanmean( rdat.P(I{i}) );
+   DR.AX(i)    = nanmean( rdat.AX(I{i}) ); 
+   DR.AY(i)    = nanmean( rdat.AY(I{i}) ); 
+   DR.AZ(i)    = nanmean( rdat.AZ(I{i}) ); 
+
+   % Pitot velocities
+   wtmp        = W(I{i}) ;
+   DR.Wa(i)    = nanmean( wtmp ); 
+   DR.Wm(i)    = nanmedian( wtmp ); 
+   % more suffisticated with removing negative outlieres
+   wtmp( wtmp<(nanmean(wtmp)-2*nanstd(wtmp)) ) = nan;
+   DR.Wa2(i)   = nanmean( wtmp ); 
+
+
+
+   DR.vT1(i)   = nanvar( rdat.T1(I{i}) ); 
+   DR.vT2(i)   = nanvar( rdat.T2(I{i}) ); 
+   DR.vAX(i)   = nanvar( rdat.AX(I{i}) ); 
+   DR.vAY(i)   = nanvar( rdat.AY(I{i}) ); 
+   DR.vAZ(i)   = nanvar( rdat.AZ(I{i}) ); 
+
+   %_____________________chipod velocity______________________
+   DR.vUax(i)  = var(vel.x(I{i}));
+   DR.vUay(i)  = var(vel.y(I{i}));
+   DR.vUaz(i)  = var(vel.z(I{i}));
+
+   %-----------temperature gradient---------------------
+   p = polyfit( rdat.P(I{i}), rdat.T1(I{i}), 1);
+   DR.Tz1(i)  = p(1); 
+   p = polyfit( rdat.P(I{i}), rdat.T2(I{i}), 1);
+   DR.Tz2(i)  = p(1); 
+
+   %---------------------spectra----------------------
+
+   % full (also integrate fast_psd in routine)   
+   [DR.Pt1_1{i}, DR.f1{i}] = fast_psd( rdat.T1(I{i}), nfft, samplerate);
+   [DR.Pt2_1{i}, ~]        = fast_psd( rdat.T2(I{i}), nfft, samplerate);
+        
+
+   % cut  just use limited band
+   iif = find( DR.f1{1}>=f_min & DR.f1{i}<= f_max);
+   DR.f2{i}    = DR.f1{i}(iif);
+   DR.Pt1_2{i} = DR.Pt1_1{i}(iif);
+   DR.Pt2_2{i} = DR.Pt2_1{i}(iif);
+
+
+    % fit  TP as f^(1/3) slope or T as f^(-5/3)
+    DR.fit_Tp1(i) = mean(DR.Pt1_2{i}.*DR.f2{i}.^(5/3));
+    DR.fit_Tp2(i) = mean(DR.Pt2_2{i}.*DR.f2{i}.^(5/3));
+
+end
+

@@ -91,10 +91,10 @@ picdir   =  [sdir '../pics/'];
    Tz_m.Sz = (S1_int-S2_int)/dz;
 
    if ~use_TS_relation
-       if length(z1) ~= 1
+       if length(z1) == 1
            z1_int = interp1(t1, z1, time);
        end
-       if length(z2) ~= 1
+       if length(z2) == 1
            z2_int = interp1(t2, z2, time);
        end
 

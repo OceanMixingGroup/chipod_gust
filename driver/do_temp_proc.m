@@ -72,7 +72,7 @@ if do_plot
 
 	%_____________________save pic______________________
 	print(fig1,[basedir 'pics' filesep 'temp.png' ],'-dpng','-r200','-painters')
-   %	savefig(gcf,[basedir 'pics' filesep 'temp.fig' ])
+   	savefig(gcf,[basedir 'pics' filesep 'temp.fig' ])
 
         %% displacement histogram
 

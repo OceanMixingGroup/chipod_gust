@@ -53,11 +53,9 @@ Sz =  s_TS .* Tz;
 %_____________________calculate N2______________________
 
    % SJW 24-Mar-2020: There's a bug here that if the pressure sensor dies, 
-   % P is all NaN when being fed into the lines below that calculate alpha
+   % P is all NaN when being fed into the lines lines that calculate alpha
    % and beta, resulting in those values being NaN along with N2 being NaN. 
-   % Fixing this with an if-statement that uses an average value of P.
-   % There is almost no dependence of alpha and beta on pressure so 
-   % using 50 dbar for pressure is an okay assumption.
+   % Fixing this with an if-statement and average values of alpha and beta:
    if isnan(nanmean(P))
        alpha = nanmean(sw_alpha(S, T,  50, 'temp'));
        beta  = nanmean(sw_beta(S, T,  50, 'temp'));

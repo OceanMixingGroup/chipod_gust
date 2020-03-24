@@ -343,6 +343,8 @@ if(do_combine)
                                                    interp1(chi.time, chi.T, chi.wda.time), ...
                                                    CP.depth);
 
+                 chi.wda.Ks = chi.wda.Kt + sw_sdif(interp1(chi.time, chi.T, chi.wda.time));
+
                  % add sorted gradient to stratification histograms
                  if do_plot && isempty(strfind(shown_Tz, 'w'))
                      shown_Tz = [shown_Tz 'w'];
@@ -441,6 +443,7 @@ if(do_combine)
          Turb.(ID).Kt = 0.5 * Turb.(ID).chi ./ Turb.(ID).dTdz.^2 + ...
              sw_tdif(Turb.(ID).S, Turb.(ID).T, CP.depth);
          Turb.(ID).Jq = -1025 .* 4200 .* Turb.(ID).Kt .* Turb.(ID).dTdz;
+         Turb.(ID).Ks = Turb.(ID).KT + sw_sdif(Turb.(ID).T);
 
          [Turb.(ID), Turb.(ID).stats.max_Kt_percentage] = ApplyMask(Turb.(ID), Turb.(ID).Kt, '>', CP.max_Kt, 'max_Kt');
          [Turb.(ID), Turb.(ID).stats.max_Jq_percentage] = ApplyMask(Turb.(ID), abs(Turb.(ID).Jq), '>', CP.max_Jq, 'max_Jq');

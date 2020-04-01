@@ -15,6 +15,7 @@ do_plot     = 1;  % do you want to generate graphical output
 dt          = 60;    % sec bits of data for analysis
 do_P        = 0;     % use pressure instead of acceleration to get z 
 min_dz      = 0.1;   % minimum displacement
+ChipodDepth = 29;    % depth of chipod (only used by code if pressure is bad)
 
 % winters d'asaro options
 wda_params.do_winters_dasaro = 1; % do sorted gradient required for WDA estimate?
@@ -59,7 +60,8 @@ if do_proc
                     filedate = datenum(fdate{f}(1:8), 'yymmddhh');
                     if (filedate) >= floor(time_lim(1)) & (filedate) < ceil(time_lim(2))
                         disp(['calculating file ' num2str(f) ' of ' num2str(length(fids))]);
-                        chi_generate_dTdz_i(basedir, fids{f}, dt, do_P, min_dz, wda_params);
+                        chi_generate_dTdz_i(basedir, fids{f}, dt, do_P, min_dz,...
+                            wda_params, ChipodDepth);
                     end
                 catch ME
                     disp(['!!!!!! ' fids{f} ' crashed while processing  internal dTdz structure !!!!!!' ]);
@@ -73,7 +75,8 @@ if do_proc
                 filedate = datenum(fdate{f}(1:8), 'yymmddhh');
                 if (filedate) >= floor(time_lim(1)) & (filedate) < (time_lim(2))
                     disp(['calculating file ' num2str(f) ' of ' num2str(length(fids))]);
-                    chi_generate_dTdz_i(basedir, fids{f}, dt, do_P, min_dz, wda_params);
+                    chi_generate_dTdz_i(basedir, fids{f}, dt, do_P, min_dz,...
+                        wda_params, ChipodDepth);
                 end
             end
         end

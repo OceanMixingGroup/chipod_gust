@@ -1,4 +1,4 @@
-function [N2, Sz, s_TS] = cal_N2_from_TS( TSP_time, T, S, P,  Tz_time, Tz,  dt)
+function [N2, Sz, s_TS] = cal_N2_from_TS( TSP_time, T, S, P,  Tz_time, Tz,  dt, ChipodDepth)
 %%    [N2, Sz, s_TS] = cal_N2_from_TS( TSP_time, T, S, P,  Tz_time, Tz,  dt)
 %
 %        This function calculates N2 based on a given temperature gradient
@@ -12,6 +12,7 @@ function [N2, Sz, s_TS] = cal_N2_from_TS( TSP_time, T, S, P,  Tz_time, Tz,  dt)
 %           Tz_time     :  time vector of the temperature gradient
 %           Tz          :  temperature gradient
 %           dt          :  timeintrevals of T-S-relation (in sec)
+%           ChipodDepth :  depth of chipod (only used if pressure is bad)
 %
 %        OUTPUT (all output quantities are on the Tz_time grid)
 %           N2          :  N2
@@ -55,12 +56,10 @@ Sz =  s_TS .* Tz;
    % SJW 24-Mar-2020: There's a bug here that if the pressure sensor dies, 
    % P is all NaN when being fed into the lines below that calculate alpha
    % and beta, resulting in those values being NaN along with N2 being NaN. 
-   % Fixing this with an if-statement that uses an average value of P.
-   % There is almost no dependence of alpha and beta on pressure so 
-   % using 50 dbar for pressure is an okay assumption.
+   % Fixing this with an if-statement that uses the manually input ChipodDepth.
    if isnan(nanmean(P))
-       alpha = nanmean(sw_alpha(S, T,  50, 'temp'));
-       beta  = nanmean(sw_beta(S, T,  50, 'temp'));
+       alpha = nanmean(sw_alpha(S, T,  ChipodDepth, 'temp'));
+       beta  = nanmean(sw_beta(S, T,  ChipodDepth, 'temp'));
    else
        alpha = nanmean(sw_alpha(S, T,  P, 'temp'));
        beta  = nanmean(sw_beta(S, T,  P, 'temp'));

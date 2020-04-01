@@ -1,5 +1,6 @@
 function [Tz_m] = chi_generate_dTdz_m(t1, z1, T1, S1, t2, z2, T2, ...
-                                      S2,  sdir, use_TS_relation, vis);
+                                      S2,  sdir, use_TS_relation, ...
+                                      ChipodDepth, vis)
 % [Tz_m] = chi_generate_dTdz_m(t1, z1, T1, S1, t2, z2, T2, S2,  sdir);
 %
 %        This function generates an input file for chi-processing dTdz_m.m at
@@ -30,7 +31,7 @@ function [Tz_m] = chi_generate_dTdz_m(t1, z1, T1, S1, t2, z2, T2, ...
 
 
 % make figure unvisisible
-if nargin < 11
+if nargin < 12
    vis = 'on';
 end
 
@@ -107,8 +108,8 @@ picdir   =  [sdir '../pics/'];
        rho_0    = 1025;
        Tz_m.N2  = -g/rho_0*(D1-D2)/dz;
    else
-       [N2_1,Sz_1,~]  = cal_N2_from_TS(t1, T1,  S1, ones(size(S1))*abs(.5*(z1+z2)), time, Tz_m.Tz, 7200);
-       [N2_2,Sz_2,~]  = cal_N2_from_TS(t2, T2,  S2, ones(size(S1))*abs(.5*(z1+z2)), time, Tz_m.Tz, 7200);
+       [N2_1,Sz_1,~]  = cal_N2_from_TS(t1, T1,  S1, ones(size(S1))*abs(.5*(z1+z2)), time, Tz_m.Tz, 7200, ChipodDepth);
+       [N2_2,Sz_2,~]  = cal_N2_from_TS(t2, T2,  S2, ones(size(S1))*abs(.5*(z1+z2)), time, Tz_m.Tz, 7200, ChipodDepth);
        Tz_m.N2 = (N2_1 + N2_2)/2;
        Tz_m.Sz = (Sz_1 + Sz_2)/2;
    end

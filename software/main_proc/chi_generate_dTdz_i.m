@@ -21,6 +21,7 @@ function [] = chi_generate_dTdz_i(basedir, rfid, varargin)
       dt    = 60; 
       do_P  = 0; 
       min_dz= .1;
+      ChipodDepth = 29;
    else
       dt = varargin{1};
    end
@@ -28,12 +29,14 @@ function [] = chi_generate_dTdz_i(basedir, rfid, varargin)
    if nargin < 4
       do_P  = 0; 
       min_dz= .1;
+      ChipodDepth = 29;
    else
       do_P = varargin{2};
    end
 
    if nargin < 5
       min_dz= .1;
+      ChipodDepth = 29;
    else
       min_dz = varargin{3};
    end
@@ -42,8 +45,15 @@ function [] = chi_generate_dTdz_i(basedir, rfid, varargin)
        wda_params.do_winters_dasaro = 1;
        wda_params.wda_dt      = 60; % time chunk over which to average sorted profiles
        wda_params.do_P        = do_P; % use pressure sensor instead of accelerometer
+       ChipodDepth = 29;
    else
        wda_params = varargin{4};
+   end
+
+   if nargin < 7
+      ChipodDepth = 29;
+   else
+      ChipodDepth = varargin{5};
    end
 
 %_____________________preper saving______________________
@@ -103,7 +113,8 @@ function [] = chi_generate_dTdz_i(basedir, rfid, varargin)
 
       Tz_i.S         = ones(length(I),1)*35;
       data.S         = ones(length(data.time),1)*35;
-      [Tz_i.N2,Tz_i.Sz,~]  = cal_N2_from_TS(data.time, data.T,  data.S, data.depth, Tz_i.time, Tz_i.Tz, 600);
+      [Tz_i.N2,Tz_i.Sz,~]  = cal_N2_from_TS(data.time, data.T,  data.S, ...
+          data.depth, Tz_i.time, Tz_i.Tz, 600, ChipodDepth);
 
       %---------------------save data----------------------
       [~,~,~] =  mkdir(savedir);
@@ -181,13 +192,16 @@ function [] = chi_generate_dTdz_i(basedir, rfid, varargin)
       Tz_i.S         = ones(1,length(I))*35;
 
       % T1
-      [Tz_i.N2_1,Tz_i.Sz,~]  = cal_N2_from_TS(data.time, data.T1,  data.S, data.depth, Tz_i.time, Tz_i.Tz1, 600);
+      [Tz_i.N2_1,Tz_i.Sz,~]  = cal_N2_from_TS(data.time, data.T1,  data.S, ...
+          data.depth, Tz_i.time, Tz_i.Tz1, 600, ChipodDepth);
 
       % T2
-      [Tz_i.N2_2,~,~]  = cal_N2_from_TS(data.time, data.T2,  data.S, data.depth, Tz_i.time, Tz_i.Tz2, 600);
+      [Tz_i.N2_2,~,~]  = cal_N2_from_TS(data.time, data.T2,  data.S, ...
+          data.depth, Tz_i.time, Tz_i.Tz2, 600, ChipodDepth);
 
       % T12
-      [Tz_i.N2_12,~,~]  = cal_N2_from_TS(data.time, .5*(data.T2 + data.T1),  data.S, data.depth, Tz_i.time, Tz_i.Tz12, 600);
+      [Tz_i.N2_12,~,~]  = cal_N2_from_TS(data.time, .5*(data.T2 + data.T1),  ...
+          data.S, data.depth, Tz_i.time, Tz_i.Tz12, 600, ChipodDepth);
    
 
       %---------------------save data----------------------

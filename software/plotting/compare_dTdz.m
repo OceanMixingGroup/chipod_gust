@@ -11,11 +11,7 @@ function [] = compare_dTdz()
     unit    = chi_get_unit_name(basedir); % get unit name
     rawdir       = [basedir filesep 'raw' filesep]; % raw files location
 
-    %_____________________set time limits______________________
-    % get time limits from whoAmI;
-    [TL] = whoAmI_timeLimits(basedir);
-    time_lim = TL.master;
-
+    %_____________________load data______________________
     if exist([basedir filesep 'input' filesep 'dTdz_m.mat'], 'file')
         load ../input/dTdz_m.mat;
     end
@@ -27,6 +23,21 @@ function [] = compare_dTdz()
     if exist([basedir filesep 'input' filesep 'dTdz_w.mat'], 'file')
         load ../input/dTdz_w.mat;
     end
+    
+    %_____________________set time limits______________________
+    % get time limits from whoAmI;
+    [TL] = whoAmI_timeLimits(basedir);
+    time_lim = TL.master;
+    
+    % if the time limits have not already been set in whoAmI, the default
+    % goes from 2000-2050 which makes the data impossible to see. In that
+    % case, set it to be the min and max time from the data.
+    if time_lim(2) == datenum(2050, 1,1)
+        time_lim(1) = min(Tz_i.time);
+        time_lim(2) = max(Tz_i.time);
+    end
+    
+    %_____________________make figure______________________
 
     fig = figure('Color',[1 1 1],'visible','on','Paperunits','centimeters',...
                  'Papersize',[30 20],'PaperPosition',[0 0 30 20]);

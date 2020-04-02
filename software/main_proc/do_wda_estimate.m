@@ -53,7 +53,9 @@ function [chi_wda] = do_wda_estimate(params, data, chi, T, Tp)
     if ~isfield(params, 'do_P') & isfield(params, 'use_pres')
         params.do_P = params.use_pres;
     else
+      if ~isfield(params, 'do_P') & ~isfield(params, 'use_pres')
         error('params.do_P not set in do_wda_estimate.')
+      end
     end
 
     if params.do_P

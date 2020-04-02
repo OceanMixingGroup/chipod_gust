@@ -71,9 +71,6 @@ addpath(genpath('./chipod_gust/software/'));% include  path to preocessing routi
     %pflag.master.ic_dt     = 600; % (in seconds) time window for ic-estimate 
     %pflag.master.ic_frange =  [1/50 1/19]; % fiting range for ic-estimate
 
-    pflag.master.parallel = 1; % 1 use default number of parallel workers
-                               % 0 serial processing
-                               % 2...n  use n number of parallel workers
     pflag = pflag.make_cons();   % make sub-flags consitent with master flags
 
    %---------------------get flag status----------------------

@@ -43,7 +43,7 @@ function [] = chi_generate_dTdz_i(basedir, rfid, varargin)
 
    if nargin < 6
        wda_params.do_winters_dasaro = 1;
-       wda_params.wda_dt      = 60; % time chunk over which to average sorted profiles
+       wda_params.wda_dt      = 600; % time chunk over which to average sorted profiles
        wda_params.do_P        = do_P; % use pressure sensor instead of accelerometer
        ChipodDepth = 29;
    else

@@ -76,7 +76,8 @@ if(do_combine)
          end
 
          disp(sprintf(['\n----------> adding ' ID '\n']));
-         clear chi;
+         % clear some variables to save memory before loading next estimate
+         clear chi chi_pre_mask Reb stats spec_floor;
          load([dirname 'chi_' ID '.mat'])
 
          fds = fields(chi);
@@ -120,8 +121,8 @@ if(do_combine)
          disp(['    ' num2str(sum(isnan(chi.chi))/length(chi.chi) * 100) ...
                '% chi estimates are NaN before I start masking.'])
 
-         % save unmasked chi structure for later use
-         chi_pre_mask = chi;
+         % save unmasked chi for later use
+         chi_pre_mask = chi.chi;
 
          if do_plot
              hfig = CreateFigure(is_visible, ['Histograms: effect of masking for ' ID]);
@@ -194,6 +195,32 @@ if(do_combine)
              [chi, chi.stats.max_chi_percentage, chi.masks.max_chi] = ApplyMask(chi, chi.chi, '>', CP.max_chi, 'max_chi');
              [chi, chi.stats.max_eps_percentage, chi.masks.max_eps] = ApplyMask(chi, chi.eps, '>', CP.max_eps, 'max_eps');
 
+             % filter out bad fits using fitting statistics
+             statsname = [basedir filesep 'proc' filesep 'chi' filesep 'stats' ...
+                         filesep 'chi_' ID '_stats.mat'];
+             if ~contains(ID, '_ic')
+                 if exist(statsname, 'file')
+                     load(statsname);
+                     % truncate + add nans for sensor deaths as for chi
+                     stats = truncate_time(stats, CP.time_range);
+                     stats = mask_all_fields(stats, isnan(chi_pre_mask));
+                     assert(isequal(stats.time, chi.time));
+
+                     [chi, chi.stats.nfreq_percentage, chi.masks.min_n_freq] = ApplyMask( ...
+                         chi, stats.n_freq, '<', CP.min_n_freq, 'number of points in final fitting range, n_freq', ...
+                         [], nan, do_plot, hfig, ID, 'n_freq');
+
+                     if CP.mask_ic_fits
+                         [chi, chi.stats.ic_fit_percentage, chi.masks.ic_fit] = ApplyMask(...
+                             chi, stats.k_stop < stats.ki, '=', 1, ['IC fit for a VC estimate, kstop < ki'], ...
+                             [], nan, do_plot, hfig, ID, 'IC fit');
+                     end
+                 else
+                     disp(['    >>> Combined stats file does not exist. Cannot ' ...
+                           'filter out bad fits.<<< '])
+                 end
+             end
+
              if isempty(ic_test)
                  % deglitch chi and eps before calculating Jq and Kt
                  % not required for IC estimate because that is already
@@ -208,6 +235,50 @@ if(do_combine)
                  toc;
              end
 
+             % buoyancy reynolds diagnostic for weak turbulence
+             Reb = chi.eps ./ sw_visc(chi.S, chi.T, CP.depth) ./ chi.N2;
+             % plot a histogram of Reb
+             if do_plot
+                 if ~exist('hreb', 'var'),
+                     hweakfig = CreateFigure(...
+                         is_visible, ['How weak is your turbulence? ' ...
+                                      'Ask buoyancy reynolds number.']);
+                     hreb = gca;
+                     hold(hreb, 'on')
+                     xlabel(hreb, 'log_{10} Re_b = log_{10} (\epsilon/(\nuN^2))')
+                     ylabel(hreb, 'PDF')
+                     for criteria=[7, 19, 200]
+                         plot(hreb, log10(criteria)*[1, 1], hreb.YLim, 'k-', ...
+                              'handlevisibility', 'off')
+                     end
+                     htxt = text(hreb, 0.65, 0.2, ...
+                                 {'Re_b Critera:',
+                                  '',
+                                  'Shi et al (2005): < 7 (molecular)'
+                                  'Itsweire et al (1993) < 19 (no overturning)',
+                                  'Gargett et al (1984): > 200 (definitely isotropic)'}, ...
+                                 'Units', 'normalized', 'FontSize', 13);
+                 end
+                 H = histogram(hreb, log10(Reb), 'Normalization', 'pdf', ...
+                               'DisplayName', ID, 'DisplayStyle', 'stairs');
+                 legend(hreb, '-dynamiclegend')
+                 ylim(hreb, [0, 1.2 * max(H.Values)])
+             end
+
+             % For weak turbulence we want KT, Jq -> molecular.
+             % There is no overturning turbulence. So I set chi to 0;
+             % but eps can be whatever it is.
+             % Save backup eps here and restore it later.
+             % eps_backup = chi.eps;
+             % [chi, chi.stats.reb_percentage, chi.masks.reb] = ApplyMask( ...
+             %     chi, Reb, '<', 20, ...
+             %     'Weak turbulence; buoyancy reynolds number', ...
+             %     [], CP.noise_floor_fill_value, do_plot, hfig, ID, 'Re_b');
+             % disp('        Undoing Re_b masking of eps (shouldn''t be NaN).')
+             % chi.eps = eps_backup;
+             % clear eps_backup
+
+             % noise floor diagnostic
              if isempty(ic_test) & isfield(chi, 'spec_area') & isfield(chi, 'spec_floor')
                  % account for two possible versions of the code
                  if ~isfield(chi, 'time_floor')
@@ -233,7 +304,8 @@ if(do_combine)
                  %  - chi.spec_floor is an estimate of the spectral energy density when
                  %    Tp is noise (estimated in chi_calibrate_chipod)
                  %  - Multiply spec_floor by nfft to get area under noise spectrum
-                 spec_floor_mask = chi.spec_area < CP.factor_spec_floor * spec_floor * nanmean(chi.nfft);
+                 spec_floor_mask = logical(...
+                     chi.spec_area < CP.factor_spec_floor * spec_floor * nanmean(chi.nfft));
 
                  % noise floor vary by sensor; make sure we aren't plotting
                  % the same curve multiple times
@@ -249,31 +321,8 @@ if(do_combine)
                      [], CP.noise_floor_fill_value, do_plot, hfig, ID, 'spec floor');
              end
 
-             % filter out bad fits using fitting statistics
-             statsname = [basedir filesep 'proc' filesep 'chi' filesep 'stats' ...
-                         filesep 'chi_' ID '_stats.mat'];
-             if ~contains(ID, '_ic')
-                 if exist(statsname, 'file')
-                     load(statsname);
-                     % truncate + add nans for sensor deaths as for chi
-                     stats = truncate_time(stats, CP.time_range);
-                     stats = mask_all_fields(stats, isnan(chi_pre_mask.chi));
-                     assert(isequal(stats.time, chi.time));
-
-                     [chi, chi.stats.nfreq_percentage, chi.masks.min_n_freq] = ApplyMask( ...
-                         chi, stats.n_freq, '<', CP.min_n_freq, 'number of points in final fitting range, n_freq', ...
-                         [], nan, do_plot, hfig, ID, 'n_freq');
-
-                     if CP.mask_ic_fits
-                         [chi, chi.stats.ic_fit_percentage, chi.masks.ic_fit] = ApplyMask(...
-                             chi, stats.k_stop < stats.ki, '=', 1, ['IC fit for a VC estimate, kstop < ki'], ...
-                             [], nan, do_plot, hfig, ID, 'IC fit');
-                     end
-                 else
-                     disp(['    >>> Combined stats file does not exist. Cannot ' ...
-                           'filter out bad fits.<<< '])
-                 end
-             end
+             % save mask where elements are 0.
+             zeromask = logical(chi.chi < 1e-15);
 
              % obtain Kt, Jq using Winters & D'Asaro methodology
              if do_wda
@@ -353,6 +402,9 @@ if(do_combine)
                  disp('    =================================================================')
              end
 
+             % save mask where elements are 0.
+             zeromask = logical(chi.chi < 1e-15);
+
              % dT/dz has to happen after I use chi to get Winters & D'Asaro
              % estimates of Kt, Jq!
              [chi, chi.stats.dTdz_mask_percentage, chi.masks.dTdz] = ApplyMask(...
@@ -371,6 +423,12 @@ if(do_combine)
                      chi, abs(Tzmask), '<', 1e-4, ['Additional Tz_' CP.additional_mask_dTdz], ...
                      [], nan, do_plot, hfig, ID, ['|Tz| > ' num2str(CP.min_dTdz, '%.1e')]);
              end
+
+             % make sure I didn't NaN out anything that was set to zero earlier.
+             % This is just to be sure. When I set things to 0, that's for a
+             % "good" reason; let's not throw those values out.
+             chi = ApplyMask(chi, zeromask & isnan(chi.chi), '=', 1, ...
+                             'undo NaNing of previously zero values', [], 0);
 
              if do_plot
                  set(0, 'currentfigure', hfig);
@@ -406,7 +464,7 @@ if(do_combine)
 
              % To prevent confusion, set masks to 0 when chi was NaN
              % *before masking* i.e. use chi_pre_mask.
-             chi.masks = mask_all_fields(chi.masks, isnan(chi_pre_mask.chi));
+             chi.masks = mask_all_fields(chi.masks, isnan(chi_pre_mask));
 
              disp(sprintf('    Summing up masks...'))
              tic;
@@ -543,6 +601,11 @@ if(do_combine)
        if exist('fig_noise_floor', 'var') & ~isempty(fig_noise_floor)
            print(fig_noise_floor.fig, [basedir '/pics/histograms-noise-floor.png'], ...
                  '-dpng','-r200','-painters')
+       end
+
+       if exist('hweakfig', 'var')
+           print(hweakfig, [basedir '/pics/buoyancy-reynolds.png'], ...
+                 '-dpng', '-r200', '-painters')
        end
    end
 

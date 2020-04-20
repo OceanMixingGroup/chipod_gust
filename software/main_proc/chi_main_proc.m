@@ -216,7 +216,8 @@ for i = 1:length(pflag.id)
                [chi, stats] = chi_chi_proc(Tp, S, Tz, T);
 
                % left for debugging purposes
-               % chi.wda = do_wda_estimate(pflag, data, chi, T, Tp);
+               % pflag.master.wda_dt = 600;
+               % chi.wda = do_wda_estimate(pflag.master, data, chi, T, Tp);
            end
 
            %---------------------save data----------------------

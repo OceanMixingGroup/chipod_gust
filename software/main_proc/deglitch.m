@@ -56,6 +56,9 @@ try
         xd(xd < (mnvec - nstd*sdvec)) = NaN;
     end
 
+    % save memory
+    clear mnmat sdmat mnvec sdvec
+
 catch ME
 
     for it=1:nt

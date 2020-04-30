@@ -501,7 +501,7 @@ if(do_combine)
          Turb.(ID).Kt = 0.5 * Turb.(ID).chi ./ Turb.(ID).dTdz.^2 + ...
              sw_tdif(Turb.(ID).S, Turb.(ID).T, CP.depth);
          Turb.(ID).Jq = -1025 .* 4200 .* Turb.(ID).Kt .* Turb.(ID).dTdz;
-         Turb.(ID).Ks = Turb.(ID).KT + sw_sdif(Turb.(ID).T);
+         Turb.(ID).Ks = Turb.(ID).Kt + sw_sdif(Turb.(ID).T);
 
          [Turb.(ID), Turb.(ID).stats.max_Kt_percentage] = ApplyMask(Turb.(ID), Turb.(ID).Kt, '>', CP.max_Kt, 'max_Kt');
          [Turb.(ID), Turb.(ID).stats.max_Jq_percentage] = ApplyMask(Turb.(ID), abs(Turb.(ID).Jq), '>', CP.max_Jq, 'max_Jq');

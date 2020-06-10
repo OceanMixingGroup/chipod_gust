@@ -253,6 +253,14 @@ function [] = chi_generate_dTdz_i(basedir, rfid, varargin)
               sgn1 = Tz_w.sgn_int1;
               sgn2 = Tz_w.sgn_int2;
               Tz_w.sign_used = 'internal';
+              
+              % SJW June 2020: Every once in a while I end up with processed
+              % dTdz_w files where some contain the field 'sgn_moor' and
+              % others don't. When this occurs, the code can't combine the 
+              % .mat files and the code crashes. Therefore, I'm adding this 
+              % line to add this field as NaN-filled variable in cases 
+              % where it doesn't exist in Tz_w.
+              Tz_w.sgn_moor = Tz_w.sgn_int1*NaN;
           end
 
           % save the dTdz time series

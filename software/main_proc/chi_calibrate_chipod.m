@@ -165,23 +165,7 @@ end
 
       % pitot_voltage
       % find pitot data W or WP
-       if isfield(rdat, 'W')
-         dV1 = abs(nanmean(rdat.W)-2.02);
-         dV2 = abs(nanmean(rdat.WP)-2.02);
-         if dV1>dV2
-            chi.W  = rdat.W;
-         else
-            chi.W  = rdat.WP;
-         end
-       else  
-         dV1 = abs(nanmean(rdat.W2)-2.02);
-         dV2 = abs(nanmean(rdat.W3)-2.02);
-         if dV1>dV2
-            chi.W  = rdat.W2;
-         else
-            chi.W  = rdat.W3;
-         end
-       end
+      chi.W = pitot_choose_W(rdat);
 
        % sync time
        chi.W  = chi.W(1:Nt);

@@ -83,29 +83,9 @@ end
 
 %_____________________Pitot______________________
    % which variable carries the Pitot signal
+    W = pitot_choose_W(rdat);
 
-      % find pitot data W or WP
-       if isfield(rdat, 'W')
-         dV1 = abs(nanmean(rdat.W)-2.02);
-         dV2 = abs(nanmean(rdat.WP)-2.02);
-         if dV1>dV2
-            W  = rdat.W;
-         else
-            W  = rdat.WP;
-         end
-       else  
-         dV1 = abs(nanmean(rdat.W2)-2.02);
-         dV2 = abs(nanmean(rdat.W3)-2.02);
-         if dV1>dV2
-            W  = rdat.W2;
-         else
-            W  = rdat.W3;
-         end
-      end
-
-
-
-
+    
 %_____________________initialize quantities______________________
    Praw.time  = nan(1,length(I));
    Praw.P     = nan(1,length(I));

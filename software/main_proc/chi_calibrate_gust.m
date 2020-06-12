@@ -98,13 +98,8 @@ function [data] = chi_calibrate_gust(rfid, head)
 
 
    % find pitot data W or WP
-        dV1 = abs(nanmean(rdat.W)-2.02);
-        dV2 = abs(nanmean(rdat.WP)-2.02);
-        if dV1 < .1 & dV1 < dV2
-           chi.W  = rdat.WP;
-        else
-           chi.W  = rdat.W;
-        end
+   chi.W = pitot_choose_W(rdat);
+   
 
 %---------------------return data----------------------
    data = chi;

@@ -83,12 +83,12 @@ for a = 1:5
     if a == 1
         var = 'chi';
         labelstr = '\chi [K^2/s]';
-        yl = [];
+        yl = [10^-10 10^-4];
         yscale = 'log';
     elseif a == 2
         var = 'eps';
         labelstr = '\epsilon [m^2/s^3]';
-        yl = [];
+        yl = [10^-10 10^-5];
         yscale = 'log';
     elseif a == 3
         var = 'Kt';

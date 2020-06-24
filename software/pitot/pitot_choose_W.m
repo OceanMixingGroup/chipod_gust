@@ -34,9 +34,10 @@ function [W] = pitot_choose_W(rdat)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % If you are processing a chipod that was deployed since 2015 and you
 % received the warning message about the code choosing WP instead of W,
-% please uncomment line 40 (W  = rdat.W;) and comment out everything below.
+% please uncomment line 39 and 40 (W  = rdat.W; return).
 
 % W  = rdat.W;
+% return
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 

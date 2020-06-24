@@ -72,6 +72,19 @@ toc
 ff = fields(Turb);
 ff = {ff{1:end-1}}'; % remove readme structure
 
+% find chipods processed with older version of software that included 'chi'
+% before all the turbulence fields in Turb.
+if strcmp(ff{1}(1:3),'chi')
+    for f = 1:length(ff)
+        if strcmp(ff{f}(1:4),'chi_')
+            Turb.(ff{f}(5:end)) = Turb.(ff{f});
+            Turb = rmfield(Turb,ff{f});
+        end
+    end
+    ff = fields(Turb);
+end
+            
+
 fig = CreateFigure(is_visible);
 fig.Name = 'plot_Turb: compare all estimates';
 [ax, ~] = create_axes(fig, 5, 1, 0);
@@ -88,7 +101,7 @@ for a = 1:5
     elseif a == 2
         var = 'eps';
         labelstr = '\epsilon [m^2/s^3]';
-        yl = [10^-10 10^-5];
+        yl = [10^-11 10^-5];
         yscale = 'log';
     elseif a == 3
         var = 'Kt';

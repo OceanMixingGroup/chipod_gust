@@ -500,6 +500,17 @@ if(do_combine)
          % add in molecular diffusivity before estimating heat flux.
          Turb.(ID).Kt = 0.5 * Turb.(ID).chi ./ Turb.(ID).dTdz.^2 + ...
              sw_tdif(Turb.(ID).S, Turb.(ID).T, CP.depth);
+         if all(isnan(Turb.(ID).Kt)) & isnan(CP.depth)
+             % If depth is not set in whoAmi.m, then CP.depth is NaN here
+             % resulting in Kt being all NaNs even though chi and epsilon
+             % are non-NaN and Kt should also be non-Nan. Giving CP.depth a
+             % dummy value that will have no effect on the result. This 
+             % ensures that Kt and Jq will not be all NaNs by accident.
+             % (We have encountered this enough that a work-around is needed.)
+             CP.depth = 0;
+             Turb.(ID).Kt = 0.5 * Turb.(ID).chi ./ Turb.(ID).dTdz.^2 + ...
+                 sw_tdif(Turb.(ID).S, Turb.(ID).T, CP.depth);
+         end
          Turb.(ID).Jq = -1025 .* 4200 .* Turb.(ID).Kt .* Turb.(ID).dTdz;
          Turb.(ID).Ks = Turb.(ID).Kt + sw_sdif(Turb.(ID).T);
 
